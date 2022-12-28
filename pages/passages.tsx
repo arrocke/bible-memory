@@ -5,11 +5,13 @@ import { useEffect, useState } from 'react'
 interface Passage { 
   reference: string
   reviewDate?: Date
+  level: number
 }
 
 interface PassageJSON {
   reference: string
   reviewDate?: string
+  level: number
 }
 
 export default function Home() {
@@ -48,17 +50,19 @@ export default function Home() {
         <thead>
           <tr>
             <th>Passage</th>
+            <th>Level</th>
             <th>Next Review</th>
             <th></th>
           </tr>
           <tr>
-            <td rowSpan={3}><button type="button" onClick={() => createPassage('Psalm 3')}>+ Add Passage</button></td>
+            <td rowSpan={4}><button type="button" onClick={() => createPassage('Psalm 3')}>+ Add Passage</button></td>
           </tr>
         </thead>
         <tbody>
           {
             passages.map(passage => <tr key={passage.reference}>
               <td>{passage.reference}</td>
+              <td>{passage.level}</td>
               <td>{passage.reviewDate ? format(passage.reviewDate, 'MM/dd/yyyy') : null}</td>
               <td>Review</td>
             </tr>)
