@@ -1,0 +1,12 @@
+.input {
+  border: 1px solid black;
+  padding: 4px;
+}
+
+.incorrectWord {
+  color: red;
+}
+
+.wordHelp {
+  color: darkorange;
+}
