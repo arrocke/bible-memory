@@ -1,14 +1,16 @@
-import styles from '../styles/passages.module.css'
+import Link from 'next/link'
 import { format } from 'date-fns'
 import { useEffect, useState } from 'react'
 
 interface Passage { 
+  id: string
   reference: string
   reviewDate?: Date
   level: number
 }
 
 interface PassageJSON {
+  id: string
   reference: string
   reviewDate?: string
   level: number
@@ -60,11 +62,11 @@ export default function Home() {
         </thead>
         <tbody>
           {
-            passages.map(passage => <tr key={passage.reference}>
+            passages.map(passage => <tr key={passage.id}>
               <td>{passage.reference}</td>
               <td>{passage.level}</td>
               <td>{passage.reviewDate ? format(passage.reviewDate, 'MM/dd/yyyy') : null}</td>
-              <td>Review</td>
+              <td><Link href={`/passages/${passage.id}/review`}>Review</Link></td>
             </tr>)
           }
         </tbody>
