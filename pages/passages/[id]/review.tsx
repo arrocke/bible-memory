@@ -44,10 +44,10 @@ export default function ReviewPage() {
     )
   }
 
-  async function createPassage(reference: string) {
-    await fetch('api/passages', {
-      method: 'POST',
-      body: JSON.stringify({ reference }),
+  async function updatePassage(id: string, review: boolean) {
+    await fetch(`/api/passages/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ review }),
       headers: {
         'content-type': 'application/js'
       }
@@ -64,7 +64,7 @@ export default function ReviewPage() {
       setTimeout(() => {
         continueLink.current?.focus()
       })
-      // TODO: update persistent state
+      updatePassage(id, progress?.totalWords === progress?.correctWordsWithHelp)
     }
   }, [progress])
 
