@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
-import VerseTyper from '../../../components/VerseTyper'
+import VerseTyper, { ProgressUpdate } from '../../../components/VerseTyper'
 import styles from './review.module.css'
+import Link from 'next/link'
 
 interface Passage { 
   id: string
@@ -23,6 +24,8 @@ export default function ReviewPage() {
   const router = useRouter()
   const [passage, setPassage] = useState<Passage>()
   const id = router.query.id as string
+
+  const continueLink = useRef<HTMLAnchorElement>(null)
 
   useEffect(() => {
     if (typeof id === 'string') {
@@ -51,10 +54,39 @@ export default function ReviewPage() {
     })
   }
 
+  const [progress, setProgress] = useState<ProgressUpdate>()
+  const [isComplete, setComplete] = useState(false)
+
+  useEffect(() => {
+    const isComplete = progress ? progress.totalWords > 0 && progress.wordsComplete === progress.totalWords : false
+    setComplete(isComplete)
+    if (isComplete) {
+      setTimeout(() => {
+        continueLink.current?.focus()
+      })
+      // TODO: update persistent state
+    }
+  }, [progress])
+
   return (
     <div>
       <h1>Review {passage?.reference}</h1>
-      {passage ? <VerseTyper className={styles.typer} text={passage.text} /> : null }
+      <div>
+        Progress: {progress ? (100 * progress.wordsComplete / progress.totalWords).toFixed(0) : 0}%
+      </div>
+      <div>
+        Accuracy: {progress ? (100 * progress.correctWords / progress.totalWords).toFixed(0) : 0}%
+      </div>
+      {passage
+        ?  <VerseTyper
+            className={styles.typer}
+            text={passage.text}
+            onProgress={setProgress}
+          />
+        : null }
+      <div style={{display: isComplete ? 'block' : 'none' }}>
+        <Link ref={continueLink} href={'/passages'}>Continue</Link>
+      </div>
     </div>
   )
 }

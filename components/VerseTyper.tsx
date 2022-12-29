@@ -4,9 +4,17 @@ import styles from "./VerseTyper.module.css";
 const WORD_REGEX = /(\d+ )?(\w+(?:'\w+)?)([^A-Za-z']+)(?=\w|\d|$)/g;
 const LETTERS_REGEX = /^[A-Za-z]$/;
 
+export interface ProgressUpdate {
+  totalWords: number
+  wordsComplete: number
+  correctWords: number
+  correctWordsWithHelp: number
+}
+
 export interface VerseTyperProps {
   className?: string;
   text: string;
+  onProgress(progress: ProgressUpdate): void
 }
 
 interface WordState {
@@ -20,7 +28,7 @@ interface WordState {
 
 type WordAction = "correct" | "fail" | "continue" | "help";
 
-export default function VerseTyper({ text, className }: VerseTyperProps) {
+export default function VerseTyper({ text, className, onProgress }: VerseTyperProps) {
   const [words, setWords] = useState<WordState[]>([]);
   useEffect(() => {
     setWords(
@@ -38,6 +46,15 @@ export default function VerseTyper({ text, className }: VerseTyperProps) {
   ).length;
   const currentProgress = words[currentIndex]!;
   const isDone = currentIndex === words.length
+
+  useEffect(() => {
+    onProgress({
+      totalWords: words.length,
+      wordsComplete: words.filter(word => typeof word.isCorrect === 'boolean').length,
+      correctWords: words.filter(word => word.isCorrect && !word.hasHelp).length,
+      correctWordsWithHelp: words.filter(word => word.isCorrect === true).length
+    })
+  }, [words])
 
   function attempt(action: WordAction) {
     switch (action) {
@@ -121,7 +138,7 @@ export default function VerseTyper({ text, className }: VerseTyperProps) {
   return (
     <div
       className={`${className} ${styles.wrapper}`}
-      tabIndex={-1}
+      tabIndex={isDone ? undefined : -1}
       onFocus={() => input.current?.focus()}
     >
       <pre>
@@ -133,31 +150,27 @@ export default function VerseTyper({ text, className }: VerseTyperProps) {
             return (
               <Fragment key={i}>
                 {prefix}
-                <span
-                  className={
-                    isCorrect === false
-                      ? styles.incorrectWord
-                      : hadHelp
-                      ? styles.wordHelp
-                      : ""
-                  }
-                >
-                  {!isComplete && hasHelp ? word[0] : isComplete ? word : null}
-                </span>
+                {isCorrect === false ? <span className={styles.incorrectWord}>{word}</span> : null}
+                {isCorrect === true && hadHelp ? <span className={styles.wordHelp}>{word}</span> : null}
+                {isCorrect === true && !hadHelp ? word : null}
+                {!isComplete && hasHelp ? <span className={styles.wordHelp}>{word[0]}</span> : null}
                 {isComplete ? gap : null}
               </Fragment>
             );
           })}
-          <input
-            ref={input}
-            className={styles.input}
-            onKeyDown={onKeyDown}
-            onFocus={() => setFocus(true)}
-            onBlur={() => setFocus(false)}
-          />
+          { !isDone
+            ? <input
+                ref={input}
+                className={styles.input}
+                onKeyDown={onKeyDown}
+                onFocus={() => setFocus(true)}
+                onBlur={() => setFocus(false)}
+              />
+            : null
+          }
       </pre>
       <div className={styles.clickFocus}>
-        {isFocused ? null : <>Click to review</>}
+        {isFocused || isDone ? null : <>Click to review</>}
       </div>
     </div>
   );
