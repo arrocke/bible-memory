@@ -5,6 +5,8 @@ import { open } from "./db";
 
 const db = open();
 
+const REVIEW_DAY_MAP = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]
+
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
   if (url.pathname === "/api/passages") {
@@ -12,7 +14,6 @@ self.addEventListener("fetch", (event) => {
       new Promise(async (resolve, reject) => {
         switch (event.request.method) {
           case "GET": {
-            console.log(await db.passages.getAll())
             return resolve(
               new Response(JSON.stringify(await db.passages.getAll()), {
                 status: 200,
@@ -24,7 +25,10 @@ self.addEventListener("fetch", (event) => {
           }
           case "POST": {
             const body = await event.request.json();
-            const passage = await db.passages.insert(body);
+            const passage = await db.passages.insert({
+              ...body,
+              level: 0
+            });
             return resolve(
               new Response(null, {
                 status: 201,
@@ -59,9 +63,11 @@ self.addEventListener("fetch", (event) => {
           case "PATCH": {
             const body = (await event.request.json()) as { review: boolean };
             if (body.review) {
-              passage.level += 1;
+              passage.level = Math.max(REVIEW_DAY_MAP.length - 1, passage.level + 1);
+            } else {
+              passage.level = Math.ceil(passage.level / 2)
             }
-            passage.reviewDate = add(new Date(), { days: passage.level });
+            passage.reviewDate = add(new Date(), { days: REVIEW_DAY_MAP[passage.level] });
             await db.passages.update(passage);
             return resolve(new Response(null, { status: 204 }));
           }

@@ -24,14 +24,9 @@ export function open() {
 
   return {
     passages: {
-      async insert({ reference, text }: Pick<DbPassage, 'reference' | 'text'>): Promise<DbPassage> {
+      async insert(data: Omit<DbPassage, 'id'>): Promise<DbPassage> {
         const id = (1 + await (await dbPromise).count('passages')).toString()
-        const passage = {
-          id,
-          reference,
-          text,
-          level: 0
-        }
+        const passage = { ...data, id }
         await (await dbPromise).put('passages', passage, id)
         return passage
       },
