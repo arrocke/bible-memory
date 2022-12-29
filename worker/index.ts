@@ -32,11 +32,11 @@ self.addEventListener("fetch", (event) => {
           new Promise(async (resolve, reject) => {
             const body = await event.request.json();
             const passage = {
-              id: passages.length.toString(),
+              id: (passages.length + 1).toString(),
               reference: body.reference,
               reviewDate: new Date(),
               level: 0,
-              text: "",
+              text: body.text,
             };
             passages.push(passage);
             resolve(

@@ -34,17 +34,6 @@ export default function Home() {
     )))
   }
 
-  async function createPassage(reference: string) {
-    await fetch('api/passages', {
-      method: 'POST',
-      body: JSON.stringify({ reference }),
-      headers: {
-        'content-type': 'application/js'
-      }
-    })
-    await loadPassages()
-  }
-
   return (
     <div>
       <h1>Passages</h1>
@@ -57,7 +46,7 @@ export default function Home() {
             <th></th>
           </tr>
           <tr>
-            <td rowSpan={4}><button type="button" onClick={() => createPassage('Psalm 3')}>+ Add Passage</button></td>
+            <td rowSpan={4}><Link href="/passages/new">+ Add Passage</Link></td>
           </tr>
         </thead>
         <tbody>
