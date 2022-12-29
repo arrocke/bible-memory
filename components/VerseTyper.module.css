@@ -1,6 +1,15 @@
-.input {
-  border: 1px solid black;
-  padding: 4px;
+.wrapper {
+  padding: 16px;
+}
+
+.wrapper pre {
+  font-family: inherit;
+  margin: 0;
+}
+
+.clickFocus {
+  margin: 8px 0 0 0;
+  color: grey;
 }
 
 .incorrectWord {
@@ -9,4 +18,14 @@
 
 .wordHelp {
   color: darkorange;
+}
+
+.input {
+  border: none;
+  width: 8px;
+}
+
+.input:focus {
+  outline: none;
+  padding: 0;
 }

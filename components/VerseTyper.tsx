@@ -1,7 +1,7 @@
-import { KeyboardEvent, useState, Fragment, useEffect } from "react";
+import { KeyboardEvent, useState, Fragment, useEffect, useRef } from "react";
 import styles from "./VerseTyper.module.css";
 
-const WORD_REGEX = /(\w+(?:'\w+)?)(\W+)(?=\w|$)/g;
+const WORD_REGEX = /(\d+ )?(\w+(?:'\w+)?)([^A-Za-z']+)(?=\w|\d|$)/g;
 const LETTERS_REGEX = /^[A-Za-z]$/;
 
 export interface VerseTyperProps {
@@ -10,6 +10,7 @@ export interface VerseTyperProps {
 }
 
 interface WordState {
+  prefix: string;
   word: string;
   gap: string;
   attempts: number;
@@ -24,8 +25,9 @@ export default function VerseTyper({ text, className }: VerseTyperProps) {
   useEffect(() => {
     setWords(
       Array.from(text.matchAll(WORD_REGEX), (match) => ({
-        word: match[1],
-        gap: match[2],
+        prefix: match[1],
+        word: match[2],
+        gap: match[3],
         attempts: 0,
       }))
     );
@@ -88,6 +90,9 @@ export default function VerseTyper({ text, className }: VerseTyperProps) {
     }
   }
 
+  const input = useRef<HTMLInputElement>(null)
+  const [isFocused, setFocus] = useState(false)
+
   function onKeyDown(e: KeyboardEvent) {
     e.preventDefault();
     e.stopPropagation();
@@ -115,32 +120,45 @@ export default function VerseTyper({ text, className }: VerseTyperProps) {
 
   return (
     <div
-      className={`${className} ${styles.input}`}
-      tabIndex={0}
-      onKeyDown={onKeyDown}
+      className={`${className} ${styles.wrapper}`}
+      tabIndex={-1}
+      onFocus={() => input.current?.focus()}
     >
-      {words
-        .slice(0, currentIndex + 1)
-        .map(({ isCorrect, hasHelp, word, gap, attempts }, i) => {
-          const isComplete = typeof isCorrect === "boolean";
-          const hadHelp = hasHelp || attempts > 1;
-          return (
-            <Fragment key={i}>
-              <span
-                className={
-                  isCorrect === false
-                    ? styles.incorrectWord
-                    : hadHelp
-                    ? styles.wordHelp
-                    : ""
-                }
-              >
-                {!isComplete && hasHelp ? word[0] : isComplete ? word : null}
-              </span>
-              {isComplete ? gap : null}
-            </Fragment>
-          );
-        })}
+      <pre>
+        {words
+          .slice(0, currentIndex + 1)
+          .map(({ isCorrect, hasHelp, word, gap, prefix, attempts }, i) => {
+            const isComplete = typeof isCorrect === "boolean";
+            const hadHelp = hasHelp || attempts > 1;
+            return (
+              <Fragment key={i}>
+                {prefix}
+                <span
+                  className={
+                    isCorrect === false
+                      ? styles.incorrectWord
+                      : hadHelp
+                      ? styles.wordHelp
+                      : ""
+                  }
+                >
+                  {!isComplete && hasHelp ? word[0] : isComplete ? word : null}
+                </span>
+                {isComplete ? gap : null}
+              </Fragment>
+            );
+          })}
+          <input
+            ref={input}
+            className={styles.input}
+            onKeyDown={onKeyDown}
+            onFocus={() => setFocus(true)}
+            onBlur={() => setFocus(false)}
+          />
+      </pre>
+      <div className={styles.clickFocus}>
+        {isFocused ? null : <>Click to review</>}
+      </div>
     </div>
   );
 }

@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import VerseTyper from '../../../components/VerseTyper'
+import styles from './review.module.css'
 
 interface Passage { 
   id: string
   reference: string
   reviewDate?: Date
   level: number
+  text: string
 }
 
 interface PassageJSON {
@@ -13,13 +16,13 @@ interface PassageJSON {
   reference: string
   reviewDate?: string
   level: number
+  text: string
 }
 
 export default function ReviewPage() {
   const router = useRouter()
   const [passage, setPassage] = useState<Passage>()
   const id = router.query.id as string
-  console.log(id)
 
   useEffect(() => {
     if (typeof id === 'string') {
@@ -51,6 +54,7 @@ export default function ReviewPage() {
   return (
     <div>
       <h1>Review {passage?.reference}</h1>
+      {passage ? <VerseTyper className={styles.typer} text={passage.text} /> : null }
     </div>
   )
 }
