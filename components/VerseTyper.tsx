@@ -180,8 +180,24 @@ export default function VerseTyper({ text, className, onProgress }: VerseTyperPr
         isDone
           ? null
           : <div>
-              <button type="button" onClick={() => attempt('help')}>Hint</button>
-              <button type="button" onClick={() => attempt('continue')}>Skip</button>
+              <button
+                type="button"
+                onClick={() => {
+                  attempt('help')
+                  input.current?.focus()
+                }}
+              >
+                Hint
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  attempt('continue')
+                  input.current?.focus()
+                }}
+              >
+                Skip
+              </button>
             </div>
       }
     </div>
