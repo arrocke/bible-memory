@@ -1,4 +1,4 @@
-import { KeyboardEvent, useState, Fragment, useEffect, useRef } from "react";
+import { KeyboardEvent, useState, Fragment, useEffect, useRef, FormEvent } from "react";
 import styles from "./VerseTyper.module.css";
 
 const WORD_REGEX = /(\d+ )?(\w+(?:'\w+)?)([^A-Za-z']+)(?=\w|\d|$)/g;
@@ -108,11 +108,24 @@ export default function VerseTyper({ text, className, onProgress }: VerseTyperPr
   }
 
   const input = useRef<HTMLInputElement>(null)
-  const [isFocused, setFocus] = useState(false)
 
-  function onKeyDown(e: KeyboardEvent) {
-    e.preventDefault();
-    e.stopPropagation();
+  function processLetter(char: string) {
+    if (LETTERS_REGEX.test(char)) {
+      const key = char.toLowerCase();
+      const firstChar = currentProgress.word[0].toLowerCase();
+      attempt(key === firstChar ? "correct" : "fail");
+    }
+  }
+
+  function onInput(e: FormEvent<HTMLInputElement>) {
+    const value = e.currentTarget.value
+    if (value.length > 0) {
+      processLetter(value[0])
+      e.currentTarget.value = ''
+    }
+  }
+
+  function onKeyPress(e: KeyboardEvent) {
     if (isDone) return
     switch (e.key) {
       case "/":
@@ -124,24 +137,19 @@ export default function VerseTyper({ text, className, onProgress }: VerseTyperPr
         attempt("continue");
         break;
       }
-      default: {
-        if (LETTERS_REGEX.test(e.key)) {
-          const key = e.key.toLowerCase();
-          const firstChar = currentProgress.word[0].toLowerCase();
-          attempt(key === firstChar ? "correct" : "fail");
-        }
-        break;
-      }
+      default:
+        return
     }
+    e.preventDefault();
+    e.stopPropagation();
   }
 
   return (
-    <div
-      className={`${className} ${styles.wrapper}`}
-      tabIndex={isDone ? undefined : -1}
-      onFocus={() => input.current?.focus()}
-    >
-      <pre>
+    <div className={`${className} ${styles.wrapper}`}>
+      <pre
+        tabIndex={isDone ? undefined : -1}
+        onFocus={() => input.current?.focus()}
+      >
         {words
           .slice(0, currentIndex + 1)
           .map(({ isCorrect, hasHelp, word, gap, prefix, attempts }, i) => {
@@ -158,20 +166,24 @@ export default function VerseTyper({ text, className, onProgress }: VerseTyperPr
               </Fragment>
             );
           })}
-          { !isDone
-            ? <input
+          { isDone
+            ? null
+            : <input
                 ref={input}
                 className={styles.input}
-                onKeyDown={onKeyDown}
-                onFocus={() => setFocus(true)}
-                onBlur={() => setFocus(false)}
+                onInput={onInput}
+                onKeyDown={onKeyPress}
               />
-            : null
           }
       </pre>
-      <div className={styles.clickFocus}>
-        {isFocused || isDone ? null : <>Click to review</>}
-      </div>
+      {
+        isDone
+          ? null
+          : <div>
+              <button type="button" onClick={() => attempt('help')}>Hint</button>
+              <button type="button" onClick={() => attempt('continue')}>Skip</button>
+            </div>
+      }
     </div>
   );
 }

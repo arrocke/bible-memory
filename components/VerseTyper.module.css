@@ -8,11 +8,6 @@
   white-space: pre-wrap;
 }
 
-.clickFocus {
-  margin: 8px 0 0 0;
-  color: grey;
-}
-
 .incorrectWord {
   color: red;
 }
