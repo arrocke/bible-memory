@@ -4,5 +4,13 @@ const withPWA = require('next-pwa')({
 })
 
 module.exports = withPWA({
-  // config
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/passages',
+        permanent: false,
+      },
+    ]
+  }
 })
