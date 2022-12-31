@@ -85,6 +85,7 @@ export default function ReviewPage() {
       </div>
       {passage
         ?  <VerseTyper
+            className="mb-4"
             text={passage.text}
             onProgress={setProgress}
           />
