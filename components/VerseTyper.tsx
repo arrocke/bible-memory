@@ -1,5 +1,5 @@
 import { KeyboardEvent, useState, Fragment, useEffect, useRef, FormEvent } from "react";
-import styles from "./VerseTyper.module.css";
+import Button from "./ui/Button";
 
 const WORD_REGEX = /(\d+ )?(\w+(?:'\w+)?)([^A-Za-z']+)(?=\w|\d|$)/g;
 const LETTERS_REGEX = /^[A-Za-z]$/;
@@ -28,7 +28,7 @@ interface WordState {
 
 type WordAction = "correct" | "fail" | "continue" | "help";
 
-export default function VerseTyper({ text, className, onProgress }: VerseTyperProps) {
+export default function VerseTyper({ text, className = '', onProgress }: VerseTyperProps) {
   const [words, setWords] = useState<WordState[]>([]);
   useEffect(() => {
     setWords(
@@ -145,8 +145,9 @@ export default function VerseTyper({ text, className, onProgress }: VerseTyperPr
   }
 
   return (
-    <div className={`${className} ${styles.wrapper}`}>
+    <div className={`${className}`}>
       <pre
+        className="focus-within:outline outline-blue-600 h-80 overflow-x-auto font-sans whitespace-pre-wrap mb-4 px-2 py-1 rounded border border-gray-400 shadow-inner"
         tabIndex={isDone ? undefined : -1}
         onFocus={() => input.current?.focus()}
       >
@@ -158,10 +159,10 @@ export default function VerseTyper({ text, className, onProgress }: VerseTyperPr
             return (
               <Fragment key={i}>
                 {prefix}
-                {isCorrect === false ? <span className={styles.incorrectWord}>{word}</span> : null}
-                {isCorrect === true && hadHelp ? <span className={styles.wordHelp}>{word}</span> : null}
+                {isCorrect === false ? <span className="bg-red-500">{word}</span> : null}
+                {isCorrect === true && hadHelp ? <span className="bg-yellow-500">{word}</span> : null}
                 {isCorrect === true && !hadHelp ? word : null}
-                {!isComplete && hasHelp ? <span className={styles.wordHelp}>{word[0]}</span> : null}
+                {!isComplete && hasHelp ? <span className="bg-yellow-500">{word[0]}</span> : null}
                 {isComplete ? gap : null}
               </Fragment>
             );
@@ -170,7 +171,7 @@ export default function VerseTyper({ text, className, onProgress }: VerseTyperPr
             ? null
             : <input
                 ref={input}
-                className={styles.input}
+                className="focus:outline-none w-2"
                 onInput={onInput}
                 onKeyDown={onKeyPress}
               />
@@ -180,24 +181,23 @@ export default function VerseTyper({ text, className, onProgress }: VerseTyperPr
         isDone
           ? null
           : <div>
-              <button
-                type="button"
+              <Button
                 onClick={() => {
                   attempt('help')
                   input.current?.focus()
                 }}
               >
                 Hint
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                className="ml-2"
                 onClick={() => {
                   attempt('continue')
                   input.current?.focus()
                 }}
               >
                 Skip
-              </button>
+              </Button>
             </div>
       }
     </div>

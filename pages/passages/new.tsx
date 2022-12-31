@@ -1,6 +1,14 @@
-import Link from "next/link";
+import Link from "../../components/ui/Link";
 import { useRouter } from "next/router";
 import { FormEvent, useState } from "react";
+import Page from "../../components/ui/Page";
+import PageHeader from "../../components/ui/PageHeader";
+import PageTitle from "../../components/ui/PageTitle";
+import BackLink from "../../components/ui/BackLink";
+import TextInput from "../../components/ui/TextInput";
+import MultilineTextInput from "../../components/ui/MultilineTextInput";
+import Label from "../../components/ui/Label";
+import Button from "../../components/ui/Button";
 
 export default function NewPassagePage() {
   const router = useRouter()
@@ -20,33 +28,35 @@ export default function NewPassagePage() {
   }
 
   return (
-    <div>
-      <h1>New Passage</h1>
+    <Page>
+      <PageHeader>
+        <BackLink href="/passages">Back to Passages</BackLink>
+        <PageTitle>New Passage</PageTitle>
+      </PageHeader>
       <form onSubmit={onSubmit}>
         <div>
-          <label htmlFor="reference">Reference</label>
-          <input
-            type="text"
+          <Label htmlFor="reference">REFERENCE</Label>
+          <TextInput 
+            className="block"
             id="reference"
-            required
             value={reference}
-            onChange={(e) => setReference(e.target.value)}
+            onChange={setReference}
+            autoComplete="off"
           />
         </div>
-        <div>
-          <label htmlFor="text">Text</label>
-          <textarea
+        <div className="mt-2">
+          <Label htmlFor="text">TEXT</Label>
+          <MultilineTextInput 
+            className="block w-full h-96 resize-none"
             id="text"
-            required
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={setText}
           />
         </div>
-        <div>
-          <Link href="/passages">Back</Link>
-          <button>Save</button>
+        <div className="mt-4">
+          <Button type="submit">Save</Button>
         </div>
       </form>
-    </div>
+    </Page>
   );
 }

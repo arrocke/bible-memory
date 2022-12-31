@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import VerseTyper, { ProgressUpdate } from '../../../components/VerseTyper'
-import styles from './review.module.css'
-import Link from 'next/link'
+import Link from '../../../components/ui/Link'
+import Page from '../../../components/ui/Page'
+import PageHeader from '../../../components/ui/PageHeader'
+import PageTitle from '../../../components/ui/PageTitle'
+import BackLink from '../../../components/ui/BackLink'
 
 interface Passage { 
   id: string
@@ -69,25 +72,27 @@ export default function ReviewPage() {
   }, [progress])
 
   return (
-    <div>
-      <h1>Review {passage?.reference}</h1>
+    <Page>
+      <PageHeader>
+        <BackLink href="/passages">Back to Passages</BackLink>
+        <PageTitle>Review {passage?.reference}</PageTitle>
+      </PageHeader>
       <div>
         Progress: {progress ? (100 * progress.wordsComplete / progress.totalWords).toFixed(0) : 0}%
       </div>
-      <div>
+      <div className="mb-2">
         Accuracy: {progress ? (100 * progress.correctWords / progress.totalWords).toFixed(0) : 0}%
       </div>
       {passage
         ?  <VerseTyper
-            className={styles.typer}
             text={passage.text}
             onProgress={setProgress}
           />
         : null }
       <div style={{display: isComplete ? 'block' : 'none' }}>
-        <Link ref={continueLink} href={'/passages'}>Continue</Link>
+        <Link button ref={continueLink} href={'/passages'}>Continue</Link>
       </div>
-    </div>
+    </Page>
   )
 }
 
