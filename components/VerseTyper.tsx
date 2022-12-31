@@ -146,8 +146,31 @@ export default function VerseTyper({ text, className = '', onProgress }: VerseTy
 
   return (
     <div className={`${className}`}>
+      {
+        isDone
+          ? null
+          : <div className="mb-2">
+              <Button
+                onClick={() => {
+                  attempt('help')
+                  input.current?.focus()
+                }}
+              >
+                Hint
+              </Button>
+              <Button
+                className="ml-2"
+                onClick={() => {
+                  attempt('continue')
+                  input.current?.focus()
+                }}
+              >
+                Skip
+              </Button>
+            </div>
+      }
       <pre
-        className="focus-within:outline outline-blue-600 h-80 overflow-x-auto font-sans whitespace-pre-wrap mb-4 px-2 py-1 rounded border border-gray-400 shadow-inner"
+        className="focus-within:outline outline-yellow-500 focus-within:border-yellow-500 h-80 overflow-x-auto font-sans whitespace-pre-wrap px-2 py-1 rounded border border-gray-400 shadow-inner"
         tabIndex={isDone ? undefined : -1}
         onFocus={() => input.current?.focus()}
       >
@@ -177,29 +200,6 @@ export default function VerseTyper({ text, className = '', onProgress }: VerseTy
               />
           }
       </pre>
-      {
-        isDone
-          ? null
-          : <div>
-              <Button
-                onClick={() => {
-                  attempt('help')
-                  input.current?.focus()
-                }}
-              >
-                Hint
-              </Button>
-              <Button
-                className="ml-2"
-                onClick={() => {
-                  attempt('continue')
-                  input.current?.focus()
-                }}
-              >
-                Skip
-              </Button>
-            </div>
-      }
     </div>
   );
 }

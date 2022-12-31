@@ -6,7 +6,7 @@ export interface MultilineTextInputProps extends Omit<TextareaHTMLAttributes<HTM
 
 export default function MultilineTextInput({ onChange, className = '', ...props }: MultilineTextInputProps) {
   return <textarea
-    className={`${className} px-2 py-1 rounded border border-gray-400 shadow-inner`}
+    className={`${className} px-2 py-1 rounded border border-gray-400 shadow-inner focus:outline outline-yellow-500 focus:border-yellow-500 `}
     {...props}
     onChange={e => onChange(e.target.value)}
   />

@@ -71,7 +71,7 @@ export default function Home() {
         </TableBody>
         <TableFooter>
           <tr>
-            <td rowSpan={4}>
+            <td colSpan={4}>
               <Link href="/passages/new" className="py-1 block">
                 + Add Passage
               </Link>
