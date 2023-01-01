@@ -48,7 +48,7 @@ export default function VerseTyper({ text, className = '', onProgress }: VerseTy
   const isDone = currentIndex === words.length
 
   useEffect(() => {
-    input.current?.scrollIntoView()
+    input.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' })
     onProgress({
       totalWords: words.length,
       wordsComplete: words.filter(word => typeof word.isCorrect === 'boolean').length,
