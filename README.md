@@ -11,6 +11,7 @@
 -[] Full text typer mode
 -[] Select typer mode based on level
 -[] Make PWA initial load smoother
+-[] Load verses automatically
 
 # Progressive Web App Example
 
