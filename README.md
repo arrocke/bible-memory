@@ -2,7 +2,7 @@
 
 -[] Table styles on small screens
 -[] Table keyboard navigation, accessibility
--[] Split reference in form
+-[] Validate new passage form
 -[] Passage edit (reference, text)
 -[] Autocomplete reference
 -[] Delete passage
