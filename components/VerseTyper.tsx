@@ -198,6 +198,8 @@ export default function VerseTyper({ text, className = '', onProgress }: VerseTy
                 className="focus:outline-none w-2"
                 onInput={onInput}
                 onKeyDown={onKeyPress}
+                autoCapitalize="none"
+                autoComplete="none"
               />
           }
       </pre>
