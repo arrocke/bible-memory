@@ -1,3 +1,17 @@
+## TODO
+
+-[] Table styles on small screens
+-[] Table keyboard navigation, accessibility
+-[] Split reference in form
+-[] Passage edit (reference, text)
+-[] Autocomplete reference
+-[] Delete passage
+-[] Merge passages with adjacent references
+-[] First letter typer mode
+-[] Full text typer mode
+-[] Select typer mode based on level
+-[] Make PWA initial load smoother
+
 # Progressive Web App Example
 
 This example uses [`next-pwa`](https://github.com/shadowwalker/next-pwa) to create a progressive web app (PWA) powered by [Workbox](https://developers.google.com/web/tools/workbox/).
