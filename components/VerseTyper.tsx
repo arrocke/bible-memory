@@ -29,9 +29,6 @@ interface WordState {
 
 type WordAction = "correct" | "fail" | "continue" | "help";
 
-function toFirstLetter(word: string) {
-}
-
 function renderWord({ word, isCorrect, hasHelp, attempts, mode = 'review' }: WordState & Pick<VerseTyperProps, 'mode'>): ReactNode {
   const isComplete = typeof isCorrect === "boolean";
   const hadHelp = hasHelp || attempts > 1;
@@ -153,10 +150,9 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
   }
 
   function onInput(e: FormEvent<HTMLInputElement>) {
-    const value = e.currentTarget.value
-    if (value.length > 0) {
-      processLetter(value[0])
-      e.currentTarget.value = ''
+    const char = e.currentTarget.value.at(-1)
+    if (char) {
+      processLetter(char)
     }
   }
 
@@ -199,7 +195,7 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
       <input
         key="input"
         ref={input}
-        className="focus:outline-none w-0 caret-transparent"
+        className="focus:outline-none absolute opacity-0"
         onInput={onInput}
         onKeyDown={onKeyPress}
         autoCapitalize="none"
