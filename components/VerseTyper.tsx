@@ -14,7 +14,7 @@ export interface ProgressUpdate {
 export interface VerseTyperProps {
   className?: string;
   text: string;
-  mode?: 'empty' | 'hints'
+  mode?: 'empty' | 'hints' | 'full'
   onProgress(progress: ProgressUpdate): void
 }
 
@@ -47,7 +47,10 @@ function renderWord({ word, isCorrect, hasHelp, attempts, mode = 'empty' }: Word
       return <span className="bg-red-500">{word}</span>
     }
   } else {
-    if (mode === 'hints' || hasHelp) {
+    if (mode === 'full') {
+      return <span className="text-gray-500">{word}</span>
+    }
+    else if (mode === 'hints' || hasHelp) {
       return <span className="text-gray-500">{word[0]}<span className="text-transparent">{word.slice(1)}</span></span>
     } else {
       return null

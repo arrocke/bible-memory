@@ -87,6 +87,7 @@ export default function ReviewPage() {
         ?  <VerseTyper
             className="mb-4"
             text={passage.text}
+            mode="empty"
             onProgress={setProgress}
           />
         : null }
