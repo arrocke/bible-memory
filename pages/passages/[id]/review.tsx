@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
-import VerseTyper, { ProgressUpdate } from '../../../components/VerseTyper'
+import VerseTyper, { ProgressUpdate, VerseTyperProps } from '../../../components/VerseTyper'
 import Link from '../../../components/ui/Link'
 import Page from '../../../components/ui/Page'
 import PageHeader from '../../../components/ui/PageHeader'
@@ -27,6 +27,7 @@ export default function ReviewPage() {
   const router = useRouter()
   const [passage, setPassage] = useState<Passage>()
   const id = router.query.id as string
+  const mode = router.query.mode as VerseTyperProps['mode']
 
   const continueLink = useRef<HTMLAnchorElement>(null)
 
@@ -87,7 +88,7 @@ export default function ReviewPage() {
         ?  <VerseTyper
             className="mb-4"
             text={passage.text}
-            mode="empty"
+            mode={mode}
             onProgress={setProgress}
           />
         : null }

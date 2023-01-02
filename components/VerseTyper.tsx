@@ -14,7 +14,7 @@ export interface ProgressUpdate {
 export interface VerseTyperProps {
   className?: string;
   text: string;
-  mode?: 'empty' | 'hints' | 'full'
+  mode?: 'review' | 'recall' | 'learn'
   onProgress(progress: ProgressUpdate): void
 }
 
@@ -32,7 +32,7 @@ type WordAction = "correct" | "fail" | "continue" | "help";
 function toFirstLetter(word: string) {
 }
 
-function renderWord({ word, isCorrect, hasHelp, attempts, mode = 'empty' }: WordState & Pick<VerseTyperProps, 'mode'>): ReactNode {
+function renderWord({ word, isCorrect, hasHelp, attempts, mode = 'review' }: WordState & Pick<VerseTyperProps, 'mode'>): ReactNode {
   const isComplete = typeof isCorrect === "boolean";
   const hadHelp = hasHelp || attempts > 1;
 
@@ -47,10 +47,10 @@ function renderWord({ word, isCorrect, hasHelp, attempts, mode = 'empty' }: Word
       return <span className="bg-red-500">{word}</span>
     }
   } else {
-    if (mode === 'full') {
+    if (mode === 'learn') {
       return <span className="text-gray-500">{word}</span>
     }
-    else if (mode === 'hints' || hasHelp) {
+    else if (mode === 'recall' || hasHelp) {
       return <span className="text-gray-500">{word[0]}<span className="text-transparent">{word.slice(1)}</span></span>
     } else {
       return null
@@ -58,7 +58,7 @@ function renderWord({ word, isCorrect, hasHelp, attempts, mode = 'empty' }: Word
   }
 }
 
-export default function VerseTyper({ text, mode = 'empty', className = '', onProgress }: VerseTyperProps) {
+export default function VerseTyper({ text, mode = 'review', className = '', onProgress }: VerseTyperProps) {
   const [words, setWords] = useState<WordState[]>([]);
   useEffect(() => {
     setWords(
@@ -127,7 +127,7 @@ export default function VerseTyper({ text, mode = 'empty', className = '', onPro
         break;
       }
       case "help": {
-        if (mode === 'empty') {
+        if (mode === 'review') {
           setWords((p) => [
             ...p.slice(0, currentIndex),
             {
@@ -180,14 +180,14 @@ export default function VerseTyper({ text, mode = 'empty', className = '', onPro
   }
 
   const renderedWords = words
-    .slice(0, mode === 'empty' ? currentIndex + 1 : undefined)
+    .slice(0, mode === 'review' ? currentIndex + 1 : undefined)
     .map((data, i) => {
       const { isCorrect, gap, prefix } = data
       return (
         <Fragment key={i}>
           {prefix}
           {renderWord({ ...data, mode })}
-          {typeof isCorrect === 'boolean' || mode !== 'empty' ? gap : null}
+          {typeof isCorrect === 'boolean' || mode !== 'review' ? gap : null}
         </Fragment>
       );
     })

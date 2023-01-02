@@ -64,7 +64,11 @@ export default function Home() {
               <TableDataCell>{passage.level}</TableDataCell>
               <TableDataCell>{passage.reviewDate ? format(passage.reviewDate, 'MM/dd/yyyy') : null}</TableDataCell>
               <TableDataCell>
-                <Link href={`/passages/${passage.id}/review`}>Review</Link>
+                <Link className="mr-1" href={`/passages/${passage.id}/review?mode=learn`}>Learn</Link>
+                |
+                <Link className="mx-1" href={`/passages/${passage.id}/review?mode=recall`}>Recall</Link>
+                |
+                <Link className="ml-1" href={`/passages/${passage.id}/review?mode=review`}>Review</Link>
               </TableDataCell>
             </tr>)
           }
