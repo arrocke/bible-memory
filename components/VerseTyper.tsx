@@ -1,4 +1,4 @@
-import { KeyboardEvent, useState, Fragment, useEffect, useRef, FormEvent } from "react";
+import { KeyboardEvent, useState, Fragment, useEffect, useRef, FormEvent, ReactNode } from "react";
 import Button from "./ui/Button";
 
 const WORD_REGEX = /(\d+ )?(\w+(?:'\w+)?)([^A-Za-z']+)(?=\w|\d|$)/g;
@@ -14,6 +14,7 @@ export interface ProgressUpdate {
 export interface VerseTyperProps {
   className?: string;
   text: string;
+  mode?: 'empty' | 'hints'
   onProgress(progress: ProgressUpdate): void
 }
 
@@ -28,7 +29,33 @@ interface WordState {
 
 type WordAction = "correct" | "fail" | "continue" | "help";
 
-export default function VerseTyper({ text, className = '', onProgress }: VerseTyperProps) {
+function toFirstLetter(word: string) {
+}
+
+function renderWord({ word, isCorrect, hasHelp, attempts, mode = 'empty' }: WordState & Pick<VerseTyperProps, 'mode'>): ReactNode {
+  const isComplete = typeof isCorrect === "boolean";
+  const hadHelp = hasHelp || attempts > 1;
+
+  if (isComplete) {
+    if (isCorrect) {
+      if (hadHelp) {
+        return <span className="bg-yellow-500">{word}</span>
+      } else {
+        return <span className="inline-block leading-none border-b-2 border-green-400">{word}</span>
+      }
+    } else {
+      return <span className="bg-red-500">{word}</span>
+    }
+  } else {
+    if (mode === 'hints' || hasHelp) {
+      return <span className="text-gray-500">{word[0]}<span className="text-transparent">{word.slice(1)}</span></span>
+    } else {
+      return null
+    }
+  }
+}
+
+export default function VerseTyper({ text, mode = 'empty', className = '', onProgress }: VerseTyperProps) {
   const [words, setWords] = useState<WordState[]>([]);
   useEffect(() => {
     setWords(
@@ -48,7 +75,9 @@ export default function VerseTyper({ text, className = '', onProgress }: VerseTy
   const isDone = currentIndex === words.length
 
   useEffect(() => {
-    input.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' })
+    setTimeout(() => {
+      input.current?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'start' })
+    })
     onProgress({
       totalWords: words.length,
       wordsComplete: words.filter(word => typeof word.isCorrect === 'boolean').length,
@@ -95,14 +124,16 @@ export default function VerseTyper({ text, className = '', onProgress }: VerseTy
         break;
       }
       case "help": {
-        setWords((p) => [
-          ...p.slice(0, currentIndex),
-          {
-            ...currentProgress,
-            hasHelp: true,
-          },
-          ...p.slice(currentIndex + 1),
-        ]);
+        if (mode === 'empty') {
+          setWords((p) => [
+            ...p.slice(0, currentIndex),
+            {
+              ...currentProgress,
+              hasHelp: true,
+            },
+            ...p.slice(currentIndex + 1),
+          ]);
+        }
         break;
       }
     }
@@ -145,6 +176,35 @@ export default function VerseTyper({ text, className = '', onProgress }: VerseTy
     e.stopPropagation();
   }
 
+  const renderedWords = words
+    .slice(0, mode === 'empty' ? currentIndex + 1 : undefined)
+    .map((data, i) => {
+      const { isCorrect, gap, prefix } = data
+      return (
+        <Fragment key={i}>
+          {prefix}
+          {renderWord({ ...data, mode })}
+          {typeof isCorrect === 'boolean' || mode !== 'empty' ? gap : null}
+        </Fragment>
+      );
+    })
+
+  if (!isDone) {
+    renderedWords.splice(
+      currentIndex,
+      0,
+      <input
+        key="input"
+        ref={input}
+        className="focus:outline-none w-0 caret-transparent"
+        onInput={onInput}
+        onKeyDown={onKeyPress}
+        autoCapitalize="none"
+        autoComplete="none"
+      />
+    )
+  }
+
   return (
     <div className={`${className}`}>
       {
@@ -175,33 +235,7 @@ export default function VerseTyper({ text, className = '', onProgress }: VerseTy
         tabIndex={isDone ? undefined : -1}
         onFocus={() => input.current?.focus()}
       >
-        {words
-          .slice(0, currentIndex + 1)
-          .map(({ isCorrect, hasHelp, word, gap, prefix, attempts }, i) => {
-            const isComplete = typeof isCorrect === "boolean";
-            const hadHelp = hasHelp || attempts > 1;
-            return (
-              <Fragment key={i}>
-                {prefix}
-                {isCorrect === false ? <span className="bg-red-500">{word}</span> : null}
-                {isCorrect === true && hadHelp ? <span className="bg-yellow-500">{word}</span> : null}
-                {isCorrect === true && !hadHelp ? word : null}
-                {!isComplete && hasHelp ? <span className="bg-yellow-500">{word[0]}</span> : null}
-                {isComplete ? gap : null}
-              </Fragment>
-            );
-          })}
-          { isDone
-            ? null
-            : <input
-                ref={input}
-                className="focus:outline-none w-2"
-                onInput={onInput}
-                onKeyDown={onKeyPress}
-                autoCapitalize="none"
-                autoComplete="none"
-              />
-          }
+        {renderedWords}
       </pre>
     </div>
   );
