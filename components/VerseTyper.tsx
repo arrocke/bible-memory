@@ -76,7 +76,7 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
 
   useEffect(() => {
     setTimeout(() => {
-      input.current?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'start' })
+      input.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     })
     onProgress({
       totalWords: words.length,
