@@ -68,7 +68,9 @@ export default function ReviewPage() {
       setTimeout(() => {
         continueLink.current?.focus()
       })
-      updatePassage(id, progress?.totalWords === progress?.correctWordsWithHelp)
+      if (mode === 'review') {
+        updatePassage(id, progress?.totalWords === progress?.correctWordsWithHelp)
+      }
     }
   }, [progress])
 
