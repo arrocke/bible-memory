@@ -230,7 +230,7 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
             </div>
       }
       <pre
-        className="focus-within:outline outline-yellow-500 focus-within:border-yellow-500 h-80 overflow-x-auto font-sans whitespace-pre-wrap px-2 py-1 rounded border border-gray-400 shadow-inner"
+        className="focus-within:outline outline-yellow-500 focus-within:border-yellow-500 h-80 overflow-x-auto font-sans whitespace-pre-wrap px-2 py-1 rounded border border-gray-400 shadow-inner select-none"
         tabIndex={isDone ? undefined : -1}
         onFocus={() => input.current?.focus()}
       >
