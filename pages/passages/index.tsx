@@ -79,7 +79,7 @@ export default function Home() {
                   value={passage.level}
                   onChange={(level) => updatePassageLevel({ id: passage.id, level })}
                   min={0}
-                  max={7}
+                  max={9}
                 />
               </TableDataCell>
               <TableDataCell>{passage.reviewDate ? format(passage.reviewDate, 'MM/dd/yyyy') : null}</TableDataCell>

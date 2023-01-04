@@ -74,9 +74,13 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
   const currentProgress = words[currentIndex]!;
   const isDone = currentIndex === words.length
 
+  const wrapper = useRef<HTMLPreElement>(null)
   useEffect(() => {
     setTimeout(() => {
-      input.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      if (input.current && wrapper.current) {
+        const newY = Math.max(0, input.current.offsetTop - wrapper.current.offsetHeight / 2)
+        wrapper.current?.scrollTo(0, newY)
+      }
     })
     onProgress({
       totalWords: words.length,
@@ -195,7 +199,7 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
       <input
         key="input"
         ref={input}
-        className="focus:outline-none absolute opacity-0"
+        className="w-0 focus:outline-none absolute opacity-0"
         onInput={onInput}
         onKeyDown={onKeyPress}
         autoCapitalize="none"
@@ -230,7 +234,8 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
             </div>
       }
       <pre
-        className="focus-within:outline outline-yellow-500 focus-within:border-yellow-500 h-80 overflow-x-auto font-sans whitespace-pre-wrap px-2 py-1 rounded border border-gray-400 shadow-inner select-none"
+        ref={wrapper}
+        className="relative focus-within:outline outline-yellow-500 focus-within:border-yellow-500 h-80 overflow-x-auto font-sans whitespace-pre-wrap px-2 py-1 rounded border border-gray-400 shadow-inner select-none"
         tabIndex={isDone ? undefined : -1}
         onFocus={() => input.current?.focus()}
       >

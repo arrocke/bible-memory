@@ -64,7 +64,7 @@ self.addEventListener("fetch", (event) => {
             const body = (await event.request.json()) as { review?: boolean, level?: number };
             if (typeof body.review === 'boolean') {
               if (body.review) {
-                passage.level = Math.max(REVIEW_DAY_MAP.length - 1, passage.level + 1);
+                passage.level = Math.min(REVIEW_DAY_MAP.length - 1, passage.level + 1);
               } else {
                 passage.level = Math.ceil(passage.level / 2)
               }
