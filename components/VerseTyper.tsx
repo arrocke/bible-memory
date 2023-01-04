@@ -50,7 +50,7 @@ function renderWord({ word, isCorrect, hasHelp, attempts, mode = 'review' }: Wor
     else if (mode === 'recall' || hasHelp) {
       return <span className="text-gray-500">{word[0]}<span className="text-transparent">{word.slice(1)}</span></span>
     } else {
-      return null
+      return <span className="text-transparent">{word}</span>
     }
   }
 }
@@ -180,14 +180,13 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
   }
 
   const renderedWords = words
-    .slice(0, mode === 'review' ? currentIndex + 1 : undefined)
     .map((data, i) => {
       const { isCorrect, gap, prefix } = data
       return (
         <Fragment key={i}>
           {prefix}
           {renderWord({ ...data, mode })}
-          {typeof isCorrect === 'boolean' || mode !== 'review' ? gap : null}
+          {typeof isCorrect === 'boolean' || mode !== 'review' ? gap : <span className="text-transparent">{gap}</span>}
         </Fragment>
       );
     })
@@ -235,7 +234,7 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
       }
       <pre
         ref={wrapper}
-        className="relative focus-within:outline outline-yellow-500 focus-within:border-yellow-500 h-80 overflow-x-auto font-sans whitespace-pre-wrap px-2 py-1 rounded border border-gray-400 shadow-inner select-none"
+        className="relative focus-within:outline outline-yellow-500 focus-within:border-yellow-500 h-80 overflow-y-auto font-sans whitespace-pre-wrap px-2 py-1 rounded border border-gray-400 shadow-inner select-none"
         tabIndex={isDone ? undefined : -1}
         onFocus={() => input.current?.focus()}
       >
