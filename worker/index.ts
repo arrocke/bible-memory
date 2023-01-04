@@ -61,13 +61,21 @@ self.addEventListener("fetch", (event) => {
             );
           }
           case "PATCH": {
-            const body = (await event.request.json()) as { review: boolean };
-            if (body.review) {
-              passage.level = Math.max(REVIEW_DAY_MAP.length - 1, passage.level + 1);
-            } else {
-              passage.level = Math.ceil(passage.level / 2)
+            const body = (await event.request.json()) as { review?: boolean, level?: number };
+            if (typeof body.review === 'boolean') {
+              if (body.review) {
+                passage.level = Math.max(REVIEW_DAY_MAP.length - 1, passage.level + 1);
+              } else {
+                passage.level = Math.ceil(passage.level / 2)
+              }
+              passage.reviewDate = add(new Date(), { days: REVIEW_DAY_MAP[passage.level] });
             }
-            passage.reviewDate = add(new Date(), { days: REVIEW_DAY_MAP[passage.level] });
+            if (typeof body.level === 'number') {
+              passage.level = body.level
+              if (passage.level > 0 && !passage.reviewDate) {
+                passage.reviewDate = add(new Date(), { days: REVIEW_DAY_MAP[passage.level] });
+              }
+            }
             await db.passages.update(passage);
             return resolve(new Response(null, { status: 204 }));
           }

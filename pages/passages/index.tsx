@@ -10,6 +10,7 @@ import TableDataCell from '../../components/ui/TableDataCell'
 import TableBody from '../../components/ui/TableBody'
 import TableFooter from '../../components/ui/TableFooter'
 import PageHeader from '../../components/ui/PageHeader'
+import EditableNumber from '../../components/ui/EditableNumber'
 
 interface Passage { 
   id: string
@@ -43,6 +44,17 @@ export default function Home() {
     )))
   }
 
+  async function updatePassageLevel({ id, level }: { id: string, level: number }) {
+    await fetch(`/api/passages/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ level }),
+      headers: {
+        'content-type': 'application/js'
+      }
+    })
+    await loadPassages()
+  }
+
   return (
     <Page>
       <PageHeader>
@@ -61,7 +73,15 @@ export default function Home() {
           {
             passages.map(passage => <tr key={passage.id}>
               <TableHeaderCell scope="row">{passage.reference}</TableHeaderCell>
-              <TableDataCell>{passage.level}</TableDataCell>
+              <TableDataCell>
+                <EditableNumber
+                  className="w-40"
+                  value={passage.level}
+                  onChange={(level) => updatePassageLevel({ id: passage.id, level })}
+                  min={0}
+                  max={7}
+                />
+              </TableDataCell>
               <TableDataCell>{passage.reviewDate ? format(passage.reviewDate, 'MM/dd/yyyy') : null}</TableDataCell>
               <TableDataCell>
                 <Link className="mr-1" href={`/passages/${passage.id}/review?mode=learn`}>Learn</Link>
