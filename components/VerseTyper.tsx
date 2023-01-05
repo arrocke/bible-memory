@@ -1,7 +1,7 @@
-import { KeyboardEvent, useState, Fragment, useEffect, useRef, FormEvent, ReactNode } from "react";
+import { KeyboardEvent, useState, useEffect, useRef, FormEvent, ReactNode } from "react";
 import Button from "./ui/Button";
 
-const WORD_REGEX = /(\d+ )?(\w+(?:'\w+)?)([^A-Za-z']+)(?=\w|\d|$)/g;
+const WORD_REGEX = /(\d+ )?(\w+(?:'\w+)?)(?:([^A-Za-z0-9']+)(?=\w|\d|$))?/g;
 const LETTERS_REGEX = /^[A-Za-z]$/;
 
 export interface ProgressUpdate {
@@ -53,7 +53,7 @@ function textStyle({ isCorrect, hasHelp }: WordState, mode: VerseTyperProps['mod
   }
 }
 
-function borderStyle({ word, isCorrect, hasHelp, attempts }: WordState): ReactNode {
+function borderStyle({ isCorrect, hasHelp, attempts }: WordState): ReactNode {
   if (isCorrect === true && !hasHelp && attempts === 1) {
     return 'inline-block leading-none border-b-2 border-green-400'
   }
@@ -71,6 +71,8 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
       }))
     );
   }, [text]);
+
+  console.log(words)
 
   const currentIndex = words.filter(
     (state) => typeof state.isCorrect === "boolean"
