@@ -163,6 +163,7 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
     if (char) {
       processLetter(char)
     }
+    e.currentTarget.value = ''
   }
 
   function onKeyPress(e: KeyboardEvent) {
