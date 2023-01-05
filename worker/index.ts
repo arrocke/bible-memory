@@ -61,7 +61,7 @@ self.addEventListener("fetch", (event) => {
             );
           }
           case "PATCH": {
-            const body = (await event.request.json()) as { review?: boolean, level?: number };
+            const body = (await event.request.json()) as { review?: boolean, level?: number, reference?: string, text?: string };
             if (typeof body.review === 'boolean') {
               if (body.review) {
                 passage.level = Math.min(REVIEW_DAY_MAP.length - 1, passage.level + 1);
@@ -75,6 +75,12 @@ self.addEventListener("fetch", (event) => {
               if (passage.level > 0 && !passage.reviewDate) {
                 passage.reviewDate = add(new Date(), { days: REVIEW_DAY_MAP[passage.level] });
               }
+            }
+            if (typeof body.reference === 'string') {
+              passage.reference = body.reference
+            }
+            if (typeof body.text === 'string') {
+              passage.text = body.text
             }
             await db.passages.update(passage);
             return resolve(new Response(null, { status: 204 }));

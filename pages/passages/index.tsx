@@ -60,49 +60,53 @@ export default function Home() {
       <PageHeader>
         <PageTitle>Passages</PageTitle>
       </PageHeader>
-      <Table className="w-full">
-        <TableHeader>
-          <tr>
-            <TableHeaderCell scope="col">PASSAGE</TableHeaderCell>
-            <TableHeaderCell scope="col">LEVEL</TableHeaderCell>
-            <TableHeaderCell scope="col">NEXT REVIEW</TableHeaderCell>
-            <TableHeaderCell scope="col"></TableHeaderCell>
-          </tr>
-        </TableHeader>
-        <TableBody>
-          {
-            passages.map(passage => <tr key={passage.id}>
-              <TableHeaderCell scope="row">{passage.reference}</TableHeaderCell>
-              <TableDataCell>
-                <EditableNumber
-                  className="w-40"
-                  value={passage.level}
-                  onChange={(level) => updatePassageLevel({ id: passage.id, level })}
-                  min={0}
-                  max={9}
-                />
-              </TableDataCell>
-              <TableDataCell>{passage.reviewDate ? format(passage.reviewDate, 'MM/dd/yyyy') : null}</TableDataCell>
-              <TableDataCell>
-                <Link className="mr-1" href={`/passages/${passage.id}/review?mode=learn`}>Learn</Link>
-                |
-                <Link className="mx-1" href={`/passages/${passage.id}/review?mode=recall`}>Recall</Link>
-                |
-                <Link className="ml-1" href={`/passages/${passage.id}/review?mode=review`}>Review</Link>
-              </TableDataCell>
-            </tr>)
-          }
-        </TableBody>
-        <TableFooter>
-          <tr>
-            <td colSpan={4}>
-              <Link href="/passages/new" className="py-1 block">
-                + Add Passage
-              </Link>
-            </td>
-          </tr>
-        </TableFooter>
-      </Table>
+      <div className="w-full overflow-x-auto">
+        <Table className="w-full min-w-[700px]">
+          <TableHeader>
+            <tr>
+              <TableHeaderCell scope="col">PASSAGE</TableHeaderCell>
+              <TableHeaderCell scope="col">LEVEL</TableHeaderCell>
+              <TableHeaderCell scope="col">NEXT REVIEW</TableHeaderCell>
+              <TableHeaderCell scope="col"></TableHeaderCell>
+            </tr>
+          </TableHeader>
+          <TableBody>
+            {
+              passages.map(passage => <tr key={passage.id}>
+                <TableHeaderCell scope="row">{passage.reference}</TableHeaderCell>
+                <TableDataCell>
+                  <EditableNumber
+                    className="w-40"
+                    value={passage.level}
+                    onChange={(level) => updatePassageLevel({ id: passage.id, level })}
+                    min={0}
+                    max={9}
+                  />
+                </TableDataCell>
+                <TableDataCell>{passage.reviewDate ? format(passage.reviewDate, 'MM/dd/yyyy') : null}</TableDataCell>
+                <TableDataCell>
+                  <Link className="mr-1" href={`/passages/${passage.id}`}>Edit</Link>
+                  |
+                  <Link className="mx-1" href={`/passages/${passage.id}/review?mode=learn`}>Learn</Link>
+                  |
+                  <Link className="mx-1" href={`/passages/${passage.id}/review?mode=recall`}>Recall</Link>
+                  |
+                  <Link className="ml-1" href={`/passages/${passage.id}/review?mode=review`}>Review</Link>
+                </TableDataCell>
+              </tr>)
+            }
+          </TableBody>
+          <TableFooter>
+            <tr>
+              <td colSpan={4}>
+                <Link href="/passages/new" className="py-1 block">
+                  + Add Passage
+                </Link>
+              </td>
+            </tr>
+          </TableFooter>
+        </Table>
+      </div>
     </Page>
   )
 }
