@@ -29,29 +29,33 @@ interface WordState {
 
 type WordAction = "correct" | "fail" | "continue" | "help";
 
-function renderWord({ word, isCorrect, hasHelp, attempts, mode = 'review' }: WordState & Pick<VerseTyperProps, 'mode'>): ReactNode {
-  const isComplete = typeof isCorrect === "boolean";
-  const hadHelp = hasHelp || attempts > 1;
+function bgStyle({ isCorrect, hasHelp, attempts }: WordState): string {
+  if (isCorrect === true && (hasHelp || attempts > 1)) {
+    return "bg-yellow-500"
+  } else if (isCorrect === false) {
+    return "bg-red-500"
+  } else if (typeof isCorrect === 'undefined' && attempts > 0) {
+    return 'bg-yellow-500'
+  } else {
+    return ''
+  }
+}
 
-  if (isComplete) {
-    if (isCorrect) {
-      if (hadHelp) {
-        return <span className="bg-yellow-500">{word}</span>
-      } else {
-        return <span className="inline-block leading-none border-b-2 border-green-400">{word}</span>
-      }
+function textStyle({ isCorrect, hasHelp }: WordState, mode: VerseTyperProps['mode']): ReactNode {
+  if (typeof isCorrect === 'undefined') {
+    if (mode !== 'review' || hasHelp) {
+      return 'text-gray-500'
     } else {
-      return <span className="bg-red-500">{word}</span>
+      return 'text-transparent'
     }
   } else {
-    if (mode === 'learn') {
-      return <span className="text-gray-500">{word}</span>
-    }
-    else if (mode === 'recall' || hasHelp) {
-      return <span className="text-gray-500">{word[0]}<span className="text-transparent">{word.slice(1)}</span></span>
-    } else {
-      return <span className="text-transparent">{word}</span>
-    }
+    return ''
+  }
+}
+
+function borderStyle({ word, isCorrect, hasHelp, attempts }: WordState): ReactNode {
+  if (isCorrect === true && !hasHelp && attempts === 1) {
+    return 'inline-block leading-none border-b-2 border-green-400'
   }
 }
 
@@ -76,12 +80,13 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
 
   const wrapper = useRef<HTMLPreElement>(null)
   useEffect(() => {
-    setTimeout(() => {
-      if (input.current && wrapper.current) {
-        const newY = Math.max(0, input.current.offsetTop - wrapper.current.offsetHeight / 2)
-        wrapper.current?.scrollTo(0, newY)
+    if (wrapper.current) {
+      const word = wrapper.current.querySelector<HTMLSpanElement>(`[data-word='${currentIndex}']`)
+      if (word) {
+        const newY = Math.max(0, word.offsetTop - wrapper.current.offsetHeight / 2)
+        wrapper.current.scrollTo(0, newY)
       }
-    })
+    }
     onProgress({
       totalWords: words.length,
       wordsComplete: words.filter(word => typeof word.isCorrect === 'boolean').length,
@@ -179,33 +184,6 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
     e.stopPropagation();
   }
 
-  const renderedWords = words
-    .map((data, i) => {
-      const { isCorrect, gap, prefix } = data
-      return (
-        <Fragment key={i}>
-          {prefix}
-          {renderWord({ ...data, mode })}
-          {typeof isCorrect === 'boolean' || mode !== 'review' ? gap : <span className="text-transparent">{gap}</span>}
-        </Fragment>
-      );
-    })
-
-  if (!isDone) {
-    renderedWords.splice(
-      currentIndex,
-      0,
-      <input
-        key="input"
-        ref={input}
-        className="w-0 focus:outline-none absolute opacity-0"
-        onInput={onInput}
-        onKeyDown={onKeyPress}
-        autoCapitalize="none"
-        autoComplete="none"
-      />
-    )
-  }
 
   return (
     <div className={`${className}`}>
@@ -232,14 +210,50 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
               </Button>
             </div>
       }
-      <pre
-        ref={wrapper}
-        className="relative focus-within:outline outline-yellow-500 focus-within:border-yellow-500 h-80 overflow-y-auto font-sans whitespace-pre-wrap px-2 py-1 rounded border border-gray-400 shadow-inner select-none"
-        tabIndex={isDone ? undefined : -1}
-        onFocus={() => input.current?.focus()}
-      >
-        {renderedWords}
-      </pre>
+      <div className="relative focus-within:outline outline-yellow-500 focus-within:border-yellow-500 rounded border border-gray-400 shadow-inner">
+        <input
+          ref={input}
+          className="w-0 focus:outline-none absolute opacity-0"
+          onInput={onInput}
+          onKeyDown={onKeyPress}
+          autoCapitalize="none"
+          autoComplete="none"
+        />
+        <pre
+          ref={wrapper}
+          className="h-80 overflow-y-auto font-sans whitespace-pre-wrap px-2 py-1 select-none"
+          tabIndex={isDone ? undefined : -1}
+          onFocus={() => input.current?.focus()}
+        >
+          {words
+            .map((data, i) => {
+              const { isCorrect, gap, prefix, hasHelp, word } = data
+              return [
+                prefix && <span key={`prefix-${i}`}>{prefix}</span>,
+                <span
+                  key={`word-${i}`}
+                  data-word={i}
+                  className={`${bgStyle(data)} ${textStyle(data, mode)} ${borderStyle(data)}`}
+                >
+                  {typeof isCorrect === 'undefined' && (mode == 'recall' || hasHelp)
+                    ? 
+                      <>
+                        {word[0]}
+                        <span className="text-transparent">{word.slice(1)}</span>
+                      </>
+                    : word}
+                </span>,
+                gap && <span
+                  key={`suffix-${i}`}
+                  className={typeof isCorrect === 'boolean' || mode !== 'review' ? '' : 'text-transparent'}
+                >
+                  {gap}
+                </span>,
+              ].filter(Boolean);
+            })
+          }
+        </pre>
+      </div>
     </div>
   );
 }
