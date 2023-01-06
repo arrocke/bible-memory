@@ -1,11 +1,15 @@
 /// <reference lib="WebWorker" />
 declare const self: ServiceWorkerGlobalScope;
-import { add } from "date-fns";
+import { add, format } from "date-fns";
 import { open } from "./db";
 
 const db = open();
 
 const REVIEW_DAY_MAP = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]
+
+function getDate(date: Date): Date {
+  return new Date(format(date, 'yyy-MM-dd'))
+}
 
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
@@ -61,19 +65,19 @@ self.addEventListener("fetch", (event) => {
             );
           }
           case "PATCH": {
-            const body = (await event.request.json()) as { review?: boolean, level?: number, reference?: string, text?: string };
+            const body = (await event.request.json()) as { review?: boolean, level?: number, reference?: string, text?: string, reviewDate?: string };
             if (typeof body.review === 'boolean') {
               if (body.review) {
                 passage.level = Math.min(REVIEW_DAY_MAP.length - 1, passage.level + 1);
               } else {
                 passage.level = Math.ceil(passage.level / 2)
               }
-              passage.reviewDate = add(new Date(), { days: REVIEW_DAY_MAP[passage.level] });
+              passage.reviewDate = getDate(add(new Date(), { days: REVIEW_DAY_MAP[passage.level] }));
             }
             if (typeof body.level === 'number') {
               passage.level = body.level
               if (passage.level > 0 && !passage.reviewDate) {
-                passage.reviewDate = add(new Date(), { days: REVIEW_DAY_MAP[passage.level] });
+                passage.reviewDate = getDate(add(new Date(), { days: REVIEW_DAY_MAP[passage.level] }));
               }
             }
             if (typeof body.reference === 'string') {
@@ -81,6 +85,9 @@ self.addEventListener("fetch", (event) => {
             }
             if (typeof body.text === 'string') {
               passage.text = body.text
+            }
+            if (typeof body.reviewDate === 'string') {
+              passage.reviewDate = getDate(new Date(body.reviewDate))
             }
             await db.passages.update(passage);
             return resolve(new Response(null, { status: 204 }));

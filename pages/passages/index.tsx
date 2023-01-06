@@ -1,5 +1,5 @@
 import Link from '../../components/ui/Link'
-import { format } from 'date-fns'
+import { format, add } from 'date-fns'
 import { useEffect, useState } from 'react'
 import Page from '../../components/ui/Page'
 import PageTitle from '../../components/ui/PageTitle'
@@ -11,6 +11,9 @@ import TableBody from '../../components/ui/TableBody'
 import TableFooter from '../../components/ui/TableFooter'
 import PageHeader from '../../components/ui/PageHeader'
 import EditableNumber from '../../components/ui/EditableNumber'
+import NumberStepper from '../../components/ui/NumberStepper'
+import EditableField from '../../components/ui/EditableField'
+import EditableDate from '../../components/ui/EditableDate'
 
 interface Passage { 
   id: string
@@ -36,18 +39,20 @@ export default function Home() {
   async function loadPassages() {
     const request = await fetch('/api/passages')
     const body = await request.json() as PassageJSON[]
-    setPassages(body.map(passage => (
-      {
+    setPassages(body.map(passage => {
+      return {
         ...passage,
-        reviewDate: passage.reviewDate ? new Date(passage.reviewDate) : undefined
+        reviewDate: passage.reviewDate
+          ? add(new Date(passage.reviewDate), { minutes: new Date(passage.reviewDate).getTimezoneOffset() })
+          : undefined
       }
-    )))
+    }))
   }
 
-  async function updatePassageLevel({ id, level }: { id: string, level: number }) {
+  async function updatePassage({ id, ...data }: { id: string, level?: number, reviewDate?: Date }) {
     await fetch(`/api/passages/${id}`, {
       method: 'PATCH',
-      body: JSON.stringify({ level }),
+      body: JSON.stringify(data),
       headers: {
         'content-type': 'application/js'
       }
@@ -78,12 +83,17 @@ export default function Home() {
                   <EditableNumber
                     className="w-40"
                     value={passage.level}
-                    onChange={(level) => updatePassageLevel({ id: passage.id, level })}
+                    onChange={(level) => updatePassage({ id: passage.id, level })}
                     min={0}
                     max={9}
                   />
                 </TableDataCell>
-                <TableDataCell>{passage.reviewDate ? format(passage.reviewDate, 'MM/dd/yyyy') : null}</TableDataCell>
+                <TableDataCell>
+                  <EditableDate 
+                    value={passage.reviewDate}
+                    onChange={(reviewDate) => updatePassage({ id: passage.id, reviewDate })}
+                  />
+                </TableDataCell>
                 <TableDataCell>
                   <Link className="mr-1" href={`/passages/${passage.id}`}>Edit</Link>
                   |
