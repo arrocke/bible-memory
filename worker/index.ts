@@ -92,6 +92,10 @@ self.addEventListener("fetch", (event) => {
             await db.passages.update(passage);
             return resolve(new Response(null, { status: 204 }));
           }
+          case "DELETE": {
+            await db.passages.delete(id)
+            return resolve(new Response(null, { status: 204 }))
+          }
         }
       })
     );

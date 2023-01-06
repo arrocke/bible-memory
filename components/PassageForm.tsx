@@ -21,6 +21,7 @@ export interface PassageFormData {
 export interface PassageFormProps {
   initialData? : { text: string, reference: string }
   onSubmit(data: { text: string, reference: string }): void
+  onDelete?(): void
 }
 
 const REFERENCE_MATCH = /^((?:(?:1|2) )?\w+) (\d+):(\d+)-(\d+):(\d+)$/
@@ -39,7 +40,7 @@ function parseReference(reference: string): Reference {
   }
 }
 
-export default function PassageForm({ initialData, onSubmit }: PassageFormProps) {
+export default function PassageForm({ initialData, onSubmit, onDelete }: PassageFormProps) {
   const [{ reference, text }, setData] = useState<PassageFormData>(() => ({
     reference: initialData?.reference ? parseReference(initialData.reference) : {},
     text: initialData?.text ?? ''
@@ -139,6 +140,7 @@ export default function PassageForm({ initialData, onSubmit }: PassageFormProps)
     </div>
     <div className="mt-4">
       <Button type="submit">Save</Button>
+      {onDelete ? <Button className="ml-4" destructive onClick={onDelete}>Delete</Button> : null}
     </div>
   </form>
 }

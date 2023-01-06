@@ -41,13 +41,20 @@ export default function EditPassagePage() {
     router.push('/passages')
   }
 
+  async function onDelete() {
+    await fetch(`/api/passages/${id}`, {
+      method: 'DELETE'
+    })
+    router.push('/passages')
+  }
+
   return (
     <Page>
       <PageHeader>
         <BackLink href="/passages">Back to Passages</BackLink>
         <PageTitle>Edit {passage?.reference}</PageTitle>
       </PageHeader>
-      {passage && <PassageForm initialData={passage} onSubmit={onSubmit}/>}
+      {passage && <PassageForm initialData={passage} onSubmit={onSubmit} onDelete={onDelete} />}
     </Page>
   )
 }

@@ -38,6 +38,9 @@ export function open() {
       },
       async getAll(): Promise<DbPassage[]> {
         return await (await dbPromise).getAll('passages')
+      },
+      async delete(id: string): Promise<void> {
+        return await (await dbPromise).delete('passages', id)
       }
     }
   }
