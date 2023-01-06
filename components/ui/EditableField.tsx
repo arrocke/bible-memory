@@ -29,11 +29,11 @@ export default function EditableField<T>({ className = '', value, edit, display,
   if (isEditing) {
     return <form className={`${className} flex align-middle`} onSubmit={submit}>
       {edit({ value: mutableValue, onChange: setValue })}
-      <button className="px-2 py-1">
+      <button className="px-2 py-1 w-8 focus:outline-2 outline-yellow-500">
         <span className="sr-only">Submit</span>
         <Icon icon="check" aria-hidden="true" />
       </button>
-      <button type="button" className="px-2 py-1" onClick={cancel}>
+      <button type="button" className="px-2 py-1 w-8 focus:outline-2 outline-yellow-500" onClick={cancel}>
         <span className="sr-only">Cancel</span>
         <Icon icon="close" aria-hidden="true" />
       </button>
@@ -41,7 +41,7 @@ export default function EditableField<T>({ className = '', value, edit, display,
   } else {
     return <div className={`${className} flex items-center`}>
       {display}
-      <button type="button" className="px-2 py-1" onClick={() => setEditing(true)}>
+      <button type="button" className="px-2 py-1 focus:outline-2 outline-yellow-500" onClick={() => setEditing(true)}>
         <span className="sr-only">Edit</span>
         <Icon icon="pencil" aria-hidden="true" />
       </button>
