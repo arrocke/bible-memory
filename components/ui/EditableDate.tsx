@@ -8,8 +8,6 @@ export interface EditableDateProps {
   onChange(value?: Date): void
 }
 
-console.log(parse('12/22/2022', 'MM/dd/yyyy', new Date()))
-
 export default function EditableDate({ className = '', value, onChange }: EditableDateProps) {
   return <EditableField 
     className={`${className} w-44`}

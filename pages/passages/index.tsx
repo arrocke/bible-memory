@@ -1,5 +1,5 @@
 import Link from '../../components/ui/Link'
-import { format, add } from 'date-fns'
+import { add, isSameDay, isBefore, startOfToday } from 'date-fns'
 import { useEffect, useState } from 'react'
 import Page from '../../components/ui/Page'
 import PageTitle from '../../components/ui/PageTitle'
@@ -77,33 +77,39 @@ export default function Home() {
           </TableHeader>
           <TableBody>
             {
-              passages.map(passage => <tr key={passage.id}>
-                <TableHeaderCell scope="row">{passage.reference}</TableHeaderCell>
-                <TableDataCell>
-                  <EditableNumber
-                    className="w-40"
-                    value={passage.level}
-                    onChange={(level) => updatePassage({ id: passage.id, level })}
-                    min={0}
-                    max={9}
-                  />
-                </TableDataCell>
-                <TableDataCell>
-                  <EditableDate 
-                    value={passage.reviewDate}
-                    onChange={(reviewDate) => updatePassage({ id: passage.id, reviewDate })}
-                  />
-                </TableDataCell>
-                <TableDataCell>
-                  <Link className="mr-1" href={`/passages/${passage.id}`}>Edit</Link>
-                  |
-                  <Link className="mx-1" href={`/passages/${passage.id}/review?mode=learn`}>Learn</Link>
-                  |
-                  <Link className="mx-1" href={`/passages/${passage.id}/review?mode=recall`}>Recall</Link>
-                  |
-                  <Link className="ml-1" href={`/passages/${passage.id}/review?mode=review`}>Review</Link>
-                </TableDataCell>
-              </tr>)
+              passages.map(passage => {
+                const today = startOfToday()
+                const isDue = passage.reviewDate
+                  ? isSameDay(passage.reviewDate, today) || isBefore(passage.reviewDate, today)
+                  : false
+                return <tr className={isDue ? 'bg-green-200' : ''} key={passage.id}>
+                  <TableHeaderCell scope="row">{passage.reference}</TableHeaderCell>
+                  <TableDataCell>
+                    <EditableNumber
+                      className="w-40"
+                      value={passage.level}
+                      onChange={(level) => updatePassage({ id: passage.id, level })}
+                      min={0}
+                      max={9}
+                    />
+                  </TableDataCell>
+                  <TableDataCell>
+                    <EditableDate 
+                      value={passage.reviewDate}
+                      onChange={(reviewDate) => updatePassage({ id: passage.id, reviewDate })}
+                    />
+                  </TableDataCell>
+                  <TableDataCell>
+                    <Link className="mr-1" href={`/passages/${passage.id}`}>Edit</Link>
+                    |
+                    <Link className="mx-1" href={`/passages/${passage.id}/review?mode=learn`}>Learn</Link>
+                    |
+                    <Link className="mx-1" href={`/passages/${passage.id}/review?mode=recall`}>Recall</Link>
+                    |
+                    <Link className="ml-1" href={`/passages/${passage.id}/review?mode=review`}>Review</Link>
+                  </TableDataCell>
+                </tr>
+              })
             }
           </TableBody>
           <TableFooter>

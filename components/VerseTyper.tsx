@@ -72,8 +72,6 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
     );
   }, [text]);
 
-  console.log(words)
-
   const currentIndex = words.filter(
     (state) => typeof state.isCorrect === "boolean"
   ).length;
