@@ -230,7 +230,7 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
             .map((data, i) => {
               const { isCorrect, gap, prefix, hasHelp, word } = data
               return [
-                prefix && <span key={`prefix-${i}`}>{prefix}</span>,
+                (mode !== 'review' || currentIndex >= i) && prefix && <span key={`prefix-${i}`}>{prefix}</span>,
                 <span
                   key={`word-${i}`}
                   data-word={i}
