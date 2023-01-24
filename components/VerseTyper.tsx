@@ -118,6 +118,7 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
           },
           ...p.slice(currentIndex + 1),
         ]);
+        navigator.vibrate(100)
         break;
       }
       case "continue": {
