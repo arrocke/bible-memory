@@ -5,9 +5,10 @@ export interface TableHeaderCellProps {
   scope: 'row' | 'col'
   rowSpan?: number
   colSpan?: number
+  className?: string
 }
 
-export default function TableHeaderCell({ children, scope, ...props }: TableHeaderCellProps) {
+export default function TableHeaderCell({ children, scope, className, ...props }: TableHeaderCellProps) {
   return <th
     {...props}
     scope={scope}
@@ -18,6 +19,7 @@ export default function TableHeaderCell({ children, scope, ...props }: TableHead
           ? 'text-sm'
           : 'h-10'
       }
+      ${className}
     `}
   >
     {children}

@@ -50,14 +50,14 @@ export default function Home() {
       <PageHeader>
         <PageTitle>Passages</PageTitle>
       </PageHeader>
-      <div className="w-full overflow-x-auto">
-        <Table className="w-full min-w-[700px]">
+      <div className="w-full overflow-x-auto sm:flex sm:justify-center whitespace-nowrap">
+        <Table>
           <TableHeader>
             <tr>
-              <TableHeaderCell scope="col">PASSAGE</TableHeaderCell>
-              <TableHeaderCell scope="col">LEVEL</TableHeaderCell>
-              <TableHeaderCell scope="col">NEXT REVIEW</TableHeaderCell>
-              <TableHeaderCell scope="col"></TableHeaderCell>
+              <TableHeaderCell className="px-2" scope="col">PASSAGE</TableHeaderCell>
+              <TableHeaderCell className="px-2" scope="col">LEVEL</TableHeaderCell>
+              <TableHeaderCell className="px-2" scope="col">NEXT REVIEW</TableHeaderCell>
+              <TableHeaderCell className="px-2" scope="col"></TableHeaderCell>
             </tr>
           </TableHeader>
           <TableBody>
@@ -68,14 +68,14 @@ export default function Home() {
                   ? isSameDay(passage.reviewDate, today) || isBefore(passage.reviewDate, today)
                   : false
                 return <tr className={isDue ? 'bg-green-200' : ''} key={passage.id}>
-                  <TableHeaderCell scope="row">{passage.reference}</TableHeaderCell>
-                  <TableDataCell>
+                  <TableHeaderCell className="px-2" scope="row">{passage.reference}</TableHeaderCell>
+                  <TableDataCell className="px-2">
                     {passage.level ?? '-'}
                   </TableDataCell>
-                  <TableDataCell>
+                  <TableDataCell className="px-2">
                     {passage.reviewDate ? format(passage.reviewDate, 'MM/dd/yyyy') : '-'}
                   </TableDataCell>
-                  <TableDataCell>
+                  <TableDataCell className="px-2">
                     <Link className="mr-1" href={`/passages/${passage.id}`}>Edit</Link>
                     |
                     <Link className="mx-1" href={`/passages/${passage.id}/review?mode=learn`}>Learn</Link>
