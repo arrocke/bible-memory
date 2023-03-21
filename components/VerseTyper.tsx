@@ -1,7 +1,7 @@
 import { KeyboardEvent, useState, useEffect, useRef, FormEvent, ReactNode } from "react";
 import Button from "./ui/Button";
 
-const WORD_REGEX = /(\d+ [^A-Za-z0-9']*)?(\w+(?:(?:'|’|-)\w+)?)(?:([^A-Za-z0-9']+)(?=\w|\d|$))?/g;
+const WORD_REGEX = /(\d+ [^A-Za-z0-9']*)?(\w+(?:(?:'|’|-)\w+)?(?:'|’)?)(?:([^A-Za-z0-9']+)(?=\w|\d|$))?/g;
 const LETTERS_REGEX = /^[A-Za-z]$/;
 
 export interface ProgressUpdate {
