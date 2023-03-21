@@ -74,6 +74,13 @@ export default function ReviewPage() {
     }
   }, [progress])
 
+  useEffect(() => {
+    document.body.classList.add('overscroll-y-contain')
+    return () => {
+      document.body.classList.remove('overscroll-y-contain')
+    }
+  }, [])
+
   return (
     <Page>
       <PageHeader>
