@@ -1,5 +1,5 @@
 import Link from '../../components/ui/Link'
-import { add, isSameDay, isBefore, startOfToday } from 'date-fns'
+import { add, isSameDay, isBefore, startOfToday, format } from 'date-fns'
 import { useEffect, useState } from 'react'
 import Page from '../../components/ui/Page'
 import PageTitle from '../../components/ui/PageTitle'
@@ -10,10 +10,6 @@ import TableDataCell from '../../components/ui/TableDataCell'
 import TableBody from '../../components/ui/TableBody'
 import TableFooter from '../../components/ui/TableFooter'
 import PageHeader from '../../components/ui/PageHeader'
-import EditableNumber from '../../components/ui/EditableNumber'
-import NumberStepper from '../../components/ui/NumberStepper'
-import EditableField from '../../components/ui/EditableField'
-import EditableDate from '../../components/ui/EditableDate'
 
 interface Passage { 
   id: string
@@ -49,17 +45,6 @@ export default function Home() {
     }))
   }
 
-  async function updatePassage({ id, ...data }: { id: string, level?: number, reviewDate?: Date }) {
-    await fetch(`/api/passages/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-      headers: {
-        'content-type': 'application/js'
-      }
-    })
-    await loadPassages()
-  }
-
   return (
     <Page>
       <PageHeader>
@@ -85,19 +70,10 @@ export default function Home() {
                 return <tr className={isDue ? 'bg-green-200' : ''} key={passage.id}>
                   <TableHeaderCell scope="row">{passage.reference}</TableHeaderCell>
                   <TableDataCell>
-                    <EditableNumber
-                      className="w-40"
-                      value={passage.level}
-                      onChange={(level) => updatePassage({ id: passage.id, level })}
-                      min={0}
-                      max={9}
-                    />
+                    {passage.level ?? '-'}
                   </TableDataCell>
                   <TableDataCell>
-                    <EditableDate 
-                      value={passage.reviewDate}
-                      onChange={(reviewDate) => updatePassage({ id: passage.id, reviewDate })}
-                    />
+                    {passage.reviewDate ? format(passage.reviewDate, 'MM/dd/yyyy') : '-'}
                   </TableDataCell>
                   <TableDataCell>
                     <Link className="mr-1" href={`/passages/${passage.id}`}>Edit</Link>
