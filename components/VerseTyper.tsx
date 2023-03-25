@@ -28,34 +28,24 @@ interface WordState {
 
 type WordAction = "correct" | "fail" | "continue" | "help";
 
-function bgStyle({ isCorrect, hasHelp, attempts }: WordState): string {
-  if (isCorrect === true && (hasHelp || attempts > 1)) {
-    return "bg-yellow-500"
-  } else if (isCorrect === false) {
-    return "bg-red-500"
-  } else if (typeof isCorrect === 'undefined' && attempts > 0) {
-    return 'bg-yellow-500'
-  } else {
-    return ''
-  }
-}
-
 function textStyle({ isCorrect, hasHelp }: WordState, mode: VerseTyperProps['mode']): ReactNode {
   if (typeof isCorrect === 'undefined') {
     if (mode !== 'review' || hasHelp) {
       return 'text-gray-500'
-    } else {
+    } else if (!hasHelp) {
       return 'text-transparent'
     }
-  } else {
-    return ''
   }
+  return ''
 }
 
 function borderStyle({ isCorrect, hasHelp, attempts }: WordState): ReactNode {
-  if (isCorrect === true && !hasHelp && attempts === 1) {
-    return 'inline-block leading-none border-b-2 border-green-400'
+  if (hasHelp) {
+    return 'border-b-3 border-red-400'
+  } else if (isCorrect === true ? attempts > 1 : attempts > 0) {
+    return 'border-b-3 border-yellow-500'
   }
+  return ''
 }
 
 export default function VerseTyper({ text, mode = 'review', className = '', onProgress }: VerseTyperProps) {
@@ -119,18 +109,6 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
         navigator.vibrate(100)
         break;
       }
-      case "continue": {
-        setWords((p) => [
-          ...p.slice(0, currentIndex),
-          {
-            ...currentProgress,
-            attempts: currentProgress.attempts + 1,
-            isCorrect: false,
-          },
-          ...p.slice(currentIndex + 1),
-        ]);
-        break;
-      }
       case "help": {
         if (mode === 'review') {
           setWords((p) => [
@@ -168,13 +146,8 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
   function onKeyPress(e: KeyboardEvent) {
     if (isDone) return
     switch (e.key) {
-      case "/":
-      case "?": {
+      case "Enter": {
         attempt("help");
-        break;
-      }
-      case "ArrowRight": {
-        attempt("continue");
         break;
       }
       default:
@@ -188,7 +161,7 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
   return (
     <div className={`${className}`}>
       {
-        isDone
+        isDone || mode !== 'review'
           ? null
           : <div className="mb-2">
               <Button
@@ -198,15 +171,6 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
                 }}
               >
                 Hint
-              </Button>
-              <Button
-                className="ml-2"
-                onClick={() => {
-                  attempt('continue')
-                  input.current?.focus()
-                }}
-              >
-                Skip
               </Button>
             </div>
       }
@@ -221,7 +185,7 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
         />
         <pre
           ref={wrapper}
-          className="h-80 overflow-y-auto font-sans whitespace-pre-wrap px-2 py-1 select-none"
+          className="h-80 overflow-y-auto font-sans whitespace-pre-wrap px-2 py-1"
           tabIndex={isDone ? undefined : -1}
           onFocus={() => input.current?.focus()}
         >
@@ -233,7 +197,7 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
                 <span
                   key={`word-${i}`}
                   data-word={i}
-                  className={`${bgStyle(data)} ${textStyle(data, mode)} ${borderStyle(data)}`}
+                  className={`${textStyle(data, mode)} ${borderStyle(data)}`}
                 >
                   {typeof isCorrect === 'undefined' && (mode == 'recall' || hasHelp)
                     ? 
