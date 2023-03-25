@@ -8,7 +8,6 @@ export interface ProgressUpdate {
   totalWords: number
   wordsComplete: number
   correctWords: number
-  correctWordsWithHelp: number
 }
 
 export interface VerseTyperProps {
@@ -91,7 +90,6 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
       totalWords: words.length,
       wordsComplete: words.filter(word => typeof word.isCorrect === 'boolean').length,
       correctWords: words.filter(word => word.isCorrect && !word.hasHelp).length,
-      correctWordsWithHelp: words.filter(word => word.isCorrect === true).length
     })
   }, [words])
 

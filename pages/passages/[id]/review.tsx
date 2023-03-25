@@ -48,10 +48,10 @@ export default function ReviewPage() {
     )
   }
 
-  async function updatePassage(id: string, review: boolean) {
+  async function updatePassage(id: string, accuracy: number) {
     await fetch(`/api/passages/${id}`, {
       method: 'PATCH',
-      body: JSON.stringify({ review }),
+      body: JSON.stringify({ accuracy }),
       headers: {
         'content-type': 'application/js'
       }
@@ -62,15 +62,19 @@ export default function ReviewPage() {
   const [isComplete, setComplete] = useState(false)
 
   useEffect(() => {
-    const isComplete = progress ? progress.totalWords > 0 && progress.wordsComplete === progress.totalWords : false
-    setComplete(isComplete)
-    if (isComplete) {
-      setTimeout(() => {
-        continueLink.current?.focus()
-      })
-      if (mode === 'review') {
-        updatePassage(id, progress?.totalWords === progress?.correctWordsWithHelp)
+    if (progress) {
+      const isComplete = progress.totalWords > 0 && progress.wordsComplete === progress.totalWords
+      setComplete(isComplete)
+      if (isComplete) {
+        setTimeout(() => {
+          continueLink.current?.focus()
+        })
+        if (mode === 'review') {
+          updatePassage(id, progress.correctWords / progress.totalWords)
+        }
       }
+    } else {
+      setComplete(false)
     }
   }, [progress])
 

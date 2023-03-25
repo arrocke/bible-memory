@@ -5,7 +5,9 @@ import { open } from "./db";
 
 const db = open();
 
-const REVIEW_DAY_MAP = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]
+const REVIEW_DAY_MAP = [1, 1, 1, 2, 2, 3, 5, 8, 13, 21, 34, 55]
+const BACKOFF_UPPER_THRESH = 0.9
+const BACKOFF_LOWER_THRESH = 0.8
 
 function getDate(date: Date): Date {
   return new Date(format(date, 'yyy-MM-dd'))
@@ -65,11 +67,13 @@ self.addEventListener("fetch", (event) => {
             );
           }
           case "PATCH": {
-            const body = (await event.request.json()) as { review?: boolean, level?: number, reference?: string, text?: string, reviewDate?: string };
-            if (typeof body.review === 'boolean') {
-              if (body.review) {
+            const body = (await event.request.json()) as { accuracy?: number, level?: number, reference?: string, text?: string, reviewDate?: string };
+            if (typeof body.accuracy === 'number') {
+              if (body.accuracy === 1) {
                 passage.level = Math.min(REVIEW_DAY_MAP.length - 1, passage.level + 1);
-              } else {
+              } else if (body.accuracy >= BACKOFF_LOWER_THRESH && body.accuracy < BACKOFF_UPPER_THRESH) {
+                passage.level = Math.max(0, passage.level - 1)
+              } else if (body.accuracy < BACKOFF_LOWER_THRESH) {
                 passage.level = Math.ceil(passage.level / 2)
               }
               passage.reviewDate = getDate(add(new Date(), { days: REVIEW_DAY_MAP[passage.level] }));
