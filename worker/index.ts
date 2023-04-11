@@ -20,8 +20,11 @@ self.addEventListener("fetch", (event) => {
       new Promise(async (resolve, reject) => {
         switch (event.request.method) {
           case "GET": {
+            const passages = (await db.passages.getAll()).sort((a, b) =>
+              a.reference.localeCompare(b.reference)
+            );
             return resolve(
-              new Response(JSON.stringify(await db.passages.getAll()), {
+              new Response(JSON.stringify(passages), {
                 status: 200,
                 headers: {
                   "content-type": "application/js",

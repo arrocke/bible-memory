@@ -59,9 +59,6 @@ export default function Home() {
           <TableHeader>
             <tr>
               <TableHeaderCell className="px-2" scope="col">
-                ID
-              </TableHeaderCell>
-              <TableHeaderCell className="px-2" scope="col">
                 PASSAGE
               </TableHeaderCell>
               <TableHeaderCell className="px-2" scope="col">
@@ -82,7 +79,6 @@ export default function Home() {
                 : false;
               return (
                 <tr className={isDue ? "bg-green-200" : ""} key={passage.id}>
-                  <TableDataCell>{passage.id}</TableDataCell>
                   <TableHeaderCell className="px-2" scope="row">
                     {passage.reference}
                   </TableHeaderCell>
