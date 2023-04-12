@@ -47,7 +47,7 @@ export function open() {
         return { ...data, id };
       },
       async update(passage: DbPassage): Promise<void> {
-        await (await dbPromise).put("passages", passage, passage.id);
+        await (await dbPromise).put("passages", passage);
       },
       async getById(id: number): Promise<DbPassage | undefined> {
         return await (await dbPromise).get("passages", id);
