@@ -1,9 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "dev": "npx http-server ./src --proxy http://localhost:8080?"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.2.1",
@@ -19,6 +17,7 @@
     "@types/node": "17.0.4",
     "@types/react": "17.0.38",
     "autoprefixer": "^10.4.13",
+    "http-serve": "1.0.1",
     "idb": "7.1.1",
     "postcss": "^8.4.20",
     "tailwindcss": "^3.2.4",
