@@ -7,9 +7,9 @@ module.exports = {
   theme: {
     extend: {
       borderWidth: {
-        3: '3px'
-      }
+        3: "3px",
+      },
     },
   },
   plugins: [],
-}
+};
