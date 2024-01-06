@@ -1,10 +1,3 @@
-//! Simple usage of using `axum_template` with the `handlebars` crate
-//!
-//! Run the example using
-//!
-//! ```sh
-//! cargo run --example=handlebars --features=handlebars
-//! ```
 use std::net::Ipv4Addr;
 
 use axum::{
@@ -26,19 +19,18 @@ pub struct Person {
     name: String,
 }
 
-async fn get_name(
-    // Obtain the engine
-    engine: AppEngine,
-    // Extract the key
-    Key(key): Key,
-    Path(name): Path<String>,
-) -> impl IntoResponse {
+async fn get_name(engine: AppEngine, Key(key): Key, Path(name): Path<String>) -> impl IntoResponse {
     let person = Person { name };
-
     RenderHtml(key, engine, person)
 }
 
-// Define your application shared state
+async fn get_index(engine: AppEngine) -> impl IntoResponse {
+    let person = Person {
+        name: String::from("Index"),
+    };
+    RenderHtml(Key(String::from("/:name")), engine, person)
+}
+
 #[derive(Clone, FromRef)]
 struct AppState {
     engine: AppEngine,
@@ -46,13 +38,13 @@ struct AppState {
 
 #[tokio::main]
 async fn main() {
-    // Set up the Handlebars engine with the same route paths as the Axum router
     let mut hbs = Handlebars::new();
-    hbs.register_template_string("/:name", "<h1>Hello HandleBars!</h1><p>{{name}}</p>")
+    hbs.register_template_file("/:name", "./src/templates/index.hbs")
         .unwrap();
 
     let app = Router::new()
         .route("/:name", get(get_name))
+        .route("/", get(get_index))
         // Create the application state
         .with_state(AppState {
             engine: Engine::from(hbs),
