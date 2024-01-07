@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block title %}New Passage | Bible Memory{% endblock %}
+
+{% block body %}
+<h1>New Passage</h1>
+<form action="/passages" method="POST">
+  <div>
+    <label>Reference</label>
+    <input name="reference" />
+  </div>
+  <button>Add</button>
+</form>
+{% endblock %}

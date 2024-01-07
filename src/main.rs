@@ -2,11 +2,12 @@ use std::net::Ipv4Addr;
 
 use askama::Template;
 use axum::{
-    extract::{FromRef, Path, State},
-    response::IntoResponse,
-    routing::get,
+    extract::{Form, FromRef, Path, State},
+    response::{IntoResponse, Redirect},
+    routing::{get, post},
     serve, Router,
 };
+use serde::Deserialize;
 use tokio::net::TcpListener;
 
 #[derive(Debug, Clone)]
@@ -24,6 +25,37 @@ struct IndexTemplate {
 
 async fn get_index(State(passages): State<Vec<Passage>>) -> impl IntoResponse {
     IndexTemplate { passages }
+}
+
+#[derive(Template)]
+#[template(path = "new-passage.html")]
+struct NewPassageTemplate {}
+
+async fn get_new_passage() -> impl IntoResponse {
+    NewPassageTemplate {}
+}
+
+#[derive(Deserialize)]
+struct NewPassageForm {
+    reference: String,
+}
+
+async fn post_new_passage(
+    State(passages): State<Vec<Passage>>,
+    Form(form): Form<NewPassageForm>,
+) -> impl IntoResponse {
+    let id = match passages.iter().map(|p| p.id).max() {
+        Some(id) => id + 1,
+        None => 1,
+    };
+    println!("New passage {} {}", id, form.reference);
+    // let mut mut_passages = &passages;
+    // mut_passages.push(Passage {
+    //     id,
+    //     reference: form.reference,
+    //     level: 0,
+    // });
+    Redirect::to("/")
 }
 
 #[derive(Template)]
@@ -53,7 +85,9 @@ struct AppState {
 async fn main() {
     let app = Router::new()
         .route("/", get(get_index))
-        .route("/:passage_id/review", get(get_review))
+        .route("/passages", post(post_new_passage))
+        .route("/passages/new", get(get_new_passage))
+        .route("/passages/:passage_id/review", get(get_review))
         // Create the application state
         .with_state(AppState {
             passages: Vec::from([
@@ -61,13 +95,11 @@ async fn main() {
                     id: 1,
                     reference: String::from("Genesis 1:1-5"),
                     level: 1,
-                    // review_date: std::time::Date
                 },
                 Passage {
                     id: 2,
                     reference: String::from("Genesis 2:5-10"),
                     level: 2,
-                    // review_date: std::time::Date
                 },
             ]),
         });

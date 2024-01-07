@@ -9,6 +9,11 @@
       <th>Level</th>
       <th>Actions</th>
     </tr>
+    <tr>
+      <td colspan="3">
+        <a href="/passages/new">Add Passage</a>
+      </td>
+    </tr>
   </thead>
   <tbody>
     {% for passage in passages %}
@@ -16,7 +21,7 @@
       <th>{{passage.reference}}</th>
       <td>{{passage.level}}</td>
       <td>
-        <a hx-boost="true" href="/{{passage.id}}/review">Review</a>
+        <a href="/passages/{{passage.id}}/review">Review</a>
       </td>
     </tr>
     {% endfor %}
