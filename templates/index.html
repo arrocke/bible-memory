@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<h1>Bible Memory</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Passage</th>
+      <th>Level</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for passage in passages %}
+    <tr>
+      <th>{{passage.reference}}</th>
+      <td>{{passage.level}}</td>
+      <td>
+        <a hx-boost="true" href="/{{passage.id}}/review">Review</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
