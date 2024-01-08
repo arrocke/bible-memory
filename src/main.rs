@@ -1,5 +1,3 @@
-use regex::Regex;
-use std::fmt;
 use std::net::Ipv4Addr;
 
 use askama::Template;
@@ -16,45 +14,9 @@ use sqlx::{
 };
 use tokio::net::TcpListener;
 
-#[derive(Debug, Clone)]
-struct PassageReference {
-    book: String,
-    start_chapter: i32,
-    start_verse: i32,
-    end_chapter: i32,
-    end_verse: i32,
-}
+mod passage;
 
-impl fmt::Display for PassageReference {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{} {}:{}-{}:{}",
-            self.book, self.start_chapter, self.start_verse, self.end_chapter, self.end_verse
-        )
-    }
-}
-
-impl From<String> for PassageReference {
-    fn from(s: String) -> Self {
-        let matcher = Regex::new(r"^((?:(?:1|2) )?\w+) (\d+):(\d+)-(\d+):(\d+)$").unwrap();
-        let captures = matcher.captures(&s[..]).unwrap();
-        PassageReference {
-            book: String::from(&captures[1]),
-            start_chapter: captures[2].parse::<i32>().unwrap(),
-            start_verse: captures[3].parse::<i32>().unwrap(),
-            end_chapter: captures[4].parse::<i32>().unwrap(),
-            end_verse: captures[5].parse::<i32>().unwrap(),
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-struct Passage {
-    id: i32,
-    reference: PassageReference,
-    level: i32,
-}
+use passage::{Passage, PassageReference};
 
 #[derive(Template)]
 #[template(path = "index.html")]
@@ -101,7 +63,7 @@ async fn post_new_passage(
     State(db_pool): State<Pool<Postgres>>,
     Form(form): Form<NewPassageForm>,
 ) -> impl IntoResponse {
-    let reference = PassageReference::from(form.reference);
+    let reference = form.reference.parse::<PassageReference>().unwrap();
     sqlx::query!(
         r#"INSERT INTO passage (book, start_chapter, start_verse, end_chapter, end_verse) VALUES ($1, $2, $3, $4, $5)"#,
         reference.book,
