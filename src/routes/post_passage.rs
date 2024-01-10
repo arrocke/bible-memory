@@ -3,8 +3,7 @@ use axum::{extract::State, response::Redirect, routing::post, Form, Router};
 use serde::Deserialize;
 
 use crate::passage::PassageReference;
-
-use crate::routes::{AppState, DbPool};
+use crate::routes::{AppState, DbPool, ErrorResponse};
 
 #[derive(Deserialize)]
 struct NewPassageForm {
@@ -29,12 +28,14 @@ async fn insert_passage(db_pool: &DbPool, passage: &Passage) -> Result<(), sqlx:
 async fn handler(
     State(db_pool): State<DbPool>,
     Form(form): Form<NewPassageForm>,
-) -> impl IntoResponse {
-    let passage = Passage {
-        reference: form.reference.parse::<PassageReference>().unwrap(),
+) -> Result<impl IntoResponse, ErrorResponse> {
+    let Ok(reference) = form.reference.parse::<PassageReference>() else {
+        // TODO: convert to invalid response
+        return Err(ErrorResponse::ServerError);
     };
-    insert_passage(&db_pool, &passage).await.unwrap();
-    Redirect::to("/")
+    let passage = Passage { reference };
+    insert_passage(&db_pool, &passage).await?;
+    Ok(Redirect::to("/"))
 }
 
 pub fn route() -> Router<AppState> {

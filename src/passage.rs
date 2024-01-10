@@ -28,26 +28,24 @@ impl FromStr for PassageReference {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let reference_regex: Regex = Regex::new(r"^((?:(?:1|2) )?\w+) (\d+):(\d+)-(\d+):(\d+)$")
             .expect("REFERENCE_REGEX failed to compile");
-        let Some(reference) = reference_regex.captures(&s[..]).and_then(|captures| {
-            let (Ok(start_chapter), Ok(start_verse), Ok(end_chapter), Ok(end_verse)) = (
-                captures[2].parse(),
-                captures[3].parse(),
-                captures[4].parse(),
-                captures[5].parse(),
-            ) else {
-                return None;
-            };
-            Some(PassageReference {
-                book: String::from(&captures[1]),
-                start_chapter,
-                start_verse,
-                end_chapter,
-                end_verse,
-            })
-        }) else {
+        let Some(captures) = reference_regex.captures(s) else {
             return Err(PassageReferenceParseError);
         };
-        Ok(reference)
+        let (Ok(start_chapter), Ok(start_verse), Ok(end_chapter), Ok(end_verse)) = (
+            captures[2].parse(),
+            captures[3].parse(),
+            captures[4].parse(),
+            captures[5].parse(),
+        ) else {
+            return Err(PassageReferenceParseError);
+        };
+        Ok(PassageReference {
+            book: String::from(&captures[1]),
+            start_chapter,
+            start_verse,
+            end_chapter,
+            end_verse,
+        })
     }
 }
 

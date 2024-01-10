@@ -2,13 +2,12 @@ use askama::Template;
 use askama_axum::IntoResponse;
 use axum::{
     extract::{Path, State},
-    http::StatusCode,
     routing::get,
     Router,
 };
 
 use crate::passage::{Passage, PassageReference};
-use crate::routes::{AppState, DbPool, ErrorTemplate, NotFoundTemplate};
+use crate::routes::{AppState, DbPool, ErrorResponse};
 
 #[derive(Template)]
 #[template(path = "review.html")]
@@ -37,26 +36,17 @@ async fn query_passage(db_pool: &DbPool, passage_id: i32) -> Result<Option<Passa
         })
 }
 
-async fn handler(State(db_pool): State<DbPool>, Path(passage_id): Path<i32>) -> impl IntoResponse {
-    let Ok(result) = query_passage(&db_pool, passage_id).await else {
-        return (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            ErrorTemplate {
-                error_message: String::from("Unknown error occurred."),
-            },
-        )
-            .into_response();
-    };
+async fn handler(
+    State(db_pool): State<DbPool>,
+    Path(passage_id): Path<i32>,
+) -> Result<impl IntoResponse, ErrorResponse> {
+    let result = query_passage(&db_pool, passage_id).await?;
     let Some(passage) = result else {
-        return (
-            StatusCode::NOT_FOUND,
-            NotFoundTemplate {
-                error_message: String::from("Couldn't find passage to review."),
-            },
-        )
-            .into_response();
+        return Err(ErrorResponse::NotFound {
+            resource: String::from("passage"),
+        });
     };
-    (ReviewTemplate { passage }).into_response()
+    Ok(ReviewTemplate { passage })
 }
 
 pub fn route() -> Router<AppState> {

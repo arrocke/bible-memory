@@ -2,7 +2,7 @@ use crate::passage::{Passage, PassageReference};
 use askama::Template;
 use axum::{extract::State, response::IntoResponse, routing::get, Router};
 
-use crate::routes::{AppState, DbPool};
+use crate::routes::{AppState, DbPool, ErrorResponse};
 
 #[derive(Template)]
 #[template(path = "index.html")]
@@ -31,9 +31,11 @@ async fn query_passages(db_pool: &DbPool) -> Result<Vec<Passage>, sqlx::Error> {
         })
 }
 
-async fn handler(State(db_pool): State<DbPool>) -> impl IntoResponse {
-    let passages = query_passages(&db_pool).await.unwrap();
-    IndexTemplate { passages }
+async fn handler(State(db_pool): State<DbPool>) -> Result<impl IntoResponse, ErrorResponse> {
+    let template = IndexTemplate {
+        passages: query_passages(&db_pool).await?,
+    };
+    Ok(template)
 }
 
 pub fn route() -> Router<AppState> {
