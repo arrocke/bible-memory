@@ -53,5 +53,6 @@ impl FromStr for PassageReference {
 pub struct Passage {
     pub id: i32,
     pub reference: PassageReference,
+    pub text: String,
     pub level: i32,
 }

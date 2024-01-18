@@ -7,7 +7,11 @@
 <form action="/passages" method="POST">
   <div>
     <label>Reference</label>
-    <input name="reference" />
+    <input name="reference" required />
+  </div>
+  <div>
+    <label>Text</label>
+    <textarea name="text" required />
   </div>
   <button>Add</button>
 </form>

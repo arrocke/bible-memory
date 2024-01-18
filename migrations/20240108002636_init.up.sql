@@ -4,5 +4,6 @@ CREATE TABLE passage (
   start_chapter INT NOT NULL,
   start_verse INT NOT NULL,
   end_chapter INT NOT NULL,
-  end_verse INT NOT NULL
+  end_verse INT NOT NULL,
+  text TEXT NOT NULL
 );

@@ -30,6 +30,7 @@ async fn query_passage(db_pool: &DbPool, passage_id: i32) -> Result<Option<Passa
                         end_chapter: row.end_chapter,
                         end_verse: row.end_verse,
                     },
+                    text: row.text,
                     level: 0,
                 })
             })

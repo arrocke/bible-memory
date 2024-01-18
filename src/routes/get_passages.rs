@@ -15,7 +15,7 @@ async fn query_passages(db_pool: &DbPool) -> Result<Vec<Passage>, sqlx::Error> {
         .fetch_all(db_pool)
         .await
         .map(|rows| {
-            rows.iter()
+            rows.into_iter()
                 .map(|row| Passage {
                     id: row.id,
                     reference: PassageReference {
@@ -25,6 +25,7 @@ async fn query_passages(db_pool: &DbPool) -> Result<Vec<Passage>, sqlx::Error> {
                         end_chapter: row.end_chapter,
                         end_verse: row.end_verse,
                     },
+                    text: row.text,
                     level: 0,
                 })
                 .collect()

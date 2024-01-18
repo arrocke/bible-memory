@@ -8,6 +8,7 @@ use crate::routes::{AppState, DbPool, ErrorResponse};
 #[derive(Deserialize)]
 struct NewPassageForm {
     reference: String,
+    text: String,
 }
 
 struct Passage {
