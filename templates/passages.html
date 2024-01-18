@@ -1,0 +1,27 @@
+{{define "head"}}<title>Passages | Bible Memory</title>{{end}}
+{{define "body"}}
+<h1>Passages</h1>
+<table>
+  <thead>
+    <tr>
+      <td>Reference</td>
+      <td>Level</td>
+      <td>Actions</td>
+    </tr>
+    <tr>
+      <td colspan="3">
+        Add Passage
+      </td>
+    </tr>
+  </thead>
+  <tbody>
+    {{range .Passages}}
+    <tr>
+      <td>{{.Reference}}</td>
+      <td>{{.Level}}</td>
+      <td><a href="/passages/{{.Id}}/review">Review</a> | Delete</td>
+    </tr>
+    {{end}}
+  </tbody>
+</table>
+{{end}}
