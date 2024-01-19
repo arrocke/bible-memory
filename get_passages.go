@@ -18,6 +18,7 @@ func GetPassages(router *mux.Router, conn *pgxpool.Pool) {
 		StartVerse   int32
 		EndChapter   int32
 		EndVerse     int32
+		Level        int32
 	}
 
 	type Passage struct {
@@ -33,7 +34,7 @@ func GetPassages(router *mux.Router, conn *pgxpool.Pool) {
 	tmpl := template.Must(template.ParseFiles("templates/passages.html", "templates/layout.html"))
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		query := "SELECT id, book, start_chapter, start_verse, end_chapter, end_verse FROM passage ORDER BY id ASC"
+		query := "SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, level FROM passage ORDER BY id ASC"
 		rows, _ := conn.Query(context.Background(), query)
 		defer rows.Close()
 
@@ -47,7 +48,7 @@ func GetPassages(router *mux.Router, conn *pgxpool.Pool) {
 		for i, passage := range passages {
 			templateData.Passages[i] = Passage{
 				Id:        passage.Id,
-				Level:     1,
+				Level:     passage.Level,
 				Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
 			}
 		}
