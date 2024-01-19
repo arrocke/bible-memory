@@ -33,7 +33,7 @@ func GetPassages(router *mux.Router, conn *pgxpool.Pool) {
 	tmpl := template.Must(template.ParseFiles("templates/passages.html", "templates/layout.html"))
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		query := "SELECT id, book, start_chapter, start_verse, end_chapter, end_verse FROM public.passage ORDER BY id ASC"
+		query := "SELECT id, book, start_chapter, start_verse, end_chapter, end_verse FROM passage ORDER BY id ASC"
 		rows, _ := conn.Query(context.Background(), query)
 		defer rows.Close()
 
@@ -53,5 +53,5 @@ func GetPassages(router *mux.Router, conn *pgxpool.Pool) {
 		}
 
 		tmpl.ExecuteTemplate(w, "layout.html", templateData)
-	})
+	}).Methods("GET")
 }

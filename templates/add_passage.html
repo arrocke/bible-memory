@@ -1,0 +1,15 @@
+{{define "head"}}<title>New Passage | Bible Memory</title>{{end}}
+{{define "body"}}
+<h1>New Passage</h1>
+<form action="/passages" method="POST">
+  <div>
+    <label for="reference">Reference</label>
+    <input id="reference" type="text" name="reference" />
+  </div>
+  <div>
+    <label for="text">Text</label>
+    <textarea type="text" name="text"></textarea>
+  </div>
+  <button>Add Passage</button>
+</form>
+{{end}}

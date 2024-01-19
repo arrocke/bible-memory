@@ -38,7 +38,7 @@ func GetPassageReview(router *mux.Router, conn *pgxpool.Pool) {
 			return
 		}
 
-		query := "SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text FROM public.passage WHERE id = $1"
+		query := "SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text FROM passage WHERE id = $1"
 		rows, _ := conn.Query(context.Background(), query, id)
 		defer rows.Close()
 
@@ -56,5 +56,5 @@ func GetPassageReview(router *mux.Router, conn *pgxpool.Pool) {
 			Id:        passage.Id,
 			Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
 		})
-	})
+	}).Methods("Get")
 }

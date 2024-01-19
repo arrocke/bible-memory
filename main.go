@@ -25,6 +25,8 @@ func main() {
 
 	GetPassages(r, conn)
 	GetPassageReview(r, conn)
+	GetCreatePassage(r, conn)
+	PostCreatePassage(r, conn)
 
 	http.ListenAndServe(":8080", r)
 }
