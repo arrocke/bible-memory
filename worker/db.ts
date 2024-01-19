@@ -16,28 +16,13 @@ interface DbSchema extends DBSchema {
 }
 
 export function open() {
-  let migratePassages = false;
   const dbPromise = openDB<DbSchema>("bible-memory", 2, {
-    upgrade(db, prevVersion, newVersion, transaction) {
-      if (prevVersion < 2) {
-        migratePassages = true;
-        transaction.objectStore("passages").name = "passages-old";
-      }
+    upgrade(db) {
       db.createObjectStore("passages", {
         keyPath: "id",
         autoIncrement: true,
       });
     },
-  });
-
-  dbPromise.then(async (db) => {
-    if (migratePassages) {
-      const passages = await db.getAll("passages-old" as any);
-
-      for (const { id, ...passage } of passages) {
-        await db.put("passages", passage);
-      }
-    }
   });
 
   return {
