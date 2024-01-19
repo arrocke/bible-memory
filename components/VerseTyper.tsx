@@ -1,20 +1,29 @@
-import { KeyboardEvent, useState, useEffect, useRef, FormEvent, ReactNode } from "react";
+import {
+  KeyboardEvent,
+  useState,
+  useEffect,
+  useRef,
+  FormEvent,
+  ReactNode,
+} from "react";
 import Button from "./ui/Button";
 
-const WORD_REGEX = /(\d+ [^A-Za-z0-9']*)?(\w+(?:(?:'|’|-)\w+)?(?:'|’)?)(?:([^A-Za-z0-9']+)(?=\w|\d|$))?/g;
+const WORD_REGEX =
+  /(\d+ [^A-Za-zÀ-ÖØ-öø-ÿ0-9']*)?([A-Za-zÀ-ÖØ-öø-ÿ]+(?:(?:'|’|-)[A-Za-zÀ-ÖØ-öø-ÿ]+)?(?:'|’)?)([^A-Za-zÀ-ÖØ-öø-ÿ0-9']+)?/g;
 const LETTERS_REGEX = /^[A-Za-z]$/;
+const DIACRITIC_REGEX = /[\u0300-\u036f]/g;
 
 export interface ProgressUpdate {
-  totalWords: number
-  wordsComplete: number
-  correctWords: number
+  totalWords: number;
+  wordsComplete: number;
+  correctWords: number;
 }
 
 export interface VerseTyperProps {
   className?: string;
   text: string;
-  mode?: 'review' | 'recall' | 'learn'
-  onProgress(progress: ProgressUpdate): void
+  mode?: "review" | "recall" | "learn";
+  onProgress(progress: ProgressUpdate): void;
 }
 
 interface WordState {
@@ -28,27 +37,35 @@ interface WordState {
 
 type WordAction = "correct" | "fail" | "continue" | "help";
 
-function textStyle({ isCorrect, hasHelp }: WordState, mode: VerseTyperProps['mode']): ReactNode {
-  if (typeof isCorrect === 'undefined') {
-    if (mode !== 'review' || hasHelp) {
-      return 'text-gray-500'
+function textStyle(
+  { isCorrect, hasHelp }: WordState,
+  mode: VerseTyperProps["mode"]
+): ReactNode {
+  if (typeof isCorrect === "undefined") {
+    if (mode !== "review" || hasHelp) {
+      return "text-gray-500";
     } else if (!hasHelp) {
-      return 'text-transparent'
+      return "text-transparent";
     }
   }
-  return ''
+  return "";
 }
 
 function borderStyle({ isCorrect, hasHelp, attempts }: WordState): ReactNode {
   if (hasHelp) {
-    return 'border-b-3 border-red-400'
+    return "border-b-3 border-red-400";
   } else if (isCorrect === true ? attempts > 1 : attempts > 0) {
-    return 'border-b-3 border-yellow-500'
+    return "border-b-3 border-yellow-500";
   }
-  return ''
+  return "";
 }
 
-export default function VerseTyper({ text, mode = 'review', className = '', onProgress }: VerseTyperProps) {
+export default function VerseTyper({
+  text,
+  mode = "review",
+  className = "",
+  onProgress,
+}: VerseTyperProps) {
   const [words, setWords] = useState<WordState[]>([]);
   useEffect(() => {
     setWords(
@@ -65,23 +82,30 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
     (state) => typeof state.isCorrect === "boolean"
   ).length;
   const currentProgress = words[currentIndex]!;
-  const isDone = currentIndex === words.length
+  const isDone = currentIndex === words.length;
 
-  const wrapper = useRef<HTMLPreElement>(null)
+  const wrapper = useRef<HTMLPreElement>(null);
   useEffect(() => {
     if (wrapper.current) {
-      const word = wrapper.current.querySelector<HTMLSpanElement>(`[data-word='${currentIndex}']`)
+      const word = wrapper.current.querySelector<HTMLSpanElement>(
+        `[data-word='${currentIndex}']`
+      );
       if (word) {
-        const newY = Math.max(0, word.offsetTop - wrapper.current.offsetHeight / 2)
-        wrapper.current.scrollTo(0, newY)
+        const newY = Math.max(
+          0,
+          word.offsetTop - wrapper.current.offsetHeight / 2
+        );
+        wrapper.current.scrollTo(0, newY);
       }
     }
     onProgress({
       totalWords: words.length,
-      wordsComplete: words.filter(word => typeof word.isCorrect === 'boolean').length,
-      correctWords: words.filter(word => word.isCorrect && !word.hasHelp).length,
-    })
-  }, [words])
+      wordsComplete: words.filter((word) => typeof word.isCorrect === "boolean")
+        .length,
+      correctWords: words.filter((word) => word.isCorrect && !word.hasHelp)
+        .length,
+    });
+  }, [words]);
 
   function attempt(action: WordAction) {
     switch (action) {
@@ -106,11 +130,11 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
           },
           ...p.slice(currentIndex + 1),
         ]);
-        navigator.vibrate(100)
+        navigator.vibrate(100);
         break;
       }
       case "help": {
-        if (mode === 'review') {
+        if (mode === "review") {
           setWords((p) => [
             ...p.slice(0, currentIndex),
             {
@@ -125,55 +149,55 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
     }
   }
 
-  const input = useRef<HTMLInputElement>(null)
+  const input = useRef<HTMLInputElement>(null);
 
   function processLetter(char: string) {
     if (LETTERS_REGEX.test(char)) {
       const key = char.toLowerCase();
-      const firstChar = currentProgress.word[0].toLowerCase();
+      const firstChar = currentProgress.word[0]
+        .toLowerCase()
+        .normalize("NFD")
+        .replaceAll(DIACRITIC_REGEX, "");
       attempt(key === firstChar ? "correct" : "fail");
     }
   }
 
   function onInput(e: FormEvent<HTMLInputElement>) {
-    const char = e.currentTarget.value.at(-1)
+    const char = e.currentTarget.value.at(-1);
     if (char) {
-      processLetter(char)
+      processLetter(char);
     }
-    e.currentTarget.value = ''
+    e.currentTarget.value = "";
   }
 
   function onKeyPress(e: KeyboardEvent) {
-    if (isDone) return
+    if (isDone) return;
     switch (e.key) {
       case "Enter": {
         attempt("help");
         break;
       }
       default:
-        return
+        return;
     }
     e.preventDefault();
     e.stopPropagation();
   }
 
-
   return (
     <div className={`${className}`}>
-      {
-        isDone || mode !== 'review'
-          ? null
-          : <div className="mb-2">
-              <Button
-                onClick={() => {
-                  attempt('help')
-                  input.current?.focus()
-                }}
-              >
-                Hint
-              </Button>
-            </div>
-      }
+      {isDone || mode !== "review" ? null : (
+        <div className="mb-2">
+          <Button
+            onClick={() => {
+              attempt("help");
+              input.current?.focus();
+            }}
+          >
+            Hint
+          </Button>
+        </div>
+      )}
       <div className="relative focus-within:outline outline-yellow-500 focus-within:border-yellow-500 rounded border border-gray-400 shadow-inner">
         <input
           ref={input}
@@ -189,33 +213,41 @@ export default function VerseTyper({ text, mode = 'review', className = '', onPr
           tabIndex={isDone ? undefined : -1}
           onFocus={() => input.current?.focus()}
         >
-          {words
-            .map((data, i) => {
-              const { isCorrect, gap, prefix, hasHelp, word } = data
-              return [
-                (mode !== 'review' || currentIndex >= i) && prefix && <span key={`prefix-${i}`}>{prefix}</span>,
+          {words.map((data, i) => {
+            const { isCorrect, gap, prefix, hasHelp, word } = data;
+            return [
+              (mode !== "review" || currentIndex >= i) && prefix && (
+                <span key={`prefix-${i}`}>{prefix}</span>
+              ),
+              <span
+                key={`word-${i}`}
+                data-word={i}
+                className={`${textStyle(data, mode)} ${borderStyle(data)}`}
+              >
+                {typeof isCorrect === "undefined" &&
+                (mode == "recall" || hasHelp) ? (
+                  <>
+                    {word[0]}
+                    <span className="text-transparent">{word.slice(1)}</span>
+                  </>
+                ) : (
+                  word
+                )}
+              </span>,
+              gap && (
                 <span
-                  key={`word-${i}`}
-                  data-word={i}
-                  className={`${textStyle(data, mode)} ${borderStyle(data)}`}
-                >
-                  {typeof isCorrect === 'undefined' && (mode == 'recall' || hasHelp)
-                    ? 
-                      <>
-                        {word[0]}
-                        <span className="text-transparent">{word.slice(1)}</span>
-                      </>
-                    : word}
-                </span>,
-                gap && <span
                   key={`suffix-${i}`}
-                  className={typeof isCorrect === 'boolean' || mode !== 'review' ? '' : 'text-transparent'}
+                  className={
+                    typeof isCorrect === "boolean" || mode !== "review"
+                      ? ""
+                      : "text-transparent"
+                  }
                 >
                   {gap}
-                </span>,
-              ].filter(Boolean);
-            })
-          }
+                </span>
+              ),
+            ].filter(Boolean);
+          })}
         </pre>
       </div>
     </div>
