@@ -98,6 +98,7 @@ func GetPassageReview(router *mux.Router, conn *pgxpool.Pool) {
 			passageList, err := LoadPassageList(conn)
 			if err != nil {
 				http.Error(w, "Database Error", http.StatusInternalServerError)
+				return
 			}
 
 			tmpl.ExecuteTemplate(w, "layout.html", FullTemplateData{

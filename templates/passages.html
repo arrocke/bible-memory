@@ -38,11 +38,18 @@
     padding: 8px;
     margin: 0 8px;
     border-bottom: 1px solid lightgrey;
+  }
+
+  .passage-list-item-row-1 {
     display: flex;
   }
 
   .passage-link {
     flex-grow: 1;
+  }
+
+  .passage-review-date {
+    font-size: 12px;
   }
 
   .passage-delete {
@@ -59,11 +66,16 @@
     <ul class="passage-list">
       {{range .Passages}}
       <li class="passage-list-item">
-        <a class="passage-link" href="/passages/{{.Id}}/review" hx-target="#main">
-          {{.Reference}}
-        </a>
-        <button class="passage-delete" hx-delete="/passages/{{.Id}}" hx-target="closest li" hx-swap="outerHTML"
-          hx-confirm="Are you sure you want to delete {{.Reference}}?">Delete</button>
+        <div class="passage-list-item-row-1">
+          <a class="passage-link" href="/passages/{{.Id}}/review" hx-target="#main">
+            {{.Reference}}
+          </a>
+          <button class="passage-delete" hx-delete="/passages/{{.Id}}" hx-target="closest li" hx-swap="outerHTML"
+            hx-confirm="Are you sure you want to delete {{.Reference}}?">Delete</button>
+        </div>
+        <div class="passage-list-item-row-2">
+          <span class="passage-review-date">{{.ReviewAt}}</span>
+        </div>
       </li>
       {{end}}
     </ul>
