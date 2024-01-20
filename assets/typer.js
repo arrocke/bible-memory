@@ -65,8 +65,32 @@ function buildWord({ index, word: data }) {
   };
 }
 
-window.Typer = function ({ el: root, words, mode, onProgress }) {
+function buildProgress({ size }) {
+  const root = document.createElement("div");
+  root.classList.add("typer-progress");
+
+  const correctDiv = document.createElement("div");
+  correctDiv.classList.add("typer-progress-correct");
+  correctDiv.style.width = "0%";
+  root.appendChild(correctDiv);
+
+  const incorrectDiv = document.createElement("div");
+  incorrectDiv.classList.add("typer-progress-incorrect");
+  incorrectDiv.style.width = "0%";
+  root.appendChild(incorrectDiv);
+
+  return {
+    root,
+    update({ correct, incorrect }) {
+      correctDiv.style.width = `${(correct / size) * 100}%`;
+      incorrectDiv.style.width = `${(incorrect / size) * 100}%`;
+    },
+  };
+}
+
+window.Typer = function ({ el: root, words, mode, onComplete }) {
   root.classList.add(`typer-${mode}`);
+
   const pre = document.createElement("pre");
   const input = document.createElement("input");
 
@@ -79,10 +103,12 @@ window.Typer = function ({ el: root, words, mode, onProgress }) {
     attempts: 0,
     component: buildWord({ index, word }),
   }));
+  const progress = buildProgress({ size: words.length });
 
   wordState.forEach((word) => {
     pre.appendChild(word.component.root);
   });
+  root.appendChild(progress.root);
   root.appendChild(pre);
   root.appendChild(input);
 
@@ -119,21 +145,24 @@ window.Typer = function ({ el: root, words, mode, onProgress }) {
     currentWord.component.update({ currentIndex, ...currentWord });
 
     currentIndex += 1;
+    const counts = wordState.reduce(
+      (counts, word, i) => {
+        if (i >= currentIndex) return counts;
+        else if (word.isCorrect) counts.correct += 1;
+        else counts.incorrect += 1;
+        return counts;
+      },
+      { correct: 0, incorrect: 0 }
+    );
+
     if (currentIndex == wordState.length) {
       input.remove();
+      onComplete?.({ accuracy: counts.correct / wordState.length });
     } else {
       currentWord = wordState[currentIndex];
       currentWord.component.update({ currentIndex, ...currentWord });
     }
 
-    const correctCount = wordState.reduce(
-      (count, word, i) =>
-        i < currentIndex && word.isCorrect ? count + 1 : count,
-      0
-    );
-    onProgress?.({
-      progress: currentIndex / wordState.length,
-      accuracy: correctCount / currentIndex,
-    });
+    progress.update(counts);
   });
 };

@@ -1,3 +1,19 @@
+.typer-progress {
+  height: 8px;
+  width: 100px;
+  display: flex; 
+  background: lightgray;
+  align-items: stretch;
+}
+
+.typer-progress-incorrect {
+  background: red;
+}
+
+.typer-progress-correct {
+  background: green;
+}
+
 .typer-learn {
   --typer-prefix-color: grey;
   --typer-word-color: grey;
