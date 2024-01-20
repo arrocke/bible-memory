@@ -29,5 +29,7 @@ func main() {
 	PostCreatePassage(r, conn)
 	DeletePassage(r, conn)
 
+	r.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets/"))))
+
 	http.ListenAndServe(":8080", r)
 }

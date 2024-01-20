@@ -1,0 +1,59 @@
+.typer-learn {
+  --typer-prefix-color: grey;
+  --typer-word-color: grey;
+  --typer-suffix-color: grey;
+}
+
+.typer-recall {
+  --typer-prefix-color: transparent;
+  --typer-first-letter-color: grey;
+  --typer-word-color: transparent;
+  --typer-suffix-color: transparent;
+}
+
+.typer-review {
+  --typer-prefix-color: transparent;
+  --typer-word-color: transparent;
+  --typer-suffix-color: transparent;
+}
+
+.typer-current {
+  --typer-prefix-color: black;
+}
+
+.typer-correct, .typer-incorrect, .typer-almost {
+  --typer-prefix-color: black;
+  --typer-first-letter-color: black;
+  --typer-word-color: black;
+  --typer-suffix-color: black;
+}
+
+.typer-review .typer-hint {
+  --typer-first-letter-color: grey;
+}
+
+.typer-prefix {
+  color: var(--typer-prefix-color);
+}
+
+.typer-first-letter {
+  color: var(--typer-first-letter-color);
+}
+
+.typer-word {
+  color: var(--typer-word-color);
+}
+
+.typer-suffix {
+  color: var(--typer-suffix-color);
+}
+
+.typer-hint .typer-word,
+.typer-incorrect .typer-word {
+  border-bottom: 3px solid red;
+}
+
+.typer-attempt .typer-word,
+.typer-almost .typer-word {
+  border-bottom: 3px solid orange;
+}

@@ -20,6 +20,8 @@
       <td>{{.Reference}}</td>
       <td>{{.Level}}</td>
       <td>
+        <a href="/passages/{{.Id}}/learn">Learn</a> |
+        <a href="/passages/{{.Id}}/recall">Recall</a> |
         <a href="/passages/{{.Id}}/review">Review</a> |
         <button type="button" hx-delete="/passages/{{.Id}}" hx-confirm="Are you want to delete {{.Reference}}?"
           hx-target="closest tr" hx-swap="outerHTML swap:1s">Delete</button>
