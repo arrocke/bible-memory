@@ -1,4 +1,148 @@
 {{define "head"}}<title>Review {{.Reference}} | Bible Memory</title>{{end}}
 {{define "body"}}
-<h1>{{.Reference}}: Review</h1>
+<h1>Review {{.Reference}}</h1>
+<pre class="typer-{{.Mode}}">{{range $i, $word := .Words}}{{if .Prefix}}<span {{if gt $i 0}}class="typer-prefix"{{end}} data-typer="prefix-{{$i}}">{{.Prefix}}</span>{{end}}<span class="typer-word" data-typer="word-{{$i}}"><span>{{.FirstLetter}}</span>{{.RestOfWord}}</span>{{if .Gap}}<span class="typer-suffix" data-typer="suffix-{{$i}}">{{.Gap}}</span>{{end}}{{end}}</pre>
+<input id="typer-input" type="text" />
+
+<script type="text/javascript">
+  const mode = "{{.Mode}}"
+
+  const input = document.querySelector('#typer-input')
+
+  const DIACRITIC_REGEX = /[\u0300-\u036f]/g;
+  const wordState = [
+    {{range $i, $word:= .Words}}
+      {
+        word: "{{$word.Word}}",
+        firstLetter: "{{$word.Word}}"[0].toLowerCase().normalize("NFD").replaceAll(DIACRITIC_REGEX, ""),
+        wordEl: document.querySelector("[data-typer='word-{{$i}}']"),
+        {{if .Prefix}}prefixEl: document.querySelector("[data-typer='prefix-{{$i}}']"),{{end}}
+        {{if .Gap}}suffixEl: document.querySelector("[data-typer='suffix-{{$i}}']"),{{end}}
+        attempts: 0
+      },
+    {{end}}
+  ]
+  window.wordState = wordState
+
+  let currentIndex = 0
+
+  function updateWord(index) {
+    const word = wordState[index]
+    if (!word) {
+      return
+    }
+
+    if (word.isCorrect === true) {
+      word.wordEl.className = word.attempts > 1 || word.hasHelp ? 'typer-word typer-almost' : 'typer-word typer-correct'
+    } else if (word.isCorrect === false) {
+      word.wordEl.className = 'typer-word typer-incorrect'
+    } else if (word.hasHelp) {
+      word.wordEl.className = 'typer-word typer-hint'
+    } else if (word.attempts > 0) {
+      word.wordEl.className = 'typer-word typer-attempt'
+    } else {
+      word.wordEl.className = 'typer-word'
+    }
+  }
+
+  if (mode === 'review') {
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        let word = wordState[currentIndex]
+        if (word) {
+          word.hasHelp = true
+          updateWord(currentIndex)
+        }
+        e.preventDefault()
+        e.stopPropagation()
+      }
+    })
+  }
+
+  const LETTERS_REGEX = /^[A-Za-z]$/
+  input.addEventListener('input', e => {
+    let word = wordState[currentIndex]
+    if (!word) {
+      e.target.value = ''
+      return
+    }
+
+    const char = e.target.value.at(-1)
+    if (char && LETTERS_REGEX.test(char)) {
+      word.attempts += 1
+      if (char.toLowerCase() === word.firstLetter) {
+        word.isCorrect = !word.hasHelp
+        updateWord(currentIndex)
+        if (currentIndex + 1 == wordState.length) {
+          input.remove()
+        } else {
+          currentIndex += 1
+        }
+      } else {
+        navigator.vibrate(100)
+        updateWord(currentIndex)
+      }
+    }
+
+    e.target.value = ''
+  })
+</script>
+
+<style>
+.typer-review {
+  --typer-default-word-color: transparent;
+}
+.typer-recall {
+  --typer-default-word-color: grey;
+}
+.typer-learn {
+  --typer-default-word-color: grey;
+}
+
+.typer-word, .typer-prefix, .typer-suffix {
+  color: var(--typer-default-word-color);
+}
+
+.typer-hint {
+  color: transparent;
+  border-bottom: 3px solid red;
+}
+.typer-recall .typer-word:not(.typer-correct, .typer-incorrect, .typer-almost) {
+  color: transparent;
+}
+.typer-hint span,
+.typer-recall .typer-word:not(.typer-correct, .typer-incorrect, .typer-almost) span {
+  color: grey;
+}
+
+.typer-attempt {
+  border-bottom: 3px solid orange;
+}
+
+.typer-correct {
+  color: unset;
+}
+
+.typer-incorrect {
+  color: unset;
+  border-bottom: 3px solid red;
+}
+
+.typer-almost {
+  color: unset;
+  border-bottom: 3px solid orange;
+}
+
+.typer-incorrect + .typer-suffix + .typer-prefix,
+.typer-correct + .typer-suffix + .typer-prefix,
+.typer-almost + .typer-suffix + .typer-prefix,
+.typer-incorrect + .typer-prefix,
+.typer-correct + .typer-prefix,
+.typer-almost + .typer-prefix,
+.typer-incorrect + .typer-suffix,
+.typer-correct + .typer-suffix,
+.typer-almost + .typer-suffix {
+  color: unset;
+}
+</style>
 {{end}}
