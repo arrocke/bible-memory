@@ -91,8 +91,16 @@ function buildProgress({ size }) {
 window.Typer = function ({ el: root, words, mode, onComplete }) {
   root.classList.add(`typer-${mode}`);
 
+  const typer = document.createElement("div");
+  typer.classList.add("typer-input-wrapper");
   const pre = document.createElement("pre");
+  pre.classList.add("typer-content");
   const input = document.createElement("input");
+  input.classList.add("typer-input");
+
+  pre.addEventListener("click", () => {
+    input.focus();
+  });
 
   const wordState = words.map((word, index) => ({
     ...word,
@@ -109,8 +117,9 @@ window.Typer = function ({ el: root, words, mode, onComplete }) {
     pre.appendChild(word.component.root);
   });
   root.appendChild(progress.root);
-  root.appendChild(pre);
-  root.appendChild(input);
+  typer.appendChild(pre);
+  typer.appendChild(input);
+  root.appendChild(typer);
 
   let currentIndex = 0;
   let currentWord = wordState[currentIndex];

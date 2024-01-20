@@ -27,6 +27,7 @@ func main() {
 	GetPassageReview(r, conn)
 	GetCreatePassage(r, conn)
 	PostCreatePassage(r, conn)
+	PostReviewPassage(r, conn)
 	DeletePassage(r, conn)
 
 	r.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets/"))))

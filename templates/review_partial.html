@@ -1,4 +1,5 @@
 <div class="review-panel">
+  <div id="result"></div>
   <div id="typer"></div>
 </div>
 
@@ -21,6 +22,11 @@
       {{end}}
     ],
     mode: "{{.Mode}}",
-    onComplete: console.log
+    onComplete({ accuracy }) {
+      htmx.ajax("POST", "/passages/{{.Id}}/review", {
+        values: { accuracy },
+        target: '#result'
+      })
+    }
   })
 </script>

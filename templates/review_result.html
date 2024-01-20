@@ -1,0 +1,11 @@
+<div class="review-result">
+  {{if eq .Kind "perfect"}}Perfect score!{{end}}
+  {{if eq .Kind "good"}}Great job!{{end}}
+  {{if eq .Kind "ok"}}Almost got it!{{end}}
+  {{if eq .Kind "fail"}}Try again!{{end}}
+</div>
+<style>
+  .review-result {
+    margin-bottom: 16px;
+  }
+</style>

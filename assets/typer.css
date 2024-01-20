@@ -1,9 +1,11 @@
 .typer-progress {
-  height: 8px;
-  width: 100px;
+  height: 6px;
   display: flex; 
   background: lightgray;
   align-items: stretch;
+  margin-bottom: 16px;
+  border-radius: 3px;
+  overflow: hidden;
 }
 
 .typer-progress-incorrect {
@@ -32,6 +34,26 @@
   --typer-word-color: transparent;
   --typer-suffix-color: transparent;
 }
+
+.typer-input-wrapper {
+  border: 1px solid grey;
+  border-radius: 4px;
+  padding: 8px;
+}
+.typer-input-wrapper:focus-within {
+  outline: 1px solid blue;
+}
+
+.typer-content {
+  font-family: inherit;
+  margin: 0;
+}
+
+.typer-input {
+  position: absolute;
+  opacity: 0;
+}
+
 
 .typer-current {
   --typer-prefix-color: black;
