@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -16,13 +17,15 @@ func PostCreatePassage(router *mux.Router, conn *pgxpool.Pool) {
 			return
 		}
 
-		query := "INSERT INTO passage (book, start_chapter, start_verse, end_chapter, end_verse, text) VALUES ($1, $2, $3, $4, $5, $6)"
-		_, err = conn.Exec(context.Background(), query, reference.Book, reference.StartChapter, reference.StartVerse, reference.EndChapter, reference.EndVerse, r.FormValue("Text"))
+		var id int32
+		query := "INSERT INTO passage (book, start_chapter, start_verse, end_chapter, end_verse, text) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id"
+		err = conn.QueryRow(context.Background(), query, reference.Book, reference.StartChapter, reference.StartVerse, reference.EndChapter, reference.EndVerse, r.FormValue("text")).Scan(&id)
 		if err != nil {
 			http.Error(w, "Database Error", http.StatusInternalServerError)
 			return
 		}
 
-		http.Redirect(w, r, "/", http.StatusFound)
+		w.Header().Set("Hx-Redirect", fmt.Sprintf("/passages/%d/review", id))
+		w.WriteHeader(http.StatusNoContent)
 	}).Methods("Post")
 }

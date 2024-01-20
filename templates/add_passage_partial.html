@@ -1,0 +1,63 @@
+<style>
+  .view-header {
+    margin: 0 0 16px 0;
+  }
+
+  .add-passage-view {
+    padding: 16px;
+  }
+
+  .text-box {
+    border: 1px solid grey;
+    border-radius: 4px;
+    height: 32px;
+    box-sizing: border-box;
+    padding: 8px;
+  }
+
+  .text-box--multiline {
+    resize: vertical;
+    width: 100%;
+    height: 300px;
+    font-family: inherit;
+  }
+
+  .form-label {
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .submit-button {
+    border-radius: 4px;
+    background: black;
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 8px 16px;
+    box-sizing: border-box;
+    height: 32px;
+  }
+</style>
+
+<div class="add-passage-view">
+  <h2 class="view-header">Add Passage</h2>
+  <form class="form" action="/passages" method="POST">
+    <div class="form-group">
+      <label class="form-label" for="reference">Reference</label>
+      <div>
+        <input class="text-box" id="reference" type="text" name="reference" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="text">Text</label>
+      <div>
+        <textarea class="text-box text-box--multiline" type="text" name="text"></textarea>
+      </div>
+    </div>
+    <button class="submit-button">Add Passage</button>
+  </form>
+</div>
