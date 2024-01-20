@@ -52,18 +52,26 @@ func GetPassageReview(router *mux.Router, conn *pgxpool.Pool) {
 		Text         string
 	}
 
-	type TemplateData struct {
+	type PartialTemplateData struct {
 		Id        int32
 		Reference string
 		Words     []ReviewWord
 		Mode      string
 	}
 
-	tmpl := template.Must(template.ParseFiles("templates/review.html", "templates/layout.html"))
+	type FullTemplateData struct {
+		Id        int32
+		Reference string
+		Words     []ReviewWord
+		Mode      string
+		Passages  []PassageListItem
+	}
+
+	tmpl := template.Must(template.ParseFiles("templates/review_partial.html", "templates/review.html", "templates/passages.html", "templates/layout.html"))
 
 	router.HandleFunc("/passages/{Id}/{Mode}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-
+		mode := vars["Mode"]
 		id, err := strconv.ParseInt(vars["Id"], 10, 32)
 		if err != nil {
 			http.Error(w, "Not Found", http.StatusNotFound)
@@ -86,11 +94,27 @@ func GetPassageReview(router *mux.Router, conn *pgxpool.Pool) {
 
 		words := ParseWords(passage.Text)
 
-		tmpl.ExecuteTemplate(w, "layout.html", TemplateData{
-			Id:        passage.Id,
-			Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
-			Words:     words,
-			Mode:      vars["Mode"],
-		})
+		if r.Header.Get("Hx-Current-Url") == "" {
+			passageList, err := LoadPassageList(conn)
+			if err != nil {
+				http.Error(w, "Database Error", http.StatusInternalServerError)
+			}
+
+			tmpl.ExecuteTemplate(w, "layout.html", FullTemplateData{
+				Id:        passage.Id,
+				Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
+				Words:     words,
+				Mode:      mode,
+				Passages:  passageList,
+			})
+		} else {
+			tmpl.ExecuteTemplate(w, "review_partial.html", PartialTemplateData{
+				Id:        passage.Id,
+				Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
+				Words:     words,
+				Mode:      mode,
+			})
+		}
+
 	}).Methods("Get")
 }

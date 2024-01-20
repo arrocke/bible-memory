@@ -1,0 +1,26 @@
+<div class="review-panel">
+  <div id="typer"></div>
+</div>
+
+<style>
+  .review-panel {
+    padding: 8px;
+  }
+</style>
+
+<script type="text/javascript">
+  Typer({
+    el: document.querySelector('#typer'),
+    words: [
+      {{range .Words}}
+        {
+          word: "{{.Word}}",
+          {{if .Prefix}}prefix: "{{.Prefix}}",{{end}}
+          {{if .Gap}}suffix: "{{.Gap}}"{{end}}
+        },
+      {{end}}
+    ],
+    mode: "{{.Mode}}",
+    onComplete: console.log
+  })
+</script>

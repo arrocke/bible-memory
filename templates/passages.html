@@ -1,33 +1,61 @@
 {{define "head"}}<title>Passages | Bible Memory</title>{{end}}
 {{define "body"}}
-<h1>Passages</h1>
-<table>
-  <thead>
-    <tr>
-      <td>Reference</td>
-      <td>Level</td>
-      <td>Actions</td>
-    </tr>
-    <tr>
-      <td colspan="3">
-        <a href="/passages/new">Add Passage</a>
-      </td>
-    </tr>
-  </thead>
-  <tbody>
-    {{range .Passages}}
-    <tr>
-      <td>{{.Reference}}</td>
-      <td>{{.Level}}</td>
-      <td>
-        <a href="/passages/{{.Id}}/learn">Learn</a> |
-        <a href="/passages/{{.Id}}/recall">Recall</a> |
-        <a href="/passages/{{.Id}}/review">Review</a> |
-        <button type="button" hx-delete="/passages/{{.Id}}" hx-confirm="Are you want to delete {{.Reference}}?"
-          hx-target="closest tr" hx-swap="outerHTML swap:1s">Delete</button>
-      </td>
-    </tr>
-    {{end}}
-  </tbody>
-</table>
+<style>
+  .content-wrapper {
+    display: flex;
+    height: 100%;
+  }
+
+  .sidebar {
+    width: 30%;
+    border-right: 1px solid lightgray;
+  }
+
+  .main {
+    flex-grow: 1;
+  }
+
+  .add-passage {
+    padding: 8px;
+    margin: 0 8px;
+  }
+
+  .add-passage,
+  .passage-link {
+    color: inherit;
+    text-decoration: none;
+    display: block;
+  }
+
+  .passage-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .passage-list-item {
+    padding: 8px;
+    margin: 0 8px;
+    border-top: 1px solid lightgrey;
+  }
+</style>
+<div class="content-wrapper">
+  <div class="sidebar">
+    <a class="add-passage" href="/passages/new">Add Passage</a>
+    <ul class="passage-list">
+      {{range .Passages}}
+      <li class="passage-list-item">
+        <a class="passage-link" href="/passages/{{.Id}}/review" hx-target="#main">
+          {{.Reference}}
+        </a>
+      </li>
+      {{end}}
+    </ul>
+  </div>
+  <div class="main" id="main">
+    {{template "main" .}}
+  </div>
+</div>
 {{end}}
+
+{{define "main"}}{{end}}

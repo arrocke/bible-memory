@@ -1,22 +1,3 @@
-{{define "head"}}<title>Review {{.Reference}} | Bible Memory</title>{{end}}
-{{define "body"}}
-<h1>Review {{.Reference}}</h1>
-<div id="typer"></div>
-
-<script type="text/javascript">
-  Typer({
-    el: document.querySelector('#typer'),
-    words: [
-      {{range .Words}}
-        {
-          word: "{{.Word}}",
-          {{if .Prefix}}prefix: "{{.Prefix}}",{{end}}
-          {{if .Gap}}suffix: "{{.Gap}}"{{end}}
-        },
-      {{end}}
-    ],
-    mode: "{{.Mode}}",
-    onComplete: console.log
-  })
-</script>
+{{define "main"}}
+{{template "review_partial.html" .}}
 {{end}}

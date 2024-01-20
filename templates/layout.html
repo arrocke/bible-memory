@@ -16,7 +16,39 @@
 </head>
 
 <body hx-boost="true">
-  {{template "body" .}}
+  <style>
+    body {
+      margin: 0;
+    }
+
+    .header {
+      background: lightgrey;
+      padding: 8px;
+    }
+
+    .app-name {
+      margin: 0;
+    }
+
+    .wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      height: 100vh;
+    }
+
+    .content {
+      flex-grow: 1;
+    }
+  </style>
+  <div class="wrapper">
+    <header class="header">
+      <h1 class="app-name">Bible Memory</h1>
+    </header>
+    <div class="content">
+      {{template "body" .}}
+    </div>
+  </div>
 </body>
 
 </html>
