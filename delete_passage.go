@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -25,6 +27,9 @@ func DeletePassage(router *mux.Router, conn *pgxpool.Pool) {
 			return
 		}
 
+		if strings.HasSuffix(r.Header.Get("Hx-Current-Url"), fmt.Sprintf("/passages/%d/review", id)) {
+			w.Header().Set("Hx-Location", "/passages")
+		}
 		w.WriteHeader(http.StatusOK)
 	}).Methods("Delete")
 }

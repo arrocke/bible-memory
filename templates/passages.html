@@ -18,13 +18,14 @@
   .add-passage {
     padding: 8px;
     margin: 0 8px;
+    display: block;
+    border-bottom: 1px solid lightgrey;
   }
 
   .add-passage,
   .passage-link {
     color: inherit;
     text-decoration: none;
-    display: block;
   }
 
   .passage-list {
@@ -36,7 +37,20 @@
   .passage-list-item {
     padding: 8px;
     margin: 0 8px;
-    border-top: 1px solid lightgrey;
+    border-bottom: 1px solid lightgrey;
+    display: flex;
+  }
+
+  .passage-link {
+    flex-grow: 1;
+  }
+
+  .passage-delete {
+    border: none;
+    background: none;
+    color: darkred;
+    font-weight: bold;
+    font-size: inherit;
   }
 </style>
 <div class="content-wrapper">
@@ -48,6 +62,8 @@
         <a class="passage-link" href="/passages/{{.Id}}/review" hx-target="#main">
           {{.Reference}}
         </a>
+        <button class="passage-delete" hx-delete="/passages/{{.Id}}" hx-target="closest li" hx-swap="outerHTML"
+          hx-confirm="Are you sure you want to delete {{.Reference}}?">Delete</button>
       </li>
       {{end}}
     </ul>

@@ -12,13 +12,10 @@
     crossorigin="anonymous"></script>
   <script src="/assets/typer.js"></script>
 
-  {{template "head" .}}
-</head>
-
-<body hx-boost="true">
   <style>
     body {
       margin: 0;
+      font-family: sans-serif;
     }
 
     .header {
@@ -41,6 +38,11 @@
       flex-grow: 1;
     }
   </style>
+
+  {{template "head" .}}
+</head>
+
+<body hx-boost="true">
   <div class="wrapper">
     <header class="header">
       <h1 class="app-name">Bible Memory</h1>
