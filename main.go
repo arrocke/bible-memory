@@ -24,7 +24,9 @@ func main() {
 	r := mux.NewRouter()
 
 	GetRegister(r, conn)
+	GetLogin(r, conn)
 	PostRegister(r, conn)
+	PostLogin(r, conn)
 
 	GetPassages(r, conn)
 	GetPassageReview(r, conn)
