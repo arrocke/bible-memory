@@ -50,6 +50,11 @@ func PostReviewPassage(router *mux.Router, conn *pgxpool.Pool) {
 			return
 		}
 
+		if r.FormValue("mode") != "review" {
+			tmpl.ExecuteTemplate(w, "review_result.html", TemplateData{Kind: "non-review", Level: passage.Level})
+			return
+		}
+
 		accuracy, err := strconv.ParseFloat(r.FormValue("accuracy"), 64)
 		if err != nil {
 			http.Error(w, "Invalid accuracy", http.StatusBadRequest)

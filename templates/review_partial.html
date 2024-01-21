@@ -1,6 +1,11 @@
 <div class="review-passage-view">
   <h2 class="view-header">Review {{.Reference}}</h2>
   <div id="result"></div>
+  <div id="mode-select">
+    <button type="button" data-mode="learn">Learn</button>
+    <button type="button" data-mode="recall">Recall</button>
+    <button type="button" data-mode="review">Review</button>
+  </div>
   <div id="typer"></div>
 </div>
 
@@ -12,26 +17,60 @@
   .review-passage-view {
     padding: 16px;
   }
+
+  #mode-select {
+    display: flex;
+  }
+
+  #mode-select button {
+    border: 1px solid lightgrey;
+    background: inherit;
+    margin: 0;
+    border-right-width: 0px;
+    padding: 8px 16px;
+    box-sizing: border-box;
+    height: 32px;
+  }
+  #mode-select button:first-child {
+    border-radius: 4px 0 0 4px;
+  }
+  #mode-select button:last-child {
+    border-radius: 0 4px 4px 0;
+    border-right-width: 1px;
+  }
 </style>
 
 <script type="text/javascript">
-  Typer({
-    el: document.querySelector('#typer'),
-    words: [
-      {{ range .Words }}
-        {
-      word: "{{.Word}}",
-          {{ if .Prefix }}prefix: "{{.Prefix}}", {{ end }}
-    {{ if .Gap }}suffix: "{{.Gap}}"{{ end }}
-        },
-    {{ end }}
-    ],
-    mode: "{{.Mode}}",
-    onComplete({ accuracy }) {
-    htmx.ajax("POST", "/passages/{{.Id}}/review", {
-      values: { accuracy },
-      target: '#result'
+  const selectModeRoot = document.querySelector('#mode-select')
+  selectModeRoot.addEventListener('click', e => {
+    const mode = e.target.dataset.mode
+    if (mode) {
+      selectModeRoot.style.display = 'none'
+      initTyper(mode)
+    }
+  })
+
+  const words = [
+    {{range .Words}}
+      {
+        word: "{{.Word}}",
+        {{if .Prefix}}prefix: "{{.Prefix}}",{{end}}
+        {{if .Gap}}suffix: "{{.Gap}}"{{end}}
+      },
+    {{end}}
+  ]
+
+  function initTyper(mode) {
+    Typer({
+      el: document.querySelector('#typer'),
+      words,
+      mode,
+      onComplete({ accuracy }) {
+        htmx.ajax("POST", "/passages/{{.Id}}/review", {
+          values: { accuracy, mode },
+          target: '#result'
+        })
+      }
     })
   }
-  })
 </script>
