@@ -1,6 +1,10 @@
 {{define "head"}}<title>Passages | Bible Memory</title>{{end}}
 {{define "body"}}
 <style>
+  .flex-spacer {
+    flex-grow: 1;
+  }
+
   .content-wrapper {
     display: flex;
     height: 100%;
@@ -40,9 +44,14 @@
     border-bottom: 1px solid lightgrey;
   }
 
-  .passage-list-item-row-1 {
+  .passage-list-item-row-1,
+  .passage-list-item-row-2 {
     display: flex;
     align-items: center;
+  }
+
+  .passage-list-item-row-1 {
+    margin-bottom: 4px;
   }
 
   .passage-link {
@@ -86,7 +95,9 @@
           </button>
         </div>
         <div class="passage-list-item-row-2">
-          <span class="passage-review-date">{{.ReviewAt}}</span>
+          <span class="passage-review-date">Review: {{if eq .ReviewAt ""}}-{{else}}{{.ReviewAt}}{{end}}</span>
+          <span class="flex-spacer"></span>
+          <span class="passage-review-date">Level: {{.Level}}</span>
         </div>
       </li>
       {{end}}
