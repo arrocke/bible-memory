@@ -31,6 +31,11 @@
   padding: 16px;
 }
 
+.view--centered {
+  display: flex;
+  justify-content: center;
+}
+
 .view-heading {
   font-size: 18px;
   font-weight: bold;
@@ -43,6 +48,12 @@
 
 .form-group {
   margin-bottom: 16px;
+}
+
+.form-group--2-column {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
 }
 
 .form-label {

@@ -1,0 +1,45 @@
+{{define "head"}}<title>Register | Bible Memory</title>{{end}}
+{{define "body"}}
+<div class="view view--centered">
+  <div>
+    <h2 class="view-heading">Register</h2>
+    <form action="/users/register" method="POST">
+      <div class="form-group">
+        <label class="form-label" for="email">Email</label>
+        <div>
+          <input id="email" class="text-input" name="email" />
+        </div>
+      </div>
+      <div class="form-group--2-column">
+        <div>
+          <label class="form-label" for="first-name">First Name</label>
+          <div>
+            <input id="first-name" class="text-input" name="first_name" />
+          </div>
+        </div>
+        <div>
+          <label class="form-label" for="last-name">Last Name</label>
+          <div>
+            <input id="last-name" class="text-input" name="last_name" />
+          </div>
+        </div>
+      </div>
+      <div class="form-group--2-column">
+        <div>
+          <label class="form-label" for="password">Password</label>
+          <div>
+            <input id="password" type="password" class="text-input" name="password" />
+          </div>
+        </div>
+        <div>
+          <label class="form-label" for="confirm_password">Confirm Password</label>
+          <div>
+            <input id="confirm_password" type="password" class="text-input" name="confirm_password" />
+          </div>
+        </div>
+      </div>
+      <button class="button">Register</button>
+    </form>
+  </div>
+</div>
+{{end}}

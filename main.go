@@ -23,6 +23,9 @@ func main() {
 
 	r := mux.NewRouter()
 
+	GetRegister(r, conn)
+	PostRegister(r, conn)
+
 	GetPassages(r, conn)
 	GetPassageReview(r, conn)
 	GetCreatePassage(r, conn)
