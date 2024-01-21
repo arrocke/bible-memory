@@ -98,7 +98,7 @@ window.Typer = function ({ el: root, words, mode, onComplete }) {
   const input = document.createElement("input");
   input.classList.add("typer-input");
 
-  pre.addEventListener("click", () => {
+  typer.addEventListener("click", () => {
     input.focus();
   });
 

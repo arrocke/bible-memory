@@ -39,6 +39,7 @@
   border: 1px solid grey;
   border-radius: 4px;
   padding: 8px;
+  min-height: 200px;
 }
 .typer-input-wrapper:focus-within {
   outline: 1px solid blue;

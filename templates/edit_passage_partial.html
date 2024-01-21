@@ -3,7 +3,7 @@
     margin: 0 0 16px 0;
   }
 
-  .add-passage-view {
+  .edit-passage-view {
     padding: 16px;
   }
 
@@ -43,21 +43,33 @@
   }
 </style>
 
-<div class="add-passage-view">
-  <h2 class="view-header">Add Passage</h2>
-  <form class="form" action="/passages" method="POST">
+<div class="edit-passage-view">
+  <h2 class="view-header">Edit {{.Reference}}</h2>
+  <form class="form" hx-put="/passages/{{.Id}}">
     <div class="form-group">
       <label class="form-label" for="reference">Reference</label>
       <div>
-        <input class="text-box" id="reference" type="text" name="reference" />
+        <input class="text-box" id="reference" type="text" name="reference" value="{{.Reference}}" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="level">Level</label>
+      <div>
+        <input class="text-box" id="level" type="number" name="level" value="{{.Level}}" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="review-at">Next Review</label>
+      <div>
+        <input class="text-box" id="review-at" type="date" name="review_at" value="{{.ReviewAt}}" />
       </div>
     </div>
     <div class="form-group">
       <label class="form-label" for="text">Text</label>
       <div>
-        <textarea class="text-box text-box--multiline" id="text" name="text"></textarea>
+        <textarea class="text-box text-box--multiline" id="text" name="text">{{.Text}}</textarea>
       </div>
     </div>
-    <button class="submit-button">Add Passage</button>
+    <button class="submit-button">Update</button>
   </form>
 </div>

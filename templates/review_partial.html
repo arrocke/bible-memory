@@ -1,11 +1,16 @@
-<div class="review-panel">
+<div class="review-passage-view">
+  <h2 class="view-header">Review {{.Reference}}</h2>
   <div id="result"></div>
   <div id="typer"></div>
 </div>
 
 <style>
-  .review-panel {
-    padding: 8px;
+  .view-header {
+    margin: 0 0 16px 0;
+  }
+
+  .review-passage-view {
+    padding: 16px;
   }
 </style>
 
@@ -13,20 +18,20 @@
   Typer({
     el: document.querySelector('#typer'),
     words: [
-      {{range .Words}}
+      {{ range .Words }}
         {
-          word: "{{.Word}}",
-          {{if .Prefix}}prefix: "{{.Prefix}}",{{end}}
-          {{if .Gap}}suffix: "{{.Gap}}"{{end}}
+      word: "{{.Word}}",
+          {{ if .Prefix }}prefix: "{{.Prefix}}", {{ end }}
+    {{ if .Gap }}suffix: "{{.Gap}}"{{ end }}
         },
-      {{end}}
+    {{ end }}
     ],
     mode: "{{.Mode}}",
     onComplete({ accuracy }) {
-      htmx.ajax("POST", "/passages/{{.Id}}/review", {
-        values: { accuracy },
-        target: '#result'
-      })
-    }
+    htmx.ajax("POST", "/passages/{{.Id}}/review", {
+      values: { accuracy },
+      target: '#result'
+    })
+  }
   })
 </script>
