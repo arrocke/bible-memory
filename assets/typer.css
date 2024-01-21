@@ -1,11 +1,21 @@
 .typer-progress {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.typer-accuracy {
+  margin-right: 8px;
+}
+
+.typer-progress-bar {
   height: 6px;
   display: flex; 
   background: lightgray;
   align-items: stretch;
-  margin-bottom: 16px;
   border-radius: 3px;
   overflow: hidden;
+  flex-grow: 1;
 }
 
 .typer-progress-incorrect {

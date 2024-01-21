@@ -69,21 +69,33 @@ function buildProgress({ size }) {
   const root = document.createElement("div");
   root.classList.add("typer-progress");
 
+  const accuracy = document.createElement("div");
+  accuracy.classList.add("typer-accuracy");
+  accuracy.innerText = "100%";
+  root.appendChild(accuracy);
+
+  const bar = document.createElement("div");
+  bar.classList.add("typer-progress-bar");
+  root.appendChild(bar);
+
   const correctDiv = document.createElement("div");
   correctDiv.classList.add("typer-progress-correct");
   correctDiv.style.width = "0%";
-  root.appendChild(correctDiv);
+  bar.appendChild(correctDiv);
 
   const incorrectDiv = document.createElement("div");
   incorrectDiv.classList.add("typer-progress-incorrect");
   incorrectDiv.style.width = "0%";
-  root.appendChild(incorrectDiv);
+  bar.appendChild(incorrectDiv);
 
   return {
     root,
     update({ correct, incorrect }) {
       correctDiv.style.width = `${(correct / size) * 100}%`;
       incorrectDiv.style.width = `${(incorrect / size) * 100}%`;
+      accuracy.innerText = `${((correct / (correct + incorrect)) * 100).toFixed(
+        0
+      )}%`;
     },
   };
 }
