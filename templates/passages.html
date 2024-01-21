@@ -42,6 +42,7 @@
 
   .passage-list-item-row-1 {
     display: flex;
+    align-items: center;
   }
 
   .passage-link {
@@ -58,6 +59,12 @@
     color: darkred;
     font-weight: bold;
     font-size: inherit;
+    width: 24px;
+    height: 24px;
+  }
+
+  .delete-icon {
+    fill: red;
   }
 </style>
 <div class="content-wrapper">
@@ -71,7 +78,12 @@
             {{.Reference}}
           </a>
           <button class="passage-delete" hx-delete="/passages/{{.Id}}" hx-target="closest li" hx-swap="outerHTML"
-            hx-confirm="Are you sure you want to delete {{.Reference}}?">Delete</button>
+            hx-confirm="Are you sure you want to delete {{.Reference}}?" title="Delete">
+            <span class="sr-only">Delete</span>
+            <svg class="icon delete-icon">
+              <use href="assets/icons.svg#trash" />
+            </svg>
+          </button>
         </div>
         <div class="passage-list-item-row-2">
           <span class="passage-review-date">{{.ReviewAt}}</span>
