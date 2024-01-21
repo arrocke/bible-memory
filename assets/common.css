@@ -1,0 +1,77 @@
+:root {
+  --color-separator: lightgrey;
+  --color-ui-border: grey;
+  --color-warn: red;
+  --color-success: green;
+  --color-button-bg: black;
+  --color-button-text: white;
+  --radius-input: 4px;
+  --radius-button: 4px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -.125em;
+  fill: currentColor;
+}
+
+.view {
+  padding: 16px;
+}
+
+.view-heading {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.flex-spacer {
+  flex-grow: 1;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 4px;
+  display: inline-block;
+}
+
+.text-input {
+  border: 1px solid var(--color-ui-border);
+  border-radius: var(--radius-input);
+  height: 32px;
+  padding: 8px;
+  font-size: 16px;
+}
+
+.multiline-text-input {
+  border: 1px solid var(--color-ui-border);
+  border-radius: var(--radius-input);
+  padding: 8px;
+  font-size: 16px;
+}
+
+.button {
+  border-radius: var(--radius-button);
+  background: var(--color-button-bg);
+  color: var(--color-button-text);
+  font-weight: bold;
+  padding: 8px 16px;
+  height: 32px;
+}

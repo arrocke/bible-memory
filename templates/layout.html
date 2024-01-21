@@ -5,53 +5,35 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link href="/assets/typer.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/reset.css" />
+  <link rel="stylesheet" href="/assets/common.css" />
 
   <script src="https://unpkg.com/htmx.org@1.9.10"
     integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
     crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="/assets/typer.css" />
   <script src="/assets/typer.js"></script>
 
   <style>
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      border: 0;
-    }
-
-    .icon {
-      width: 1em;
-      height: 1em;
-      vertical-align: -.125em;
-    }
-
     body {
-      margin: 0;
-      font-family: sans-serif;
-    }
-
-    .header {
-      background: lightgrey;
-      padding: 8px;
-    }
-
-    .app-name {
-      margin: 0;
-    }
-
-    .wrapper {
       display: flex;
       flex-direction: column;
       align-items: stretch;
       height: 100vh;
     }
 
-    .content {
+    .app-header {
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--color-separator);
+    }
+
+    .app-header h1 {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .app-content {
       flex-grow: 1;
     }
   </style>
@@ -60,13 +42,11 @@
 </head>
 
 <body hx-boost="true">
-  <div class="wrapper">
-    <header class="header">
-      <h1 class="app-name">Bible Memory</h1>
-    </header>
-    <div class="content">
-      {{template "body" .}}
-    </div>
+  <header class="app-header">
+    <h1>Bible Memory</h1>
+  </header>
+  <div class="app-content">
+    {{template "body" .}}
   </div>
 </body>
 

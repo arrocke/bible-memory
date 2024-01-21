@@ -1,133 +1,110 @@
 {{define "head"}}<title>Passages | Bible Memory</title>{{end}}
 {{define "body"}}
 <style>
-  .flex-spacer {
-    flex-grow: 1;
-  }
-
-  .content-wrapper {
+  .passages-wrapper {
     display: flex;
     height: 100%;
   }
 
-  .sidebar {
+  .passages-sidebar {
     width: 30%;
-    border-right: 1px solid lightgray;
+    border-right: 1px solid var(--color-separator);
     max-width: 350px;
   }
 
-  .main {
+  .selected-passage {
     flex-grow: 1;
   }
 
-  .add-passage {
+  .add-passage-action {
     padding: 8px;
     margin: 0 8px;
     display: block;
-    border-bottom: 1px solid lightgrey;
-  }
-
-  .add-passage,
-  .passage-link {
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .passage-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+    border-bottom: 1px solid var(--color-separator);
   }
 
   .passage-list-item {
     padding: 8px;
     margin: 0 8px;
-    border-bottom: 1px solid lightgrey;
+    border-bottom: 1px solid var(--color-separator);
   }
 
-  .passage-list-item-row-1,
-  .passage-list-item-row-2 {
+  .passage-list-item__row-1,
+  .passage-list-item__row-2 {
     display: flex;
     align-items: center;
   }
 
-  .passage-list-item-row-1 {
+  .passage-list-item__row-1 {
     margin-bottom: 4px;
   }
 
-  .passage-link {
+  .passage-list-item__link {
     flex-grow: 1;
   }
 
-  .passage-review-date {
+  .passage-list-item__level,
+  .passage-list-item__review-date {
     font-size: 12px;
   }
 
-  .passage-edit {
-    border: none;
-    background: none;
-    color: darkred;
-    font-weight: bold;
-    font-size: inherit;
+  .passage-list-item__edit-action {
     width: 24px;
     height: 24px;
-    color: inherit;
-    text-decoration: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
 
-  .passage-delete {
-    border: none;
-    background: none;
-    color: darkred;
-    font-weight: bold;
-    font-size: inherit;
+  .passage-list-item__delete-action {
+    color: var(--color-warn);
     width: 24px;
     height: 24px;
   }
-
-  .delete-icon {
-    fill: red;
-  }
 </style>
-<div class="content-wrapper">
-  <div class="sidebar">
-    <a class="add-passage" href="/passages/new" hx-target="#main">Add Passage</a>
+<div class="passages-wrapper">
+  <div class="passages-sidebar">
+    <a class="add-passage-action" href="/passages/new" hx-target="#main">
+      <svg class="icon">
+        <use href="/assets/icons.svg#plus"></use>
+      </svg>
+      Add Passage
+    </a>
     <ul class="passage-list">
       {{range .Passages}}
       <li class="passage-list-item">
-        <div class="passage-list-item-row-1">
-          <a class="passage-link" href="/passages/{{.Id}}/review" hx-target="#main">
+        <div class="passage-list-item__row-1">
+          <a class="passage-list-item__link" href="/passages/{{.Id}}/review" hx-target="#main">
             {{.Reference}}
           </a>
-          <a class="passage-edit" href="/passages/{{.Id}}" hx-target="#main">
+          <a class="passage-list-item__edit-action" href="/passages/{{.Id}}" hx-target="#main">
             <span class="sr-only">Edit</span>
             <svg class="icon">
               <use href="/assets/icons.svg#pencil" />
             </svg>
           </a>
-          <button class="passage-delete" hx-delete="/passages/{{.Id}}" hx-target="closest li" hx-swap="outerHTML"
-            hx-confirm="Are you sure you want to delete {{.Reference}}?" title="Delete">
+          <button class="passage-list-item__delete-action" hx-delete="/passages/{{.Id}}" hx-target="closest li"
+            hx-swap="outerHTML" hx-confirm="Are you sure you want to delete {{.Reference}}?" title="Delete">
             <span class="sr-only">Delete</span>
-            <svg class="icon delete-icon">
+            <svg class="icon">
               <use href="/assets/icons.svg#trash" />
             </svg>
           </button>
         </div>
-        <div class="passage-list-item-row-2">
-          <span class="passage-review-date">Review: {{if eq .ReviewAt ""}}-{{else}}{{.ReviewAt}}{{end}}</span>
+        <div class="passage-list-item__row-2">
+          <span class="passage-list-item__review-date">
+            Review: {{if eq .ReviewAt ""}}-{{else}}{{.ReviewAt}}{{end}}
+          </span>
           <span class="flex-spacer"></span>
-          <span class="passage-review-date">Level: {{.Level}}</span>
+          <span class="passage-list-item__level">Level: {{.Level}}</span>
         </div>
       </li>
       {{end}}
     </ul>
   </div>
-  <div class="main" id="main">
+  <main id="main" class="selected-passage">
     {{template "main" .}}
-  </div>
+  </main>
 </div>
 {{end}}
 

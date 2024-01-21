@@ -1,5 +1,5 @@
-<div class="review-passage-view">
-  <h2 class="view-header">Review {{.Reference}}</h2>
+<div class="view">
+  <h2 class="view-heading">Review {{.Reference}}</h2>
   <div id="result"></div>
   <div id="mode-select">
     <button type="button" data-mode="learn">Learn</button>
@@ -10,67 +10,59 @@
 </div>
 
 <style>
-  .view-header {
-    margin: 0 0 16px 0;
-  }
-
-  .review-passage-view {
-    padding: 16px;
-  }
-
   #mode-select {
     display: flex;
   }
 
   #mode-select button {
-    border: 1px solid lightgrey;
-    background: inherit;
-    margin: 0;
+    border: 1px solid var(--color-ui-border);
     border-right-width: 0px;
     padding: 8px 16px;
-    box-sizing: border-box;
     height: 32px;
+    font-weight: bold;
   }
   #mode-select button:first-child {
-    border-radius: 4px 0 0 4px;
+    border-radius: var(--radius-input) 0 0 var(--radius-input);
   }
   #mode-select button:last-child {
-    border-radius: 0 4px 4px 0;
+    border-radius: 0 var(--radius-input) var(--radius-input) 0;
     border-right-width: 1px;
   }
 </style>
 
 <script type="text/javascript">
-  const selectModeRoot = document.querySelector('#mode-select')
-  selectModeRoot.addEventListener('click', e => {
-    const mode = e.target.dataset.mode
-    if (mode) {
-      selectModeRoot.style.display = 'none'
-      initTyper(mode)
-    }
-  })
-
-  const words = [
-    {{range .Words}}
-      {
-        word: "{{.Word}}",
-        {{if .Prefix}}prefix: "{{.Prefix}}",{{end}}
-        {{if .Gap}}suffix: "{{.Gap}}"{{end}}
-      },
-    {{end}}
-  ]
-
-  function initTyper(mode) {
-    Typer({
-      el: document.querySelector('#typer'),
-      words,
-      mode,
-      onComplete({ accuracy }) {
-        htmx.ajax("POST", "/passages/{{.Id}}/review", {
-          values: { accuracy, mode },
-          target: '#result'
-        })
+  {
+    let selectModeRoot = document.querySelector('#mode-select')
+    selectModeRoot.addEventListener('click', e => {
+      const mode = e.target.dataset.mode
+      if (mode) {
+        selectModeRoot.style.display = 'none'
+        initTyper(mode)
       }
     })
+
+    let words = [
+      {{range .Words}}
+        {
+          word: "{{.Word}}",
+          {{if .Prefix}}prefix: "{{.Prefix}}",{{end}}
+          {{if .Gap}}suffix: "{{.Gap}}"{{end}}
+        },
+      {{end}}
+    ]
+
+    function initTyper(mode) {
+      Typer({
+        el: document.querySelector('#typer'),
+        words,
+        mode,
+        onComplete({ accuracy }) {
+          htmx.ajax("POST", "/passages/{{.Id}}/review", {
+            values: { accuracy, mode },
+            target: '#result'
+          })
+        }
+      })
+    }
   }
 </script>

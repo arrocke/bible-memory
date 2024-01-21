@@ -101,7 +101,7 @@ function buildProgress({ size }) {
 }
 
 window.Typer = function ({ el: root, words, mode, onComplete }) {
-  root.classList.add(`typer-${mode}`);
+  root.classList.add(`typer-${mode}`, 'typer');
 
   const typer = document.createElement("div");
   typer.classList.add("typer-input-wrapper");

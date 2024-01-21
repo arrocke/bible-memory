@@ -19,11 +19,11 @@
 }
 
 .typer-progress-incorrect {
-  background: red;
+  background: var(--color-warn);
 }
 
 .typer-progress-correct {
-  background: green;
+  background: var(--color-success);
 }
 
 .typer-learn {
@@ -46,8 +46,8 @@
 }
 
 .typer-input-wrapper {
-  border: 1px solid grey;
-  border-radius: 4px;
+  border: 1px solid var(--color-ui-border);
+  border-radius: var(--radius-input);
   padding: 8px;
   min-height: 200px;
 }
@@ -55,16 +55,10 @@
   outline: 1px solid blue;
 }
 
-.typer-content {
-  font-family: inherit;
-  margin: 0;
-}
-
 .typer-input {
   position: absolute;
   opacity: 0;
 }
-
 
 .typer-current {
   --typer-prefix-color: black;
