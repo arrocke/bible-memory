@@ -26,11 +26,30 @@
     .app-header {
       padding: 8px 16px;
       border-bottom: 1px solid var(--color-separator);
+      display: flex;
+      align-items: baseline;
     }
 
     .app-header h1 {
       font-size: 22px;
       font-weight: bold;
+    }
+
+    .app-navigation {
+      display: flex;
+      justify-content: flex-end;
+      align-items: baseline;
+      flex-grow: 1;
+    }
+
+    .app-nav-link {
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .app-nav-link:hover,
+    .app-nav-link:focus {
+      text-decoration: underline;
     }
 
     .app-content {
@@ -43,7 +62,14 @@
 
 <body hx-boost="true">
   <header class="app-header">
-    <h1>Bible Memory</h1>
+    <a href="{{if .IsLoggedIn}}/passages{{else}}/{{end}}">
+      <h1>Bible Memory</h1>
+    </a>
+    {{if .IsLoggedIn}}
+    <nav class="app-navigation" aria-label="Header Navigation">
+      <button class="app-nav-link" hx-post="/users/logout">Logout</button>
+    </nav>
+    {{end}}
   </header>
   <div class="app-content">
     {{template "body" .}}

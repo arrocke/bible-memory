@@ -42,6 +42,7 @@ func main() {
 	GetLogin(r, ctx)
 	PostRegister(r, ctx)
 	PostLogin(r, ctx)
+	PostLogout(r, ctx)
 
 	GetPassages(r, ctx)
 	GetPassageReview(r, ctx)

@@ -22,6 +22,6 @@ func GetLogin(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		tmpl.ExecuteTemplate(w, "layout.html", nil)
+		tmpl.ExecuteTemplate(w, "layout.html", LayoutTemplateData{})
 	}).Methods("Get")
 }

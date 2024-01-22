@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -21,12 +20,9 @@ func GetSession(r *http.Request, ctx *ServerContext) (*Session, error) {
 	}
 
 	user_id, ok := session.Values["user_id"].(int32)
-	fmt.Println(user_id)
 	if !ok {
 		return nil, nil
 	}
-
-	fmt.Println(user_id)
 
 	return &Session{ID: session.ID, user_id: &user_id}, nil
 }

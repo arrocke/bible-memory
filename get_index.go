@@ -7,6 +7,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type LayoutTemplateData struct {
+	IsLoggedIn bool
+}
+
 func GetIndex(router *mux.Router, ctx *ServerContext) {
 	tmpl := template.Must(template.ParseFiles("templates/public_index.html", "templates/layout.html"))
 
@@ -18,7 +22,7 @@ func GetIndex(router *mux.Router, ctx *ServerContext) {
 		}
 
 		if session == nil {
-			tmpl.ExecuteTemplate(w, "layout.html", nil)
+			tmpl.ExecuteTemplate(w, "layout.html", LayoutTemplateData{})
 		} else {
 			http.Redirect(w, r, "/passages", http.StatusFound)
 		}
