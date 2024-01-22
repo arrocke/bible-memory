@@ -25,12 +25,25 @@ func PostRegister(router *mux.Router, ctx *ServerContext) {
 			ConfirmPassword: r.FormValue("confirm_password"),
 		}
 
-		query := `INSERT INTO "user" (email, first_name, last_name, password) VALUES ($1, $2, $3, $4)`
-		_, err := ctx.Conn.Exec(context.Background(), query, form.Email, form.FirstName, form.LastName, form.Password)
+		var id int32
+		query := `INSERT INTO "user" (email, first_name, last_name, password) VALUES ($1, $2, $3, $4) RETURNING id`
+		err := ctx.Conn.QueryRow(context.Background(), query, form.Email, form.FirstName, form.LastName, form.Password).Scan(&id)
 		if err != nil {
 			println(err.Error())
 			http.Error(w, "Database Error", http.StatusInternalServerError)
 			return
+		}
+
+		session, err := ctx.SessionStore.New(r, "session")
+		if err != nil {
+			http.Error(w, "Session error", http.StatusInternalServerError)
+			return
+		}
+
+		session.Values["user_id"] = id
+		err = session.Save(r, w)
+		if err != nil {
+			http.Error(w, "Session Error", http.StatusInternalServerError)
 		}
 
 		w.Header().Set("Hx-Redirect", "/passages")
