@@ -33,13 +33,9 @@ func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
 		ReviewAt  string
 	}
 
-	type FullTemplateData struct {
-		Id        int32
-		Reference string
-		Text      string
-		Level     int32
-		ReviewAt  string
-		Passages  []PassageListItem
+	type TemplateData struct {
+		PartialTemplateData
+		PassagesTemplateData
 	}
 
 	tmpl := template.Must(template.ParseFiles("templates/edit_passage_partial.html", "templates/edit_passage.html", "templates/passages.html", "templates/layout.html"))
@@ -81,29 +77,27 @@ func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
 			reviewAt = passage.ReviewAt.Format("2006-01-02")
 		}
 
+		partialTemplateData := PartialTemplateData{
+			Id:        passage.Id,
+			Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
+			Level:     passage.Level,
+			Text:      passage.Text,
+			ReviewAt:  reviewAt,
+		}
+
 		if r.Header.Get("Hx-Current-Url") == "" {
-			passageList, err := LoadPassageList(ctx.Conn)
+			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn)
 			if err != nil {
 				http.Error(w, "Database Error", http.StatusInternalServerError)
 				return
 			}
 
-			tmpl.ExecuteTemplate(w, "layout.html", FullTemplateData{
-				Id:        passage.Id,
-				Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
-				Level:     passage.Level,
-				ReviewAt:  reviewAt,
-				Text:      passage.Text,
-				Passages:  passageList,
+			tmpl.ExecuteTemplate(w, "layout.html", TemplateData{
+				partialTemplateData,
+				*passagesTemplateData,
 			})
 		} else {
-			tmpl.ExecuteTemplate(w, "edit_passage_partial.html", PartialTemplateData{
-				Id:        passage.Id,
-				Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
-				Level:     passage.Level,
-				Text:      passage.Text,
-				ReviewAt:  reviewAt,
-			})
+			tmpl.ExecuteTemplate(w, "edit_passage_partial.html", partialTemplateData)
 		}
 
 	}).Methods("Get")

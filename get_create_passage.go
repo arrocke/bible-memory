@@ -10,10 +10,6 @@ import (
 func GetCreatePassage(router *mux.Router, ctx *ServerContext) {
 	tmpl := template.Must(template.ParseFiles("templates/add_passage.html", "templates/add_passage_partial.html", "templates/passages.html", "templates/layout.html"))
 
-	type TemplateData struct {
-		Passages []PassageListItem
-	}
-
 	router.HandleFunc("/passages/new", func(w http.ResponseWriter, r *http.Request) {
 		session, err := GetSession(r, ctx)
 		if err != nil {
@@ -26,14 +22,12 @@ func GetCreatePassage(router *mux.Router, ctx *ServerContext) {
 		}
 
 		if r.Header.Get("Hx-Current-Url") == "" {
-			passageList, err := LoadPassageList(ctx.Conn)
+			templateData, err := LoadPassagesTemplateData(ctx.Conn)
 			if err != nil {
 				http.Error(w, "Database Error", http.StatusInternalServerError)
 			}
 
-			tmpl.ExecuteTemplate(w, "layout.html", TemplateData{
-				Passages: passageList,
-			})
+			tmpl.ExecuteTemplate(w, "layout.html", templateData)
 		} else {
 			tmpl.ExecuteTemplate(w, "add_passage_partial.html", nil)
 		}

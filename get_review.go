@@ -12,34 +12,6 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-var wordRegex = regexp.MustCompile(`(\d+ [^A-Za-z0-9']*)?(\w+(?:(?:'|’|-)\w+)?(?:'|’)?)([^A-Za-z0-9']+)?`)
-
-type ReviewWord struct {
-	Prefix      string
-	Word        string
-	Gap         string
-	FirstLetter string
-	RestOfWord  string
-}
-
-func ParseWords(text string) []ReviewWord {
-	matches := wordRegex.FindAllStringSubmatch(text, -1)
-
-	words := make([]ReviewWord, len(matches))
-
-	for i, match := range matches {
-		words[i] = ReviewWord{
-			Prefix:      match[1],
-			Word:        match[2],
-			Gap:         match[3],
-			FirstLetter: match[2][0:1],
-			RestOfWord:  match[2][1:],
-		}
-	}
-
-	return words
-}
-
 func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 	type PassageModel struct {
 		Id           int32
@@ -51,17 +23,41 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 		Text         string
 	}
 
+	type ReviewWord struct {
+		Prefix      string
+		Word        string
+		Gap         string
+		FirstLetter string
+		RestOfWord  string
+	}
 	type PartialTemplateData struct {
 		Id        int32
 		Reference string
 		Words     []ReviewWord
 	}
+	type TemplateData struct {
+		PartialTemplateData
+		PassagesTemplateData
+	}
 
-	type FullTemplateData struct {
-		Id        int32
-		Reference string
-		Words     []ReviewWord
-		Passages  []PassageListItem
+	var wordRegex = regexp.MustCompile(`(\d+ [^A-Za-z0-9']*)?(\w+(?:(?:'|’|-)\w+)?(?:'|’)?)([^A-Za-z0-9']+)?`)
+
+	parseWords := func(text string) []ReviewWord {
+		matches := wordRegex.FindAllStringSubmatch(text, -1)
+
+		words := make([]ReviewWord, len(matches))
+
+		for i, match := range matches {
+			words[i] = ReviewWord{
+				Prefix:      match[1],
+				Word:        match[2],
+				Gap:         match[3],
+				FirstLetter: match[2][0:1],
+				RestOfWord:  match[2][1:],
+			}
+		}
+
+		return words
 	}
 
 	tmpl := template.Must(template.ParseFiles("templates/review_partial.html", "templates/review.html", "templates/passages.html", "templates/layout.html"))
@@ -98,28 +94,25 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		words := ParseWords(passage.Text)
+		partialTemplateData := PartialTemplateData{
+			Id:        passage.Id,
+			Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
+			Words:     parseWords(passage.Text),
+		}
 
 		if r.Header.Get("Hx-Current-Url") == "" {
-			passageList, err := LoadPassageList(ctx.Conn)
+			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn)
 			if err != nil {
 				http.Error(w, "Database Error", http.StatusInternalServerError)
 				return
 			}
 
-			tmpl.ExecuteTemplate(w, "layout.html", FullTemplateData{
-				Id:        passage.Id,
-				Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
-				Words:     words,
-				Passages:  passageList,
+			tmpl.ExecuteTemplate(w, "layout.html", TemplateData{
+				partialTemplateData,
+				*passagesTemplateData,
 			})
 		} else {
-			tmpl.ExecuteTemplate(w, "review_partial.html", PartialTemplateData{
-				Id:        passage.Id,
-				Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
-				Words:     words,
-			})
+			tmpl.ExecuteTemplate(w, "review_partial.html", partialTemplateData)
 		}
-
 	}).Methods("Get")
 }

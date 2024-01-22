@@ -17,8 +17,11 @@ type PassageListItem struct {
 	Level     int32
 	ReviewAt  string
 }
+type PassagesTemplateData struct {
+	Passages []PassageListItem
+}
 
-func LoadPassageList(conn *pgxpool.Pool) ([]PassageListItem, error) {
+func LoadPassagesTemplateData(conn *pgxpool.Pool) (*PassagesTemplateData, error) {
 	type PassageModel struct {
 		Id           int32
 		Book         string
@@ -40,13 +43,15 @@ func LoadPassageList(conn *pgxpool.Pool) ([]PassageListItem, error) {
 		return nil, err
 	}
 
-	listItems := make([]PassageListItem, len(passages))
+	templateData := PassagesTemplateData{
+		Passages: make([]PassageListItem, len(passages)),
+	}
 	for i, passage := range passages {
 		reviewAt := ""
 		if passage.ReviewAt != nil {
 			reviewAt = passage.ReviewAt.Format("01-02-2006")
 		}
-		listItems[i] = PassageListItem{
+		templateData.Passages[i] = PassageListItem{
 			Id:        passage.Id,
 			Level:     passage.Level,
 			ReviewAt:  reviewAt,
@@ -54,14 +59,10 @@ func LoadPassageList(conn *pgxpool.Pool) ([]PassageListItem, error) {
 		}
 	}
 
-	return listItems, nil
+	return &templateData, nil
 }
 
 func GetPassages(router *mux.Router, ctx *ServerContext) {
-	type TemplateData struct {
-		Passages []PassageListItem
-	}
-
 	tmpl := template.Must(template.ParseFiles("templates/passages.html", "templates/layout.html"))
 
 	router.HandleFunc("/passages", func(w http.ResponseWriter, r *http.Request) {
@@ -75,12 +76,12 @@ func GetPassages(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		passages, err := LoadPassageList(ctx.Conn)
+		data, err := LoadPassagesTemplateData(ctx.Conn)
 		if err != nil {
 			http.Error(w, "Database Error", http.StatusInternalServerError)
 			return
 		}
 
-		tmpl.ExecuteTemplate(w, "layout.html", TemplateData{Passages: passages})
+		tmpl.ExecuteTemplate(w, "layout.html", data)
 	}).Methods("GET")
 }
