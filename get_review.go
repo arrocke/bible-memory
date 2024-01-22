@@ -10,7 +10,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var wordRegex = regexp.MustCompile(`(\d+ [^A-Za-z0-9']*)?(\w+(?:(?:'|’|-)\w+)?(?:'|’)?)([^A-Za-z0-9']+)?`)
@@ -41,7 +40,7 @@ func ParseWords(text string) []ReviewWord {
 	return words
 }
 
-func GetPassageReview(router *mux.Router, conn *pgxpool.Pool) {
+func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 	type PassageModel struct {
 		Id           int32
 		Book         string
@@ -79,7 +78,7 @@ func GetPassageReview(router *mux.Router, conn *pgxpool.Pool) {
 		}
 
 		query := "SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text FROM passage WHERE id = $1"
-		rows, _ := conn.Query(context.Background(), query, id)
+		rows, _ := ctx.Conn.Query(context.Background(), query, id)
 		defer rows.Close()
 
 		passage, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[PassageModel])
@@ -95,7 +94,7 @@ func GetPassageReview(router *mux.Router, conn *pgxpool.Pool) {
 		words := ParseWords(passage.Text)
 
 		if r.Header.Get("Hx-Current-Url") == "" {
-			passageList, err := LoadPassageList(conn)
+			passageList, err := LoadPassageList(ctx.Conn)
 			if err != nil {
 				http.Error(w, "Database Error", http.StatusInternalServerError)
 				return

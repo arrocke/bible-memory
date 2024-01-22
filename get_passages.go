@@ -57,7 +57,7 @@ func LoadPassageList(conn *pgxpool.Pool) ([]PassageListItem, error) {
 	return listItems, nil
 }
 
-func GetPassages(router *mux.Router, conn *pgxpool.Pool) {
+func GetPassages(router *mux.Router, ctx *ServerContext) {
 	type TemplateData struct {
 		Passages []PassageListItem
 	}
@@ -65,7 +65,7 @@ func GetPassages(router *mux.Router, conn *pgxpool.Pool) {
 	tmpl := template.Must(template.ParseFiles("templates/passages.html", "templates/layout.html"))
 
 	router.HandleFunc("/passages", func(w http.ResponseWriter, r *http.Request) {
-		passages, err := LoadPassageList(conn)
+		passages, err := LoadPassageList(ctx.Conn)
 		if err != nil {
 			http.Error(w, "Database Error", http.StatusInternalServerError)
 			return

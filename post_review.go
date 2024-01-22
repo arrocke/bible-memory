@@ -10,12 +10,11 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var REVIEW_MAP = [...]int32{1, 1, 1, 2, 2, 3, 5, 8, 13, 21, 34, 55}
 
-func PostReviewPassage(router *mux.Router, conn *pgxpool.Pool) {
+func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 	type PassageModel struct {
 		Id    int32
 		Level int32
@@ -37,7 +36,7 @@ func PostReviewPassage(router *mux.Router, conn *pgxpool.Pool) {
 		}
 
 		query := "SELECT id, level FROM passage WHERE id = $1"
-		rows, _ := conn.Query(context.Background(), query, id)
+		rows, _ := ctx.Conn.Query(context.Background(), query, id)
 		defer rows.Close()
 
 		passage, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[PassageModel])
@@ -80,7 +79,7 @@ func PostReviewPassage(router *mux.Router, conn *pgxpool.Pool) {
 		newDate := time.Now().Add(time.Duration(REVIEW_MAP[newLevel]))
 
 		query = "UPDATE passage SET level = $2, review_at = $3 WHERE id = $1"
-		_, err = conn.Exec(context.Background(), query, id, newLevel, newDate)
+		_, err = ctx.Conn.Exec(context.Background(), query, id, newLevel, newDate)
 		if err != nil {
 			http.Error(w, "Database Error", http.StatusInternalServerError)
 			return

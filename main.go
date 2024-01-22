@@ -7,9 +7,15 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 )
+
+type ServerContext struct {
+	Conn         *pgxpool.Pool
+	SessionStore *sessions.CookieStore
+}
 
 func main() {
 	godotenv.Load(".env")
@@ -21,21 +27,28 @@ func main() {
 	}
 	defer conn.Close()
 
+	store := sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
+
+	ctx := &ServerContext{
+		Conn:         conn,
+		SessionStore: store,
+	}
+
 	r := mux.NewRouter()
 
-	GetRegister(r, conn)
-	GetLogin(r, conn)
-	PostRegister(r, conn)
-	PostLogin(r, conn)
+	GetRegister(r, ctx)
+	GetLogin(r, ctx)
+	PostRegister(r, ctx)
+	PostLogin(r, ctx)
 
-	GetPassages(r, conn)
-	GetPassageReview(r, conn)
-	GetCreatePassage(r, conn)
-	GetPassageEdit(r, conn)
-	PostCreatePassage(r, conn)
-	PostReviewPassage(r, conn)
-	PutEditPassage(r, conn)
-	DeletePassage(r, conn)
+	GetPassages(r, ctx)
+	GetPassageReview(r, ctx)
+	GetCreatePassage(r, ctx)
+	GetPassageEdit(r, ctx)
+	PostCreatePassage(r, ctx)
+	PostReviewPassage(r, ctx)
+	PutEditPassage(r, ctx)
+	DeletePassage(r, ctx)
 
 	r.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets/"))))
 

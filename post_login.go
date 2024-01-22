@@ -7,10 +7,9 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func PostLogin(router *mux.Router, conn *pgxpool.Pool) {
+func PostLogin(router *mux.Router, ctx *ServerContext) {
 	type LoginForm struct {
 		Email    string
 		Password string
@@ -24,7 +23,7 @@ func PostLogin(router *mux.Router, conn *pgxpool.Pool) {
 
 		var expectedPassword string
 		query := `SELECT password FROM "user" WHERE email = $1`
-		err := conn.QueryRow(context.Background(), query, form.Email).Scan(&expectedPassword)
+		err := ctx.Conn.QueryRow(context.Background(), query, form.Email).Scan(&expectedPassword)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				http.Error(w, "Wrong email or password", http.StatusUnauthorized)

@@ -10,10 +10,9 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func GetPassageEdit(router *mux.Router, conn *pgxpool.Pool) {
+func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
 	type PassageModel struct {
 		Id           int32
 		Book         string
@@ -54,7 +53,7 @@ func GetPassageEdit(router *mux.Router, conn *pgxpool.Pool) {
 		}
 
 		query := "SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text, level, review_at FROM passage WHERE id = $1"
-		rows, _ := conn.Query(context.Background(), query, id)
+		rows, _ := ctx.Conn.Query(context.Background(), query, id)
 		defer rows.Close()
 
 		passage, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[PassageModel])
@@ -73,7 +72,7 @@ func GetPassageEdit(router *mux.Router, conn *pgxpool.Pool) {
 		}
 
 		if r.Header.Get("Hx-Current-Url") == "" {
-			passageList, err := LoadPassageList(conn)
+			passageList, err := LoadPassageList(ctx.Conn)
 			if err != nil {
 				http.Error(w, "Database Error", http.StatusInternalServerError)
 				return

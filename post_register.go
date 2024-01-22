@@ -5,10 +5,9 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func PostRegister(router *mux.Router, conn *pgxpool.Pool) {
+func PostRegister(router *mux.Router, ctx *ServerContext) {
 	type RegisterForm struct {
 		Email           string
 		FirstName       string
@@ -27,7 +26,7 @@ func PostRegister(router *mux.Router, conn *pgxpool.Pool) {
 		}
 
 		query := `INSERT INTO "user" (email, first_name, last_name, password) VALUES ($1, $2, $3, $4)`
-		_, err := conn.Exec(context.Background(), query, form.Email, form.FirstName, form.LastName, form.Password)
+		_, err := ctx.Conn.Exec(context.Background(), query, form.Email, form.FirstName, form.LastName, form.Password)
 		if err != nil {
 			println(err.Error())
 			http.Error(w, "Database Error", http.StatusInternalServerError)
