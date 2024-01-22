@@ -29,8 +29,8 @@ func DeletePassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		query := "DELETE FROM passage WHERE id = $1"
-		_, err = ctx.Conn.Exec(context.Background(), query, id)
+		query := "DELETE FROM passage WHERE id = $1 AND user_id = $2"
+		_, err = ctx.Conn.Exec(context.Background(), query, id, *session.user_id)
 		if err != nil {
 			http.Error(w, "Database Error", http.StatusInternalServerError)
 			return

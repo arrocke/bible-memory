@@ -45,8 +45,8 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		query := "SELECT id, level FROM passage WHERE id = $1"
-		rows, _ := ctx.Conn.Query(context.Background(), query, id)
+		query := "SELECT id, level FROM passage WHERE id = $1 AND user_id = $2"
+		rows, _ := ctx.Conn.Query(context.Background(), query, id, *session.user_id)
 		defer rows.Close()
 
 		passage, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[PassageModel])

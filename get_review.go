@@ -80,8 +80,8 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		query := "SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text FROM passage WHERE id = $1"
-		rows, _ := ctx.Conn.Query(context.Background(), query, id)
+		query := "SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text FROM passage WHERE id = $1 AND user_id = $2"
+		rows, _ := ctx.Conn.Query(context.Background(), query, id, *session.user_id)
 		defer rows.Close()
 
 		passage, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[PassageModel])
@@ -101,7 +101,7 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 		}
 
 		if r.Header.Get("Hx-Current-Url") == "" {
-			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, LayoutTemplateData{IsLoggedIn: true})
+			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, LayoutTemplateData{IsLoggedIn: true})
 			if err != nil {
 				http.Error(w, "Database Error", http.StatusInternalServerError)
 				return

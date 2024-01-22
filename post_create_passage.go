@@ -27,8 +27,9 @@ func PostCreatePassage(router *mux.Router, ctx *ServerContext) {
 		}
 
 		var id int32
-		query := "INSERT INTO passage (book, start_chapter, start_verse, end_chapter, end_verse, text) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id"
-		err = ctx.Conn.QueryRow(context.Background(), query, reference.Book, reference.StartChapter, reference.StartVerse, reference.EndChapter, reference.EndVerse, r.FormValue("text")).Scan(&id)
+		query := "INSERT INTO passage (book, start_chapter, start_verse, end_chapter, end_verse, text, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
+		err = ctx.Conn.QueryRow(context.Background(), query, reference.Book, reference.StartChapter, reference.StartVerse, reference.EndChapter, reference.EndVerse, r.FormValue("text"), *(session.user_id)).Scan(&id)
+
 		if err != nil {
 			http.Error(w, "Database Error", http.StatusInternalServerError)
 			return

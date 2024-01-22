@@ -40,8 +40,8 @@ func PutEditPassage(router *mux.Router, ctx *ServerContext) {
 			reviewAt = &reviewAtString
 		}
 
-		query := "UPDATE passage SET book = $2, start_chapter = $3, start_verse = $4, end_chapter = $5, end_verse = $6, text = $7, level = $8, review_at = $9 WHERE id = $1"
-		_, err = ctx.Conn.Exec(context.Background(), query, id, reference.Book, reference.StartChapter, reference.StartVerse, reference.EndChapter, reference.EndVerse, r.FormValue("text"), r.FormValue("level"), reviewAt)
+		query := "UPDATE passage SET book = $3, start_chapter = $4, start_verse = $5, end_chapter = $6, end_verse = $7, text = $8, level = $9, review_at = $10 WHERE id = $1 AND user_id = $2"
+		_, err = ctx.Conn.Exec(context.Background(), query, id, *session.user_id, reference.Book, reference.StartChapter, reference.StartVerse, reference.EndChapter, reference.EndVerse, r.FormValue("text"), r.FormValue("level"), reviewAt)
 		if err != nil {
 			println(err.Error())
 			http.Error(w, "Database Error", http.StatusInternalServerError)
