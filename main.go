@@ -36,6 +36,8 @@ func main() {
 
 	r := mux.NewRouter()
 
+	GetIndex(r, ctx)
+
 	GetRegister(r, ctx)
 	GetLogin(r, ctx)
 	PostRegister(r, ctx)

@@ -16,7 +16,7 @@ func PostLogin(router *mux.Router, ctx *ServerContext) {
 	}
 
 	type DbUser struct {
-		ID       string
+		ID       int32
 		Password string
 	}
 

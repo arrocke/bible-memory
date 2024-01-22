@@ -28,6 +28,16 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 	tmpl := template.Must(template.ParseFiles("templates/review_result.html"))
 
 	router.HandleFunc("/passages/{Id}/review", func(w http.ResponseWriter, r *http.Request) {
+		session, err := GetSession(r, ctx)
+		if err != nil {
+			http.Error(w, "Session Error", http.StatusInternalServerError)
+			return
+		}
+		if session == nil {
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+
 		vars := mux.Vars(r)
 		id, err := strconv.ParseInt(vars["Id"], 10, 32)
 		if err != nil {

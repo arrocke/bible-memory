@@ -10,6 +10,16 @@ import (
 
 func PostCreatePassage(router *mux.Router, ctx *ServerContext) {
 	router.HandleFunc("/passages", func(w http.ResponseWriter, r *http.Request) {
+		session, err := GetSession(r, ctx)
+		if err != nil {
+			http.Error(w, "Session Error", http.StatusInternalServerError)
+			return
+		}
+		if session == nil {
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+
 		reference, err := ParseReference(r.FormValue("reference"))
 		if err != nil {
 			http.Error(w, "Invalid reference", http.StatusBadRequest)

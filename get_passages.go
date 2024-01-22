@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"html/template"
 	"net/http"
 	"time"
@@ -66,14 +65,15 @@ func GetPassages(router *mux.Router, ctx *ServerContext) {
 	tmpl := template.Must(template.ParseFiles("templates/passages.html", "templates/layout.html"))
 
 	router.HandleFunc("/passages", func(w http.ResponseWriter, r *http.Request) {
-		session, err := ctx.SessionStore.Get(r, "session")
+		session, err := GetSession(r, ctx)
 		if err != nil {
 			http.Error(w, "Session Error", http.StatusInternalServerError)
 			return
 		}
-
-		user_id := session.Values["user_id"]
-		fmt.Println(user_id)
+		if session == nil {
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
 
 		passages, err := LoadPassageList(ctx.Conn)
 		if err != nil {

@@ -55,22 +55,29 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 		Id        int32
 		Reference string
 		Words     []ReviewWord
-		Mode      string
 	}
 
 	type FullTemplateData struct {
 		Id        int32
 		Reference string
 		Words     []ReviewWord
-		Mode      string
 		Passages  []PassageListItem
 	}
 
 	tmpl := template.Must(template.ParseFiles("templates/review_partial.html", "templates/review.html", "templates/passages.html", "templates/layout.html"))
 
 	router.HandleFunc("/passages/{Id}/{Mode}", func(w http.ResponseWriter, r *http.Request) {
+		session, err := GetSession(r, ctx)
+		if err != nil {
+			http.Error(w, "Session Error", http.StatusInternalServerError)
+			return
+		}
+		if session == nil {
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+
 		vars := mux.Vars(r)
-		mode := vars["Mode"]
 		id, err := strconv.ParseInt(vars["Id"], 10, 32)
 		if err != nil {
 			http.Error(w, "Not Found", http.StatusNotFound)
@@ -104,7 +111,6 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 				Id:        passage.Id,
 				Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
 				Words:     words,
-				Mode:      mode,
 				Passages:  passageList,
 			})
 		} else {
@@ -112,7 +118,6 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 				Id:        passage.Id,
 				Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
 				Words:     words,
-				Mode:      mode,
 			})
 		}
 
