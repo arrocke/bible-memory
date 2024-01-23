@@ -86,7 +86,7 @@ func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
 		}
 
 		if r.Header.Get("Hx-Current-Url") == "" {
-			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, LayoutTemplateData{IsLoggedIn: true})
+			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id)
 			if err != nil {
 				http.Error(w, "Database Error", http.StatusInternalServerError)
 				return

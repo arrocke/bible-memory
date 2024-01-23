@@ -22,7 +22,7 @@ type PassagesTemplateData struct {
 	LayoutTemplateData
 }
 
-func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32, layoutTemplateData LayoutTemplateData) (*PassagesTemplateData, error) {
+func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32) (*PassagesTemplateData, error) {
 	type PassageModel struct {
 		Id           int32
 		Book         string
@@ -44,9 +44,15 @@ func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32, layoutTemplateD
 		return nil, err
 	}
 
+	layoutTemplateData, err := LoadLayoutTemplateData(conn, &user_id)
+	if err != nil {
+		println(err.Error())
+		return nil, err
+	}
+
 	templateData := PassagesTemplateData{
 		Passages:           make([]PassageListItem, len(passages)),
-		LayoutTemplateData: layoutTemplateData,
+		LayoutTemplateData: *layoutTemplateData,
 	}
 	for i, passage := range passages {
 		reviewAt := ""
@@ -78,7 +84,7 @@ func GetPassages(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		data, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, LayoutTemplateData{IsLoggedIn: true})
+		data, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id)
 		if err != nil {
 			http.Error(w, "Database Error", http.StatusInternalServerError)
 			return
