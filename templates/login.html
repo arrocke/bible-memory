@@ -3,11 +3,16 @@
 <div class="view view--centered">
   <div>
     <h2 class="view-heading">Log In</h2>
+    {{if .Error}}
+    <div class="form-error">
+      {{.Error}}
+    </div>
+    {{end}}
     <form action="/users/login" method="POST">
       <div class="form-group">
         <label class="form-label" for="email">Email</label>
         <div>
-          <input id="email" class="text-input" name="email" required />
+          <input id="email" class="text-input" name="email" value="{{.Email}}" required />
         </div>
       </div>
       <div class="form-group">

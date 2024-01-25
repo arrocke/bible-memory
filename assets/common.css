@@ -27,6 +27,12 @@
   fill: currentColor;
 }
 
+.form-error {
+  color: var(--color-warn);
+  margin-bottom: 16px;
+  font-weight: bold;
+}
+
 #flash {
   position: fixed;
 }

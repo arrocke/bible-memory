@@ -7,9 +7,15 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func GetLogin(router *mux.Router, ctx *ServerContext) {
-	tmpl := template.Must(template.ParseFiles("templates/login.html", "templates/layout.html"))
+type LoginTemplateData struct {
+	Error string
+	Email string
+	LayoutTemplateData
+}
 
+var LoginTemplate = template.Must(template.ParseFiles("templates/login.html", "templates/layout.html"))
+
+func GetLogin(router *mux.Router, ctx *ServerContext) {
 	router.HandleFunc("/users/login", func(w http.ResponseWriter, r *http.Request) {
 		session, err := GetSession(r, ctx)
 		if err != nil {
@@ -22,6 +28,6 @@ func GetLogin(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		tmpl.ExecuteTemplate(w, "layout.html", LayoutTemplateData{})
+		LoginTemplate.ExecuteTemplate(w, "layout.html", LoginTemplateData{})
 	}).Methods("Get")
 }
