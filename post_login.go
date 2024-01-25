@@ -31,7 +31,8 @@ func PostLogin(router *mux.Router, ctx *ServerContext) {
 		user, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[DbUser])
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
-				http.Error(w, "Wrong email or password", http.StatusUnauthorized)
+				w.WriteHeader(http.StatusUnauthorized)
+				FlashTemplate.Execute(w, []FlashMessage{{Type: "error", Text: "Invalid email or password"}})
 			} else {
 				println(err.Error())
 				http.Error(w, "Database Error", http.StatusInternalServerError)
@@ -40,7 +41,8 @@ func PostLogin(router *mux.Router, ctx *ServerContext) {
 		}
 
 		if user.Password != form.Password {
-			http.Error(w, "Wrong email or password", http.StatusUnauthorized)
+			w.WriteHeader(http.StatusUnauthorized)
+			FlashTemplate.Execute(w, []FlashMessage{{Type: "error", Text: "Invalid email or password"}})
 			return
 		}
 

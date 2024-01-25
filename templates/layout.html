@@ -11,6 +11,8 @@
   <script src="https://unpkg.com/htmx.org@1.9.10"
     integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
     crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/response-targets.js"></script>
+
 
   <link rel="stylesheet" href="/assets/typer.css" />
   <script src="/assets/typer.js"></script>
@@ -84,7 +86,8 @@
   {{template "head" .}}
 </head>
 
-<body hx-boost="true">
+<body hx-ext="response-targets" hx-boost="true" hx-target-error="#flash">
+  <div id="flash"></div>
   <header class="app-header">
     <a href="{{if .User}}/passages{{else}}/{{end}}">
       <h1>Bible Memory</h1>
@@ -119,7 +122,7 @@
       const userDropdownButton = document.querySelector('#user-dropdown')
       const icon = document.querySelector('#user-dropdown-icon')
       let isOpen = false
-      userDropdownButton.addEventListener('click', e => {
+      userDropdownButton?.addEventListener('click', e => {
         if (isOpen) return
 
         const menu = document.getElementById(e.target.dataset.menu)
@@ -138,6 +141,16 @@
           }
           window.addEventListener('click', handler)
         })
+      })
+    }
+  </script>
+  <script type="text/javascript">
+    {
+      const flash = document.querySelector('#flash')
+      flash.addEventListener('click', (e) => {
+        if (e.target.matches('button, button *')) {
+          e.target.closest('.flash-message').remove()
+        }
       })
     }
   </script>

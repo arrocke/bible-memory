@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"html/template"
 	"net/http"
 	"os"
 
@@ -16,6 +17,13 @@ type ServerContext struct {
 	Conn         *pgxpool.Pool
 	SessionStore *sessions.CookieStore
 }
+
+type FlashMessage struct {
+	Type string
+	Text string
+}
+
+var FlashTemplate = template.Must(template.ParseFiles("templates/flash.html"))
 
 func main() {
 	godotenv.Load(".env")
