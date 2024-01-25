@@ -12,13 +12,14 @@
     <div class="form-group">
       <label class="form-label" for="reference">Reference</label>
       <div>
-        <input class="text-input" id="reference" type="text" name="reference" />
+        <input class="text-input" id="reference" type="text" name="reference" required
+          pattern="(.+?)\s*(\d+)[.:](\d+)\s*-\s*(\d+)[.:](\d+)" />
       </div>
     </div>
     <div class="form-group">
       <label class="form-label" for="text">Text</label>
       <div>
-        <textarea class="multiline-text-input passage-text-input" id="text" name="text"></textarea>
+        <textarea class="multiline-text-input passage-text-input" id="text" name="text" required></textarea>
       </div>
     </div>
     <button class="button">Add Passage</button>

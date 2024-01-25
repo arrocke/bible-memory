@@ -12,13 +12,15 @@
     <div class="form-group">
       <label class="form-label" for="reference">Reference</label>
       <div>
-        <input class="text-input" id="reference" type="text" name="reference" value="{{.Reference}}" />
+        <input class="text-input" id="reference" type="text" name="reference" value="{{.Reference}}" required
+          pattern="(.+?)\s*(\d+)[.:](\d+)\s*-\s*(\d+)[.:](\d+)" />
       </div>
     </div>
     <div class="form-group">
       <label class="form-label" for="level">Level</label>
       <div>
-        <input class="text-input" id="level" type="number" name="level" value="{{.Level}}" />
+        <input class="text-input" id="level" type="number" name="level" value="{{.Level}}" required min="0" max="12"
+          step="1" />
       </div>
     </div>
     <div class="form-group">
@@ -30,7 +32,7 @@
     <div class="form-group">
       <label class="form-label" for="text">Text</label>
       <div>
-        <textarea class="multiline-text-input passage-text-input" id="text" name="text">{{.Text}}</textarea>
+        <textarea class="multiline-text-input passage-text-input" id="text" name="text" required>{{.Text}}</textarea>
       </div>
     </div>
     <button class="button">Update</button>
