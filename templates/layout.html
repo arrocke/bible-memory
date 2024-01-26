@@ -5,115 +5,46 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="/assets/reset.css" />
-  <link rel="stylesheet" href="/assets/common.css" />
+  <link rel="stylesheet" href="/assets/styles.css" />
 
   <script src="https://unpkg.com/htmx.org@1.9.10"
     integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
     crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/response-targets.js"></script>
 
-
-  <link rel="stylesheet" href="/assets/typer.css" />
   <script src="/assets/typer.js"></script>
-
-  <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      height: 100vh;
-    }
-
-    .app-header {
-      padding: 8px 16px;
-      border-bottom: 1px solid var(--color-separator);
-      display: flex;
-      align-items: baseline;
-    }
-
-    .app-header h1 {
-      font-size: 22px;
-      font-weight: bold;
-    }
-
-    .app-navigation {
-      display: flex;
-      justify-content: flex-end;
-      align-items: baseline;
-      flex-grow: 1;
-    }
-
-    .app-nav-link {
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .app-nav-link:hover,
-    .app-nav-link:focus {
-      text-decoration: underline;
-    }
-
-    .app-nav-dropdown {
-      position: relative;
-    }
-
-    .app-nav-dropdown-button {
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .app-nav-dropdown-menu {
-      position: absolute;
-      background: white;
-      padding: 8px;
-      width: calc(100% + 16px);
-      left: -8px;
-      top: 26px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      border: 1px solid var(--color-separator);
-      border-top: none;
-      border-radius: 0 0 4px 4px;
-    }
-
-    .app-content {
-      flex-grow: 1;
-    }
-  </style>
 
   {{template "head" .}}
 </head>
 
-<body hx-ext="response-targets" hx-boost="true" hx-target-error="#flash">
-  <div id="flash"></div>
-  <header class="app-header">
+<body hx-boost="true" class="flex flex-col items-stretch h-screen">
+  <header class="px-4 py-2 border-b border-slate-300 flex items-baseline">
     <a href="{{if .User}}/passages{{else}}/{{end}}">
-      <h1>Bible Memory</h1>
+      <h1 class="text-2xl font-bold">Bible Memory</h1>
     </a>
     {{if .User}}
-    <nav class="app-navigation" aria-label="Header Navigation">
-      <div class="app-nav-dropdown">
-        <button class="app-nav-dropdown-button" id="user-dropdown" data-menu="user-menu">
+    <nav class="flex-grow flex justify-end items-baseline" aria-label="Header Navigation">
+      <div class="relative">
+        <button class="font-bold hover:underline focus:underline flex items-end gap-1" id="user-dropdown"
+          data-menu="user-menu">
           {{.User.FirstName}} {{.User.LastName}}
-          <svg class="icon" aria-hidden="true">
+          <svg class="icon mb-1" aria-hidden="true">
             <use id="user-dropdown-icon" href="/assets/icons.svg#caret-down" />
           </svg>
         </button>
-        <ul id="user-menu" class="app-nav-dropdown-menu hidden">
+        <ul id="user-menu"
+          class="invisible box-content absolute bg-white p-2 w-full -left-2 top-[34px] flex flex-col gap-3 border border-t-0 border-slate-300 rounded-b">
           <li>
-            <a class="app-nav-link" href="/users/profile">Profile</a>
+            <a class="font-bold hover:underline focus:underline" href="/users/profile">Profile</a>
           </li>
           <li>
-            <button class="app-nav-link" hx-post="/users/logout">Logout</button>
+            <button class="font-bold hover:underline focus:underline" hx-post="/users/logout">Logout</button>
           </li>
         </ul>
       </div>
     </nav>
     {{end}}
   </header>
-  <div class="app-content">
+  <div class="flex-grow">
     {{template "body" .}}
   </div>
 
@@ -126,7 +57,7 @@
         if (isOpen) return
 
         const menu = document.getElementById(e.target.dataset.menu)
-        menu.classList.remove('hidden')
+        menu.classList.remove('invisible')
         isOpen = true
         icon.setAttribute('href', "/assets/icons.svg#caret-up")
 
@@ -134,23 +65,13 @@
           const handler = e => {
             if (!menu.contains(e.target) && menu !== e.target) {
               isOpen = false
-              menu.classList.add('hidden')
+              menu.classList.add('invisible')
               icon.setAttribute('href', "/assets/icons.svg#caret-down")
               window.removeEventListener('click', handler)
             }
           }
           window.addEventListener('click', handler)
         })
-      })
-    }
-  </script>
-  <script type="text/javascript">
-    {
-      const flash = document.querySelector('#flash')
-      flash.addEventListener('click', (e) => {
-        if (e.target.matches('button, button *')) {
-          e.target.closest('.flash-message').remove()
-        }
       })
     }
   </script>

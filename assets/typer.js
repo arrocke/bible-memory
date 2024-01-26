@@ -11,33 +11,35 @@ const DIACRITIC_REGEX = /[\u0300-\u036f]/g;
  *   <span class="typer-suffix">suffix</span>
  * </span>
  */
-function buildWord({ index, word: data }) {
+function buildWord({ mode, index, word: data }) {
   const root = document.createElement("span");
-  if (index === 0) {
-    root.classList.add("typer-current");
-  }
+  root.className = mode === "learn" ? "text-slate-400" : "text-transparent";
 
+  let prefix;
   if (data.prefix) {
-    const prefix = document.createElement("span");
-    prefix.className = "typer-prefix";
+    prefix = document.createElement("span");
     prefix.innerText = data.prefix;
+    if (mode !== "learn" && index === 0) {
+      prefix.className = "text-black";
+    }
     root.appendChild(prefix);
   }
 
   const word = document.createElement("span");
-  word.className = "typer-word";
 
   const firstLetter = document.createElement("span");
-  firstLetter.className = "typer-first-letter";
   firstLetter.innerText = data.word.charAt(0);
+  if (mode === "recall") {
+    firstLetter.className = "text-slate-400";
+  }
   word.appendChild(firstLetter);
 
   word.append(data.word.slice(1));
   root.appendChild(word);
 
+  let suffix;
   if (data.suffix) {
-    const suffix = document.createElement("span");
-    suffix.className = "typer-suffix";
+    suffix = document.createElement("span");
     suffix.innerText = data.suffix;
     root.appendChild(suffix);
   }
@@ -47,19 +49,30 @@ function buildWord({ index, word: data }) {
     update({ currentIndex, hasHelp, attempts, isCorrect }) {
       const isCurrent = currentIndex === index;
 
-      if (isCorrect === true) {
-        root.className =
-          attempts > 1 || hasHelp ? "typer-almost" : "typer-correct";
-      } else if (isCorrect === false) {
-        root.className = "typer-incorrect";
-      } else if (hasHelp) {
-        root.className = "typer-hint typer-current";
-      } else if (attempts > 0) {
-        root.className = "typer-attempt typer-current";
-      } else if (isCurrent) {
-        root.className = "typer-current";
-      } else {
+      if (typeof isCorrect === "boolean") {
+        if (prefix) {
+          prefix.className = "";
+        }
+        if (suffix) {
+          suffix.className = "";
+        }
+        word.className = "";
+        firstLetter.className = "";
         root.className = "";
+        if (isCorrect === true && (attempts > 1 || hasHelp)) {
+          word.className = "border-b-4 border-orange-400";
+        } else if (isCorrect === false) {
+          word.className = "border-b-4 border-red-500";
+        }
+      } else if (hasHelp) {
+        word.className = "border-b-4 border-red-500";
+        firstLetter.className = "text-slate-400";
+      } else if (attempts > 0) {
+        word.className = "border-b-4 border-orange-400";
+      } else if (isCurrent) {
+        if (prefix) {
+          prefix.className = "text-black";
+        }
       }
     },
   };
@@ -67,24 +80,25 @@ function buildWord({ index, word: data }) {
 
 function buildProgress({ size }) {
   const root = document.createElement("div");
-  root.classList.add("typer-progress");
+  root.className = "flex items-center mb-4";
 
   const accuracy = document.createElement("div");
-  accuracy.classList.add("typer-accuracy");
+  accuracy.className = "mr-2";
   accuracy.innerText = "100%";
   root.appendChild(accuracy);
 
   const bar = document.createElement("div");
-  bar.classList.add("typer-progress-bar");
+  bar.className =
+    "h-2 flex bg-slate-300 items-stretch rounded-full overflow-hidden flex-grow";
   root.appendChild(bar);
 
   const correctDiv = document.createElement("div");
-  correctDiv.classList.add("typer-progress-correct");
+  correctDiv.className = "bg-green-600";
   correctDiv.style.width = "0%";
   bar.appendChild(correctDiv);
 
   const incorrectDiv = document.createElement("div");
-  incorrectDiv.classList.add("typer-progress-incorrect");
+  incorrectDiv.className = "bg-red-600";
   incorrectDiv.style.width = "0%";
   bar.appendChild(incorrectDiv);
 
@@ -101,14 +115,15 @@ function buildProgress({ size }) {
 }
 
 window.Typer = function ({ el: root, words, mode, onComplete }) {
-  root.classList.add(`typer-${mode}`, 'typer');
-
   const typer = document.createElement("div");
-  typer.classList.add("typer-input-wrapper");
+  typer.className =
+    "border border-slate-400 rounded p-2 min-h-72 focus-within:outline-2 focus-within:outline outline-blue-600";
+
   const pre = document.createElement("pre");
-  pre.classList.add("typer-content");
+  pre.className = "font-sans";
+
   const input = document.createElement("input");
-  input.classList.add("typer-input");
+  input.className = "absolute opacity-0";
 
   typer.addEventListener("click", () => {
     input.focus();
@@ -121,7 +136,7 @@ window.Typer = function ({ el: root, words, mode, onComplete }) {
       .normalize("NFD")
       .replaceAll(DIACRITIC_REGEX, ""),
     attempts: 0,
-    component: buildWord({ index, word }),
+    component: buildWord({ mode, index, word }),
   }));
   const progress = buildProgress({ size: words.length });
 
@@ -135,6 +150,8 @@ window.Typer = function ({ el: root, words, mode, onComplete }) {
 
   let currentIndex = 0;
   let currentWord = wordState[currentIndex];
+
+  input.focus();
 
   if (mode === "review") {
     input.addEventListener("keydown", (e) => {

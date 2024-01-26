@@ -1,108 +1,46 @@
 {{define "head"}}<title>Passages | Bible Memory</title>{{end}}
 {{define "body"}}
-<style>
-  .passages-wrapper {
-    display: flex;
-    height: 100%;
-  }
-
-  .passages-sidebar {
-    width: 30%;
-    border-right: 1px solid var(--color-separator);
-    max-width: 350px;
-  }
-
-  .selected-passage {
-    flex-grow: 1;
-  }
-
-  .add-passage-action {
-    padding: 8px;
-    margin: 0 8px;
-    display: block;
-    border-bottom: 1px solid var(--color-separator);
-  }
-
-  .passage-list-item {
-    padding: 8px;
-    margin: 0 8px;
-    border-bottom: 1px solid var(--color-separator);
-  }
-
-  .passage-list-item__row-1,
-  .passage-list-item__row-2 {
-    display: flex;
-    align-items: center;
-  }
-
-  .passage-list-item__row-1 {
-    margin-bottom: 4px;
-  }
-
-  .passage-list-item__link {
-    flex-grow: 1;
-  }
-
-  .passage-list-item__level,
-  .passage-list-item__review-date {
-    font-size: 12px;
-  }
-
-  .passage-list-item__edit-action {
-    width: 24px;
-    height: 24px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .passage-list-item__delete-action {
-    color: var(--color-warn);
-    width: 24px;
-    height: 24px;
-  }
-</style>
-<div class="passages-wrapper">
-  <div class="passages-sidebar">
-    <a class="add-passage-action" href="/passages/new" hx-target="#main">
+<div class="flex h-full">
+  <div class="w-1/3 border-r border-slate-300 max-w-96">
+    <a class="p-2 mx-2 flex items-center gap-1 border-b border-slate-300" href="/passages/new" hx-target="#main">
       <svg class="icon">
         <use href="/assets/icons.svg#plus"></use>
       </svg>
       Add Passage
     </a>
-    <ul class="passage-list">
+    <ul>
       {{range .Passages}}
-      <li class="passage-list-item">
-        <div class="passage-list-item__row-1">
-          <a class="passage-list-item__link" href="/passages/{{.Id}}/review" hx-target="#main">
+      <li class="py-2 mx-2 border-b border-slate-300">
+        <div class="flex items-center mb-1 pl-2 pr-1">
+          <a class="flex-grow" href="/passages/{{.Id}}/review" hx-target="#main">
             {{.Reference}}
           </a>
-          <a class="passage-list-item__edit-action" href="/passages/{{.Id}}" hx-target="#main">
+          <a class="w-6 h-6 flex items-center justify-center" href="/passages/{{.Id}}" hx-target="#main">
             <span class="sr-only">Edit</span>
             <svg class="icon">
               <use href="/assets/icons.svg#pencil" />
             </svg>
           </a>
-          <button class="passage-list-item__delete-action" hx-delete="/passages/{{.Id}}" hx-target="closest li"
-            hx-swap="outerHTML" hx-confirm="Are you sure you want to delete {{.Reference}}?" title="Delete">
+          <button class="w-6 h-6 text-red-700 flex items-center justify-center" hx-delete="/passages/{{.Id}}"
+            hx-target="closest li" hx-swap="outerHTML" hx-confirm="Are you sure you want to delete {{.Reference}}?"
+            title="Delete">
             <span class="sr-only">Delete</span>
             <svg class="icon">
               <use href="/assets/icons.svg#trash" />
             </svg>
           </button>
         </div>
-        <div class="passage-list-item__row-2">
-          <span class="passage-list-item__review-date">
+        <div class="flex items-center px-2">
+          <span class="text-xs flex-grow">
             Review: {{if eq .ReviewAt ""}}-{{else}}{{.ReviewAt}}{{end}}
           </span>
-          <span class="flex-spacer"></span>
-          <span class="passage-list-item__level">Level: {{.Level}}</span>
+          <span class="text-xs">Level: {{.Level}}</span>
         </div>
       </li>
       {{end}}
     </ul>
   </div>
-  <main id="main" class="selected-passage">
+  <main id="main" class="flex-grow">
     {{template "main" .}}
   </main>
 </div>

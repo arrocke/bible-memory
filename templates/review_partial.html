@@ -1,34 +1,19 @@
-<div class="view">
+<div class="p-4">
   <h2 class="view-heading">Review {{.Reference}}</h2>
   <div id="result"></div>
-  <div id="mode-select">
-    <button type="button" data-mode="learn">Learn</button>
-    <button type="button" data-mode="recall">Recall</button>
-    <button type="button" data-mode="review">Review</button>
+  <div id="mode-select" class="flex">
+    <button
+      class="border border-slate-500 border-r-0 last:border-r px-4 h-8 font-bold first:rounded-l last:rounded-r"
+      type="button" data-mode="learn">Learn</button>
+    <button
+      class="border border-slate-500 border-r-0 last:border-r px-4 h-8 font-bold first:rounded-l last:rounded-r"
+      type="button" data-mode="recall">Recall</button>
+    <button
+      class="border border-slate-500 border-r-0 last:border-r px-4 h-8 font-bold first:rounded-l last:rounded-r"
+      type="button" data-mode="review">Review</button>
   </div>
   <div id="typer"></div>
 </div>
-
-<style>
-  #mode-select {
-    display: flex;
-  }
-
-  #mode-select button {
-    border: 1px solid var(--color-ui-border);
-    border-right-width: 0px;
-    padding: 8px 16px;
-    height: 32px;
-    font-weight: bold;
-  }
-  #mode-select button:first-child {
-    border-radius: var(--radius-input) 0 0 var(--radius-input);
-  }
-  #mode-select button:last-child {
-    border-radius: 0 var(--radius-input) var(--radius-input) 0;
-    border-right-width: 1px;
-  }
-</style>
 
 <script type="text/javascript">
   {
@@ -43,26 +28,26 @@
 
     let words = [
       {{range .Words}}
-        {
-          word: "{{.Word}}",
-          {{if .Prefix}}prefix: "{{.Prefix}}",{{end}}
-          {{if .Gap}}suffix: "{{.Gap}}"{{end}}
-        },
+      {
+        word: "{{.Word}}",
+        {{if .Prefix}}prefix: "{{.Prefix}}",{{end}}
+        {{if .Gap}}suffix: "{{.Gap}}"{{end}}
+      },
       {{end}}
     ]
 
-    function initTyper(mode) {
-      Typer({
-        el: document.querySelector('#typer'),
-        words,
-        mode,
-        onComplete({ accuracy }) {
-          htmx.ajax("POST", "/passages/{{.Id}}/review", {
-            values: { accuracy, mode },
-            target: '#result'
-          })
-        }
-      })
-    }
+  function initTyper(mode) {
+    Typer({
+      el: document.querySelector('#typer'),
+      words,
+      mode,
+      onComplete({ accuracy }) {
+        htmx.ajax("POST", "/passages/{{.Id}}/review", {
+          values: { accuracy, mode },
+          target: '#result'
+        })
+      }
+    })
+  }
   }
 </script>
