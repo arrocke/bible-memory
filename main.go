@@ -65,7 +65,12 @@ func main() {
 
 	r.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets/"))))
 
-	fmt.Printf("Server started on port %d\n", 8080)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
-	http.ListenAndServe(":8080", r)
+	fmt.Printf("Server started on port %v\n", port)
+
+	http.ListenAndServe(":"+port, r)
 }
