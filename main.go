@@ -63,7 +63,14 @@ func main() {
 	PutEditPassage(r, ctx)
 	DeletePassage(r, ctx)
 
-	r.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets/"))))
+	env := os.Getenv("ENV")
+	fs := http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets/")))
+	r.PathPrefix("/assets/").Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if env == "production" {
+			w.Header().Add("Cache-Control", "public, max-age=31536000")
+		}
+		fs.ServeHTTP(w, r)
+	}))
 
 	port := os.Getenv("PORT")
 	if port == "" {
