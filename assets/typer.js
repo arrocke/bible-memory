@@ -19,7 +19,7 @@ function buildWord({ mode, index, word: data }) {
   if (data.prefix) {
     prefix = document.createElement("span");
     prefix.innerText = data.prefix;
-    if (mode !== "learn" && index === 0) {
+    if (index === 0) {
       prefix.className = "text-black";
     }
     root.appendChild(prefix);
@@ -165,7 +165,11 @@ window.Typer = function ({ el: root, words, mode, onComplete }) {
   }
 
   input.addEventListener("input", (e) => {
-    const char = e.target.value.at(-1);
+    const char = e.target.value
+      .at(-1)
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(DIACRITIC_REGEX, "");
     e.target.value = "";
     if (!char || !LETTERS_REGEX.test(char)) {
       return;
