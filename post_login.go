@@ -53,7 +53,9 @@ func PostLogin(router *mux.Router, ctx *ServerContext) {
 		session.Values["user_id"] = user.ID
 		err = session.Save(r, w)
 		if err != nil {
+			println(err.Error())
 			http.Error(w, "Session Error", http.StatusInternalServerError)
+			return
 		}
 
 		w.Header().Set("Hx-Redirect", "/passages")
