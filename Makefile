@@ -1,13 +1,18 @@
-build-css:
-	tailwindcss -i ./assets/tailwind.css -o ./assets/styles.css
+bin/tailwindcss: 
+	./bin/install-tailwind
 
-build-server:
-	go run .
+assets/styles.css: bin/tailwindcss templates/* assets/*.js
+	./bin/tailwindcss -i ./assets/tailwind.css -o ./assets/styles.css
 
-build: build-css build-server
+build-assets: assets/styles.css assets/icons.svg assets/typer.js
+	./bin/cachebust assets/styles.css
+	./bin/cachebust assets/icons.svg
+	./bin/cachebust assets/typer.js
+
 
 watch-css:
-	tailwindcss -i ./assets/tailwind.css -o ./assets/styles.css --watch
+	./bin/tailwindcss -i ./assets/tailwind.css -o ./assets/styles.css --watch
 
 watch-server:
 	gow -e=go,html run .
+
