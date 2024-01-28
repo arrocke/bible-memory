@@ -115,12 +115,15 @@ function buildProgress({ size }) {
 }
 
 window.Typer = function ({ el: root, words, mode, onComplete }) {
+  root.className += " flex flex-col relative";
+
   const typer = document.createElement("div");
   typer.className =
-    "border border-slate-400 rounded p-2 min-h-72 focus-within:outline-2 focus-within:outline outline-blue-600";
+    "border border-slate-400 rounded p-2 min-h-72 focus-within:outline-2 focus-within:outline outline-blue-600 flex-1 relative";
 
   const pre = document.createElement("pre");
-  pre.className = "font-sans";
+  pre.className =
+    "font-sans whitespace-pre-wrap relative overflow-y-auto absolute w-full h-full";
 
   const input = document.createElement("input");
   input.className = "absolute opacity-0";
@@ -203,6 +206,11 @@ window.Typer = function ({ el: root, words, mode, onComplete }) {
     } else {
       currentWord = wordState[currentIndex];
       currentWord.component.update({ currentIndex, ...currentWord });
+      const newY = Math.max(
+        0,
+        currentWord.component.root.offsetTop - pre.offsetHeight / 2
+      );
+      pre.scrollTo(0, newY);
     }
 
     progress.update(counts);
