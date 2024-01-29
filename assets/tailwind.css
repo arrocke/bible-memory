@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .text-vertical {
+    writing-mode: vertical-lr;
+    transform: rotate(180deg);
+  }
+}
+
 @layer components {
   .icon  {
     width: 1em;

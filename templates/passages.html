@@ -1,13 +1,31 @@
 {{define "head"}}<title>Passages | Bible Memory</title>{{end}}
 {{define "body"}}
-<div class="flex h-full">
-  <div class="w-1/3 border-r border-slate-300 max-w-96 flex-shrink-0">
-    <a class="p-2 mx-2 flex items-center gap-1 border-b border-slate-300" href="/passages/new" hx-target="#main">
-      <svg class="icon">
-        <use href="/assets/icons.svg#plus"></use>
-      </svg>
-      Add Passage
-    </a>
+<div class="flex h-full relative">
+  <button id="open-sidebar-button" type="button"
+    class="sm:hidden border-slate-300 border-r w-8 font-bold flex flex-col items-center justify-start gap-1 focus:underline">
+    <div class="text-vertical mt-4">
+      Passages
+    </div>
+    <svg aria-hidden="true" class="icon">
+      <use href="/assets/icons.svg#angles-right" />
+    </svg>
+  </button>
+  <div id="sidebar"
+    class="absolute bg-white z-10 h-full w-11/12 max-w-80 min-w-64 border-r border-slate-300 flex-shrink-0 hidden sm:w-1/3 sm:block sm:max-w-96 sm:static">
+    <div class="flex border-b border-slate-300 mx-2">
+      <a class="flex-grow p-2 flex items-center gap-1" href="/passages/new" hx-target="#main">
+        <svg class="icon">
+          <use href="/assets/icons.svg#plus"></use>
+        </svg>
+        Add Passage
+      </a>
+      <button id="close-sidebar-button" class="sm:hidden" title="Close">
+        <svg class="icon" aria-hidden="true">
+          <use href="/assets/icons.svg#angles-left"></use>
+        </svg>
+        <span class="sr-only">Close Sidebar</span>
+      </button>
+    </div>
     <ul>
       {{range .Passages}}
       <li class="py-2 mx-2 border-b border-slate-300">
@@ -44,6 +62,20 @@
     {{template "main" .}}
   </main>
 </div>
+<script type="text/javascript">
+  {
+    const openButton = document.querySelector('#open-sidebar-button')
+    const closeButton = document.querySelector('#close-sidebar-button')
+    const sidebar = document.querySelector('#sidebar')
+
+    openButton.addEventListener('click', e => {
+      sidebar.classList.remove('hidden')
+    })
+    closeButton.addEventListener('click', e => {
+      sidebar.classList.add('hidden')
+    })
+  }
+</script>
 {{end}}
 
 {{define "main"}}{{end}}
