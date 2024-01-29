@@ -11,7 +11,7 @@
     </svg>
   </button>
   <div id="sidebar"
-    class="absolute bg-white z-10 h-full w-11/12 max-w-80 min-w-64 border-r border-slate-300 flex-shrink-0 hidden sm:w-1/3 sm:block sm:max-w-96 sm:static">
+    class="{{if not .StartOpen}}hidden{{end}} absolute bg-white z-10 h-full w-11/12 max-w-80 min-w-64 border-r border-slate-300 flex-shrink-0 sm:w-1/3 sm:block sm:max-w-96 sm:static">
     <div class="flex border-b border-slate-300 mx-2">
       <a class="flex-grow p-2 flex items-center gap-1" href="/passages/new" hx-target="#main">
         <svg class="icon">
@@ -73,6 +73,10 @@
     })
     closeButton.addEventListener('click', e => {
       sidebar.classList.add('hidden')
+    })
+
+    htmx.on('htmx:pushedIntoHistory', () => {
+      sidebar.classList.add("hidden")
     })
   }
 </script>

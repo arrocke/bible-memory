@@ -18,7 +18,8 @@ type PassageListItem struct {
 	ReviewAt  string
 }
 type PassagesTemplateData struct {
-	Passages []PassageListItem
+	Passages  []PassageListItem
+	StartOpen bool
 	LayoutTemplateData
 }
 
@@ -85,6 +86,7 @@ func GetPassages(router *mux.Router, ctx *ServerContext) {
 		}
 
 		data, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id)
+		data.StartOpen = true
 		if err != nil {
 			http.Error(w, "Database Error", http.StatusInternalServerError)
 			return
