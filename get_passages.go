@@ -35,7 +35,12 @@ func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32) (*PassagesTempl
 		ReviewAt     *time.Time
 	}
 
-	query := "SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, level, review_at FROM passage WHERE user_id = $1 ORDER BY id ASC"
+	query := `
+		SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, level, review_at
+		FROM passage
+		WHERE user_id = $1
+		ORDER BY book, start_chapter, start_verse, end_chapter, end_verse
+	`
 	rows, _ := conn.Query(context.Background(), query, user_id)
 	defer rows.Close()
 
