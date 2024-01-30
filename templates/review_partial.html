@@ -30,8 +30,9 @@
       {{range .Words}}
       {
         word: "{{.Word}}",
+        {{if .Number}}number: "{{.Number}}",{{end}}
         {{if .Prefix}}prefix: "{{.Prefix}}",{{end}}
-        {{if .Gap}}suffix: "{{.Gap}}"{{end}}
+        {{if .Suffix}}suffix: "{{.Suffix}}"{{end}}
       },
       {{end}}
     ]

@@ -4,24 +4,32 @@ const DIACRITIC_REGEX = /[\u0300-\u036f]/g;
 /**
  * This constructs a component for a word in this form:
  * <span>
- *   <span class="typer-prefix">prefix</span>
- *   <span class="typer-word">
- *     <span class="typer-first-letter">w</span>ord
+ *   <span>1</span>
+ *   <span> "</span>
+ *   <span>
+ *     <span>w</span>ord
  *   </span>
- *   <span class="typer-suffix">suffix</span>
+ *   <span>" </span>
  * </span>
  */
 function buildWord({ mode, index, word: data }) {
   const root = document.createElement("span");
   root.className = mode === "learn" ? "text-slate-400" : "text-transparent";
 
+  let number;
+  if (data.number) {
+    number = document.createElement("span");
+    number.innerText = data.number;
+    if (index === 0) {
+      number.className = "text-black";
+    }
+    root.appendChild(number);
+  }
+
   let prefix;
   if (data.prefix) {
     prefix = document.createElement("span");
     prefix.innerText = data.prefix;
-    if (index === 0) {
-      prefix.className = "text-black";
-    }
     root.appendChild(prefix);
   }
 
@@ -50,6 +58,9 @@ function buildWord({ mode, index, word: data }) {
       const isCurrent = currentIndex === index;
 
       if (typeof isCorrect === "boolean") {
+        if (number) {
+          number.className = "";
+        }
         if (prefix) {
           prefix.className = "";
         }
@@ -70,8 +81,8 @@ function buildWord({ mode, index, word: data }) {
       } else if (attempts > 0) {
         word.className = "border-b-4 border-orange-400";
       } else if (isCurrent) {
-        if (prefix) {
-          prefix.className = "text-black";
+        if (number) {
+          number.className = "text-black";
         }
       }
     },

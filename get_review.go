@@ -24,9 +24,10 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 	}
 
 	type ReviewWord struct {
+		Number      string
 		Prefix      string
 		Word        string
-		Gap         string
+		Suffix      string
 		FirstLetter string
 		RestOfWord  string
 	}
@@ -40,7 +41,7 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 		PassagesTemplateData
 	}
 
-	var wordRegex = regexp.MustCompile(`(\d+ [^A-Za-zÀ-ÖØ-öø-ÿ0-9']*)?([A-Za-zÀ-ÖØ-öø-ÿ]+(?:(?:'|’|-)[A-Za-zÀ-ÖØ-öø-ÿ]+)?(?:'|’)?)([^A-Za-zÀ-ÖØ-öø-ÿ0-9']+)?`)
+	var wordRegex = regexp.MustCompile(`(\d+)?( ?[^A-Za-zÀ-ÖØ-öø-ÿ0-9']*)?([A-Za-zÀ-ÖØ-öø-ÿ]+(?:(?:'|’|-)[A-Za-zÀ-ÖØ-öø-ÿ]+)?(?:'|’)?)([^A-Za-zÀ-ÖØ-öø-ÿ0-9' ]+\s*)?`)
 
 	parseWords := func(text string) []ReviewWord {
 		matches := wordRegex.FindAllStringSubmatch(text, -1)
@@ -49,11 +50,12 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 
 		for i, match := range matches {
 			words[i] = ReviewWord{
-				Prefix:      match[1],
-				Word:        match[2],
-				Gap:         match[3],
-				FirstLetter: match[2][0:1],
-				RestOfWord:  match[2][1:],
+				Number:      match[1],
+				Prefix:      match[2],
+				Word:        match[3],
+				Suffix:      match[4],
+				FirstLetter: match[3][0:1],
+				RestOfWord:  match[3][1:],
 			}
 		}
 
