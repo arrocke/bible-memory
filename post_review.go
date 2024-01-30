@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-var REVIEW_MAP = [...]int32{1, 1, 1, 2, 2, 3, 5, 8, 13, 21, 34, 55}
+var REVIEW_MAP = [...]int{1, 1, 1, 2, 2, 3, 5, 8, 13, 21, 34, 55}
 
 func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 	type PassageModel struct {
@@ -86,7 +86,8 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 			newLevel = passage.Level / 2
 		}
 
-		newDate := time.Now().Add(time.Duration(REVIEW_MAP[newLevel]))
+		location := time.FixedZone("Temp", GetTZ(r)*60)
+		newDate := time.Now().AddDate(0, 0, REVIEW_MAP[newLevel]).In(location)
 
 		query = "UPDATE passage SET level = $2, review_at = $3 WHERE id = $1"
 		_, err = ctx.Conn.Exec(context.Background(), query, id, newLevel, newDate)

@@ -2,7 +2,20 @@ package main
 
 import (
 	"net/http"
+	"strconv"
 )
+
+func GetTZ(r *http.Request) int {
+	cookieVal, err := r.Cookie("tzOffset")
+	if err != nil {
+		return 0
+	}
+	parsedVal, err := strconv.ParseInt(cookieVal.Value, 10, 32)
+	if err != nil {
+		return 0
+	}
+	return int(parsedVal)
+}
 
 type Session struct {
 	ID      string

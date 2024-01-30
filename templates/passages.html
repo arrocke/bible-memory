@@ -12,8 +12,8 @@
   </button>
   <div id="sidebar"
     class="{{if not .StartOpen}}hidden{{end}} absolute bg-white z-10 h-full w-11/12 max-w-80 min-w-64 border-r border-slate-300 flex-shrink-0 sm:w-1/3 sm:block sm:max-w-96 sm:static">
-    <div class="flex border-b border-slate-300 mx-2">
-      <a class="flex-grow p-2 flex items-center gap-1" href="/passages/new" hx-target="#main">
+    <div class="flex border-b border-slate-300 py-2 px-4">
+      <a class="flex-grow flex items-center gap-1" href="/passages/new" hx-target="#main">
         <svg class="icon">
           <use href="/assets/icons.svg#plus"></use>
         </svg>
@@ -28,8 +28,8 @@
     </div>
     <ul>
       {{range .Passages}}
-      <li class="py-2 mx-2 border-b border-slate-300">
-        <div class="flex items-center mb-1 pl-2 pr-1">
+      <li class="py-2 px-4 border-b border-slate-300 {{if .ReviewDue}}bg-green-300{{end}}">
+        <div class="flex items-center mb-1">
           <a class="flex-grow" href="/passages/{{.Id}}/review" hx-target="#main">
             {{.Reference}}
           </a>
@@ -39,7 +39,7 @@
               <use href="/assets/icons.svg#pencil" />
             </svg>
           </a>
-          <button class="w-6 h-6 text-red-700 flex items-center justify-center" hx-delete="/passages/{{.Id}}"
+          <button class="-mr-1 w-6 h-6 text-red-700 flex items-center justify-center" hx-delete="/passages/{{.Id}}"
             hx-target="closest li" hx-swap="outerHTML" hx-confirm="Are you sure you want to delete {{.Reference}}?"
             title="Delete">
             <span class="sr-only">Delete</span>
@@ -48,7 +48,7 @@
             </svg>
           </button>
         </div>
-        <div class="flex items-center px-2">
+        <div class="flex items-center">
           <span class="text-xs flex-grow">
             Review: {{if eq .ReviewAt ""}}-{{else}}{{.ReviewAt}}{{end}}
           </span>

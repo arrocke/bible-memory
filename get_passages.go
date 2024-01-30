@@ -16,6 +16,7 @@ type PassageListItem struct {
 	Reference string
 	Level     int32
 	ReviewAt  string
+	ReviewDue bool
 }
 type PassagesTemplateData struct {
 	Passages  []PassageListItem
@@ -23,7 +24,7 @@ type PassagesTemplateData struct {
 	LayoutTemplateData
 }
 
-func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32) (*PassagesTemplateData, error) {
+func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32, tz_offset int) (*PassagesTemplateData, error) {
 	type PassageModel struct {
 		Id           int32
 		Book         string
@@ -60,17 +61,19 @@ func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32) (*PassagesTempl
 		Passages:           make([]PassageListItem, len(passages)),
 		LayoutTemplateData: *layoutTemplateData,
 	}
+	location := time.FixedZone("temp", tz_offset)
+	now := time.Now().In(location)
 	for i, passage := range passages {
-		reviewAt := ""
-		if passage.ReviewAt != nil {
-			reviewAt = passage.ReviewAt.Format("01-02-2006")
-		}
-		templateData.Passages[i] = PassageListItem{
+		passageData := PassageListItem{
 			Id:        passage.Id,
 			Level:     passage.Level,
-			ReviewAt:  reviewAt,
 			Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
 		}
+		if passage.ReviewAt != nil {
+			passageData.ReviewAt = passage.ReviewAt.Format("01-02-2006")
+			passageData.ReviewDue = now.Compare(*passage.ReviewAt) > 0
+		}
+		templateData.Passages[i] = passageData
 	}
 
 	return &templateData, nil
@@ -90,7 +93,7 @@ func GetPassages(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		data, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id)
+		data, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetTZ(r))
 		data.StartOpen = true
 		if err != nil {
 			http.Error(w, "Database Error", http.StatusInternalServerError)

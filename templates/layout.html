@@ -9,6 +9,12 @@
   <link rel="manifest" href="/assets/manifest.json" />
   <link rel="stylesheet" href="/assets/styles.css" />
 
+  <script type="text/javascript">
+    if (!document.cooke.includes('tzOffset')) {
+      document.cookie = 'tzOffset=' + (new Date().getTimezoneOffset() * -1) + '; path=/';
+    }
+  </script>
+
   <script src="https://unpkg.com/htmx.org@1.9.10"
     integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
     crossorigin="anonymous"></script>
