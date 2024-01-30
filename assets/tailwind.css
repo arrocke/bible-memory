@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-vertical {
+    writing-mode: vertical-lr;
+    transform: rotate(180deg);
+  }
+}
+
+@layer components {
+  .icon  {
+    width: 1em;
+    height: 1em;
+    text-align: -0.125em;
+    fill: currentColor;
+  }
+
+  .form-label {
+    @apply font-bold text-sm mb-1 inline-block
+  }
+
+  .text-input {
+    @apply border border-slate-500 rounded h-8 px-2 py-1;
+  }
+
+  .button {
+    @apply rounded bg-slate-900 text-white font-bold px-4 py-2 h-8 flex justify-center items-center;
+  }
+
+  .view-heading {
+    @apply text-xl font-bold mb-4;
+  }
+}

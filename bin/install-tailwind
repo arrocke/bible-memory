@@ -1,0 +1,10 @@
+#!/bin/bash
+
+TAILWIND_BIN="tailwindcss-linux-x64"
+if [ "$(uname)" = "Darwin" ]; then
+    TAILWIND_BIN="tailwindcss-macos-x64"
+fi
+
+curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.1/${TAILWIND_BIN}
+chmod +x ${TAILWIND_BIN} 
+mv ${TAILWIND_BIN} bin/tailwindcss

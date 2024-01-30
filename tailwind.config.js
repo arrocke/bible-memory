@@ -1,15 +1,7 @@
-/** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./pages/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ["./templates/**/*.html", "./assets/**/*.js"],
   theme: {
-    extend: {
-      borderWidth: {
-        3: '3px'
-      }
-    },
+    extend: {},
   },
   plugins: [],
-}
+};

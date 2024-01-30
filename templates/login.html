@@ -1,0 +1,28 @@
+{{define "head"}}<title>Log In | Bible Memory</title>{{end}}
+{{define "body"}}
+<div class="p-4 flex justify-center">
+  <div>
+    <h2 class="view-heading">Log In</h2>
+    {{if .Error}}
+    <div class="text-red-700 mb-4 font-bold">
+      {{.Error}}
+    </div>
+    {{end}}
+    <form action="/users/login" method="POST">
+      <div class="mb-4">
+        <label class="form-label" for="email">Email</label>
+        <div>
+          <input id="email" class="text-input" name="email" value="{{.Email}}" required />
+        </div>
+      </div>
+      <div class="mb-4">
+        <label class="form-label" for="password">Password</label>
+        <div>
+          <input id="password" type="password" class="text-input" name="password" required />
+        </div>
+      </div>
+      <button class="button">Log In</button>
+    </form>
+  </div>
+</div>
+{{end}}
