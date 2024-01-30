@@ -15,6 +15,17 @@
 
   <script src="/assets/typer.js"></script>
 
+  <script type="text/javascript">
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+      if (registrations.length > 0) {
+        for (const r of registrations) {
+          r.unregister()
+        }
+        location.reload()
+      }
+    })
+  </script>
+
   {{template "head" .}}
 </head>
 
