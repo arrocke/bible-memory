@@ -41,7 +41,7 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 		PassagesTemplateData
 	}
 
-	var wordRegex = regexp.MustCompile(`(\d+)?( ?[^A-Za-zÀ-ÖØ-öø-ÿ0-9']*)?([A-Za-zÀ-ÖØ-öø-ÿ]+(?:(?:'|’|-)[A-Za-zÀ-ÖØ-öø-ÿ]+)?(?:'|’)?)([^A-Za-zÀ-ÖØ-öø-ÿ0-9' ]+\s*)?`)
+	var wordRegex = regexp.MustCompile(`(?:(\d+)\s?)?([^A-Za-zÀ-ÖØ-öø-ÿ\s]+)?([A-Za-zÀ-ÖØ-öø-ÿ]+(?:(?:'|’|-)[A-Za-zÀ-ÖØ-öø-ÿ]+)?(?:'|’)?)([^A-Za-zÀ-ÖØ-öø-ÿ0-9]*\s+)?`)
 
 	parseWords := func(text string) []ReviewWord {
 		matches := wordRegex.FindAllStringSubmatch(text, -1)
