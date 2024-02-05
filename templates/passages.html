@@ -26,35 +26,8 @@
         <span class="sr-only">Close Sidebar</span>
       </button>
     </div>
-    <ul>
-      {{range .Passages}}
-      <li class="py-2 px-4 border-b border-slate-300 {{if .ReviewDue}}bg-green-300{{end}}">
-        <div class="flex items-center mb-1">
-          <a class="flex-grow" href="/passages/{{.Id}}/review" hx-target="#main">
-            {{.Reference}}
-          </a>
-          <a class="w-6 h-6 flex items-center justify-center" href="/passages/{{.Id}}" hx-target="#main">
-            <span class="sr-only">Edit</span>
-            <svg class="icon">
-              <use href="/assets/icons.svg#pencil" />
-            </svg>
-          </a>
-          <button class="-mr-1 w-6 h-6 text-red-700 flex items-center justify-center" hx-delete="/passages/{{.Id}}"
-            hx-target="closest li" hx-swap="outerHTML" hx-confirm="Are you sure you want to delete {{.Reference}}?"
-            title="Delete">
-            <span class="sr-only">Delete</span>
-            <svg class="icon">
-              <use href="/assets/icons.svg#trash" />
-            </svg>
-          </button>
-        </div>
-        <div class="flex items-center">
-          <span class="text-xs flex-grow">
-            Review: {{if eq .ReviewAt ""}}-{{else}}{{.ReviewAt}}{{end}}
-          </span>
-        </div>
-      </li>
-      {{end}}
+    <ul id="passage-list">
+      {{template "passage_list" .Passages}}
     </ul>
   </div>
   <main id="main" class="flex-grow relative">

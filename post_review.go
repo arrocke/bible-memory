@@ -28,9 +28,10 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 	type TemplateData struct {
 		Grade    int
 		ReviewAt string
+		PassagesTemplateData
 	}
 
-	tmpl := template.Must(template.ParseFiles("templates/review_result.html"))
+	tmpl := template.Must(template.ParseFiles("templates/passage_list_partial.html", "templates/review_result.html"))
 
 	router.HandleFunc("/passages/{Id}/review", func(w http.ResponseWriter, r *http.Request) {
 		session, err := GetSession(r, ctx)
@@ -72,7 +73,12 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 		grade := int(_grade)
 
 		if r.FormValue("mode") != "review" || grade == 0 {
-			tmpl.ExecuteTemplate(w, "review_result.html", TemplateData{})
+			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetTZ(r))
+			if err != nil {
+				http.Error(w, "Database Error", http.StatusInternalServerError)
+				return
+			}
+			tmpl.ExecuteTemplate(w, "review_result.html", TemplateData{PassagesTemplateData: *passagesTemplateData})
 			return
 		}
 
@@ -102,7 +108,12 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		tmpl.ExecuteTemplate(w, "review_result.html", TemplateData{Grade: grade, ReviewAt: newDate.Format("01-02-2006")})
+		passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetTZ(r))
+		if err != nil {
+			http.Error(w, "Database Error", http.StatusInternalServerError)
+			return
+		}
 
+		tmpl.ExecuteTemplate(w, "review_result.html", TemplateData{Grade: grade, ReviewAt: newDate.Format("01-02-2006"), PassagesTemplateData: *passagesTemplateData})
 	}).Methods("Post")
 }

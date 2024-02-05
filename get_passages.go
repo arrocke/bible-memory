@@ -77,7 +77,7 @@ func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32, tz_offset int) 
 }
 
 func GetPassages(router *mux.Router, ctx *ServerContext) {
-	tmpl := template.Must(template.ParseFiles("templates/passages.html", "templates/layout.html"))
+	tmpl := template.Must(template.ParseFiles("templates/passage_list_partial.html", "templates/passages.html", "templates/layout.html"))
 
 	router.HandleFunc("/passages", func(w http.ResponseWriter, r *http.Request) {
 		session, err := GetSession(r, ctx)

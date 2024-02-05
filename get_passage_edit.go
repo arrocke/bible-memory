@@ -38,7 +38,7 @@ func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
 		PassagesTemplateData
 	}
 
-	tmpl := template.Must(template.ParseFiles("templates/edit_passage_partial.html", "templates/edit_passage.html", "templates/passages.html", "templates/layout.html"))
+	tmpl := template.Must(template.ParseFiles("templates/edit_passage_partial.html", "templates/edit_passage.html", "templates/passage_list_partial.html", "templates/passages.html", "templates/layout.html"))
 
 	router.HandleFunc("/passages/{Id}", func(w http.ResponseWriter, r *http.Request) {
 		session, err := GetSession(r, ctx)
