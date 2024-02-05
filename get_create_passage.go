@@ -8,7 +8,7 @@ import (
 )
 
 func GetCreatePassage(router *mux.Router, ctx *ServerContext) {
-	tmpl := template.Must(template.ParseFiles("templates/add_passage.html", "templates/add_passage_partial.html", "templates/passages.html", "templates/layout.html"))
+	tmpl := template.Must(template.ParseFiles("templates/add_passage.html", "templates/add_passage_partial.html", "templates/passage_list_partial.html", "templates/passages.html", "templates/layout.html"))
 
 	router.HandleFunc("/passages/new", func(w http.ResponseWriter, r *http.Request) {
 		session, err := GetSession(r, ctx)

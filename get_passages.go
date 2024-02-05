@@ -14,7 +14,6 @@ import (
 type PassageListItem struct {
 	Id        int32
 	Reference string
-	Level     int32
 	ReviewAt  string
 	ReviewDue bool
 }
@@ -32,12 +31,11 @@ func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32, tz_offset int) 
 		StartVerse   int32
 		EndChapter   int32
 		EndVerse     int32
-		Level        int32
 		ReviewAt     *time.Time
 	}
 
 	query := `
-		SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, level, review_at
+		SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, review_at
 		FROM passage
 		WHERE user_id = $1
 		ORDER BY book, start_chapter, start_verse, end_chapter, end_verse
@@ -66,7 +64,6 @@ func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32, tz_offset int) 
 	for i, passage := range passages {
 		passageData := PassageListItem{
 			Id:        passage.Id,
-			Level:     passage.Level,
 			Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
 		}
 		if passage.ReviewAt != nil {
@@ -80,7 +77,7 @@ func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32, tz_offset int) 
 }
 
 func GetPassages(router *mux.Router, ctx *ServerContext) {
-	tmpl := template.Must(template.ParseFiles("templates/passages.html", "templates/layout.html"))
+	tmpl := template.Must(template.ParseFiles("templates/passage_list_partial.html", "templates/passages.html", "templates/layout.html"))
 
 	router.HandleFunc("/passages", func(w http.ResponseWriter, r *http.Request) {
 		session, err := GetSession(r, ctx)

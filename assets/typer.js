@@ -125,6 +125,80 @@ function buildProgress({ size }) {
   };
 }
 
+function buildRater({ accuracy, onSelect }) {
+  const root = document.createElement("form");
+  root.className = "mb-8";
+
+  const fieldset = document.createElement("fieldset");
+  fieldset.className = "mb-2";
+  root.appendChild(fieldset);
+
+  const hardLabel = document.createElement("label");
+  const hardInput = document.createElement("input");
+  hardLabel.className = "block";
+  hardInput.className = "mr-2";
+  hardInput.type = "radio";
+  hardInput.name = "memory-rating";
+  hardInput.value = "2";
+  hardInput.required = true;
+  hardLabel.appendChild(hardInput);
+  hardLabel.appendChild(
+    document.createTextNode(
+      "Hard - You successfully recalled most of the passage, but you want to review it more frequently"
+    )
+  );
+  fieldset.appendChild(hardLabel);
+
+  const goodLabel = document.createElement("label");
+  const goodInput = document.createElement("input");
+  goodLabel.className = "flex";
+  goodInput.className = "mr-2";
+  goodInput.type = "radio";
+  goodInput.name = "memory-rating";
+  goodInput.value = "3";
+  goodInput.required = true;
+  goodLabel.appendChild(goodInput);
+  goodLabel.appendChild(
+    document.createTextNode(
+      "Good - You successfully recalled the passage with little help"
+    )
+  );
+  fieldset.appendChild(goodLabel);
+
+  if (accuracy === 1) {
+    const easyLabel = document.createElement("label");
+    const easyInput = document.createElement("input");
+    easyLabel.className = "block";
+    easyInput.className = "mr-2";
+    easyInput.type = "radio";
+    easyInput.name = "memory-rating";
+    easyInput.value = "4";
+    easyInput.required = true;
+    easyLabel.appendChild(easyInput);
+    easyLabel.appendChild(
+      document.createTextNode(
+        "Easy - You successfully recalled the passage with ease and are reviewing it too often"
+      )
+    );
+    fieldset.appendChild(easyLabel);
+  }
+
+  const submit = document.createElement("button");
+  submit.innerText = "Submit Review";
+  submit.className = "button";
+  root.appendChild(submit);
+
+  root.addEventListener("submit", (e) => {
+    e.preventDefault();
+    onSelect?.(parseInt(root["memory-rating"].value));
+    root.remove();
+  });
+
+  return {
+    root,
+  };
+}
+
 window.Typer = function ({ el: root, words, mode, onComplete }) {
   root.className += " flex flex-col relative";
 
@@ -213,7 +287,21 @@ window.Typer = function ({ el: root, words, mode, onComplete }) {
 
     if (currentIndex == wordState.length) {
       input.remove();
-      onComplete?.({ accuracy: counts.correct / wordState.length });
+      const accuracy = counts.correct / wordState.length;
+      if (mode !== "review") {
+        onComplete?.({ accuracy, grade: 0 });
+      }
+      if (accuracy >= 0.9) {
+        const rater = buildRater({
+          accuracy,
+          onSelect(grade) {
+            onComplete?.({ accuracy, grade });
+          },
+        });
+        root.insertBefore(rater.root, root.firstChild);
+      } else {
+        onComplete?.({ accuracy, grade: 1 });
+      }
     } else {
       currentWord = wordState[currentIndex];
       currentWord.component.update({ currentIndex, ...currentWord });

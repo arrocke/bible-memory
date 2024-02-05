@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="/assets/styles.css" />
 
   <script type="text/javascript">
-    if (!document.cooke.includes('tzOffset')) {
+    if (!document.cooke?.includes('tzOffset')) {
       document.cookie = 'tzOffset=' + (new Date().getTimezoneOffset() * -1) + '; path=/';
     }
   </script>

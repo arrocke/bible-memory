@@ -42,9 +42,9 @@
       el: document.querySelector('#typer'),
       words,
       mode,
-      onComplete({ accuracy }) {
+      onComplete({ grade }) {
         htmx.ajax("POST", "/passages/{{.Id}}/review", {
-          values: { accuracy, mode },
+          values: { grade, mode },
           target: '#result'
         })
       }
