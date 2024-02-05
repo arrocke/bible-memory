@@ -21,6 +21,7 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 	type PassageModel struct {
 		Id         int32
 		ReviewedAt *time.Time
+		ReviewAt   *time.Time
 		Difficulty *float64
 		Stability  *float64
 	}
@@ -51,7 +52,7 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		query := "SELECT id, reviewed_at, difficulty, stability FROM passage WHERE id = $1 AND user_id = $2"
+		query := "SELECT id, reviewed_at, review_at, difficulty, stability FROM passage WHERE id = $1 AND user_id = $2"
 		rows, _ := ctx.Conn.Query(context.Background(), query, id, *session.user_id)
 		defer rows.Close()
 
@@ -84,6 +85,16 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 
 		location := time.FixedZone("Temp", GetTZ(r)*60)
 		now := time.Now().In(location)
+
+		if passage.ReviewedAt != nil && passage.ReviewedAt.Day() == now.Day() && passage.ReviewedAt.Month() == now.Month() && passage.ReviewedAt.Year() == now.Year() {
+			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetTZ(r))
+			if err != nil {
+				http.Error(w, "Database Error", http.StatusInternalServerError)
+				return
+			}
+			tmpl.ExecuteTemplate(w, "review_result.html", TemplateData{ReviewAt: passage.ReviewAt.Format("01-02-2006"), PassagesTemplateData: *passagesTemplateData})
+			return
+		}
 
 		var memoryState = fsrs.MemoryState{}
 		if passage.Difficulty == nil || passage.Stability == nil || passage.ReviewedAt == nil {
