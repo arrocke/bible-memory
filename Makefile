@@ -15,5 +15,5 @@ watch-css:
 	./bin/tailwindcss -i ./assets/tailwind.css -o ./assets/styles.css --watch
 
 watch-server:
-	gow -e=go,html run .
+	gow -e=go,html,js,css run .
 
