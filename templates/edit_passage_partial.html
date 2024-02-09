@@ -5,7 +5,7 @@
       <label class="form-label" for="reference">Reference</label>
       <div>
         <input class="text-input" id="reference" type="text" name="reference" value="{{.Reference}}" required
-          pattern="(.+?)\s*(\d+)[.:](\d+)\s*-\s*(\d+)[.:](\d+)" />
+          pattern="(.+?)\s*(\d+)[.:](\d+)(?:\s*-\s*(?:(\d+)[.:])?(\d+))?" />
       </div>
     </div>
     <div class="mb-4">
