@@ -1,5 +1,5 @@
 <div class="mb-4">
-  Your next review is on {{.ReviewAt}}
+  {{if eq .ReviewAt ""}}Nice work!{{else}}Your next review is on {{.ReviewAt}}{{end}}
 </div>
 <ul id="passage-list" hx-swap-oob="true">
   {{template "passage_list" .Passages}}

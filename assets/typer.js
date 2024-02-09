@@ -199,7 +199,7 @@ function buildRater({ accuracy, onSelect }) {
   };
 }
 
-window.Typer = function ({ el: root, words, mode, onComplete }) {
+window.Typer = function ({ el: root, words, mode, alreadyReviewed, onComplete }) {
   root.className += " flex flex-col relative";
 
   const typer = document.createElement("div");
@@ -288,10 +288,10 @@ window.Typer = function ({ el: root, words, mode, onComplete }) {
     if (currentIndex == wordState.length) {
       input.remove();
       const accuracy = counts.correct / wordState.length;
-      if (mode !== "review") {
+      if (mode !== "review" || alreadyReviewed) {
         onComplete?.({ accuracy, grade: 0 });
       }
-      if (accuracy >= 0.9) {
+      else if (accuracy >= 0.9) {
         const rater = buildRater({
           accuracy,
           onSelect(grade) {

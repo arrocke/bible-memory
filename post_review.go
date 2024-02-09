@@ -73,7 +73,7 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 		}
 		grade := int(_grade)
 
-		if r.FormValue("mode") != "review" || grade == 0 {
+		if r.FormValue("mode") != "review" {
 			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetTZ(r))
 			if err != nil {
 				http.Error(w, "Database Error", http.StatusInternalServerError)

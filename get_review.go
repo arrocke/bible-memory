@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5"
@@ -21,6 +22,7 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 		EndChapter   int32
 		EndVerse     int32
 		Text         string
+		ReviewedAt   *time.Time
 	}
 
 	type ReviewWord struct {
@@ -32,9 +34,10 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 		RestOfWord  string
 	}
 	type PartialTemplateData struct {
-		Id        int32
-		Reference string
-		Words     []ReviewWord
+		Id              int32
+		Reference       string
+		Words           []ReviewWord
+		AlreadyReviewed bool
 	}
 	type TemplateData struct {
 		PartialTemplateData
@@ -82,7 +85,7 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		query := "SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text FROM passage WHERE id = $1 AND user_id = $2"
+		query := "SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text, reviewed_at FROM passage WHERE id = $1 AND user_id = $2"
 		rows, _ := ctx.Conn.Query(context.Background(), query, id, *session.user_id)
 		defer rows.Close()
 
@@ -96,10 +99,15 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
+		location := time.FixedZone("Temp", GetTZ(r)*60)
+		now := time.Now().In(location)
+
+
 		partialTemplateData := PartialTemplateData{
 			Id:        passage.Id,
 			Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
 			Words:     parseWords(passage.Text),
+			AlreadyReviewed: passage.ReviewedAt != nil && passage.ReviewedAt.Day() == now.Day() && passage.ReviewedAt.Month() == now.Month() && passage.ReviewedAt.Year() == now.Year(),
 		}
 
 		if r.Header.Get("Hx-Current-Url") == "" {
