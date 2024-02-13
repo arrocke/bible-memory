@@ -3,9 +3,17 @@ package main
 import (
 	"net/http"
 	"strconv"
+	"time"
 )
 
-func GetTZ(r *http.Request) int {
+func GetClientDate(r *http.Request) time.Time {
+	location := time.FixedZone("Temp", GetClientTZ(r)*60)
+	now := time.Now().In(location)
+
+	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+}
+
+func GetClientTZ(r *http.Request) int {
 	cookieVal, err := r.Cookie("tzOffset")
 	if err != nil {
 		return 0

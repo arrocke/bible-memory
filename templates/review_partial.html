@@ -43,6 +43,11 @@
       alreadyReviewed: {{.AlreadyReviewed}},
       words,
       mode,
+      intervals: {
+        hard: {{.HardInterval}},
+        good: {{.GoodInterval}},
+        easy: {{.EasyInterval}},
+      },
       onComplete({ grade }) {
         htmx.ajax("POST", "/passages/{{.Id}}/review", {
           values: { grade, mode },
