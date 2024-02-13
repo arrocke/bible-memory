@@ -22,7 +22,7 @@ func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
 		EndVerse     int32
 		Text         string
 		ReviewAt     *time.Time
-		Interval     int
+		Interval     *int
 	}
 
 	type PartialTemplateData struct {
@@ -30,7 +30,7 @@ func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
 		Reference string
 		Text      string
 		ReviewAt  string
-		Interval  int
+		Interval  *int
 	}
 
 	type TemplateData struct {

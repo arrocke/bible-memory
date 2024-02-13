@@ -81,7 +81,7 @@ func GetNextInterval(reviewedAt time.Time, grade int, currentInterval *int, last
 		case 3:
 			return int(float64(*currentInterval) + extension)
 		case 4:
-			return int(float64(*currentInterval) + 2.0*extension)
+			return int(float64(*currentInterval) + 1.5*extension)
 		}
 	}
 
