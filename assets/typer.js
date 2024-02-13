@@ -125,7 +125,7 @@ function buildProgress({ size }) {
   };
 }
 
-function buildRater({ accuracy, onSelect }) {
+function buildRater({ accuracy, intervals, onSelect }) {
   const root = document.createElement("form");
   root.className = "mb-8";
 
@@ -144,7 +144,7 @@ function buildRater({ accuracy, onSelect }) {
   hardLabel.appendChild(hardInput);
   hardLabel.appendChild(
     document.createTextNode(
-      "Hard - You successfully recalled most of the passage, but you want to review it more frequently"
+      `Hard (${intervals.hard} days)`
     )
   );
   fieldset.appendChild(hardLabel);
@@ -160,7 +160,7 @@ function buildRater({ accuracy, onSelect }) {
   goodLabel.appendChild(goodInput);
   goodLabel.appendChild(
     document.createTextNode(
-      "Good - You successfully recalled the passage with little help"
+      `Good (${intervals.good} days)`
     )
   );
   fieldset.appendChild(goodLabel);
@@ -177,7 +177,7 @@ function buildRater({ accuracy, onSelect }) {
     easyLabel.appendChild(easyInput);
     easyLabel.appendChild(
       document.createTextNode(
-        "Easy - You successfully recalled the passage with ease and are reviewing it too often"
+        `Easy (${intervals.easy} days)`
       )
     );
     fieldset.appendChild(easyLabel);
@@ -199,7 +199,7 @@ function buildRater({ accuracy, onSelect }) {
   };
 }
 
-window.Typer = function ({ el: root, words, mode, alreadyReviewed, onComplete }) {
+window.Typer = function ({ el: root, words, mode, alreadyReviewed, intervals, onComplete }) {
   root.className += " flex flex-col relative";
 
   const typer = document.createElement("div");
@@ -294,6 +294,7 @@ window.Typer = function ({ el: root, words, mode, alreadyReviewed, onComplete })
       else if (accuracy >= 0.9) {
         const rater = buildRater({
           accuracy,
+          intervals,
           onSelect(grade) {
             onComplete?.({ accuracy, grade });
           },

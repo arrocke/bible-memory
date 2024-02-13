@@ -23,6 +23,7 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 		EndVerse     int32
 		Text         string
 		ReviewedAt   *time.Time
+		Interval     *int
 	}
 
 	type ReviewWord struct {
@@ -38,6 +39,9 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 		Reference       string
 		Words           []ReviewWord
 		AlreadyReviewed bool
+		HardInterval    int
+		GoodInterval    int
+		EasyInterval    int
 	}
 	type TemplateData struct {
 		PartialTemplateData
@@ -85,7 +89,7 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		query := "SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text, reviewed_at FROM passage WHERE id = $1 AND user_id = $2"
+		query := "SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text, reviewed_at, interval FROM passage WHERE id = $1 AND user_id = $2"
 		rows, _ := ctx.Conn.Query(context.Background(), query, id, *session.user_id)
 		defer rows.Close()
 
@@ -106,6 +110,9 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 			Reference:       FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
 			Words:           parseWords(passage.Text),
 			AlreadyReviewed: passage.ReviewedAt != nil && *passage.ReviewedAt == now,
+			HardInterval:    GetNextInterval(now, 2, passage.Interval, passage.ReviewedAt),
+			GoodInterval:    GetNextInterval(now, 3, passage.Interval, passage.ReviewedAt),
+			EasyInterval:    GetNextInterval(now, 4, passage.Interval, passage.ReviewedAt),
 		}
 
 		if r.Header.Get("Hx-Current-Url") == "" {
