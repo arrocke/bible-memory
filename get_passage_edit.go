@@ -22,6 +22,7 @@ func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
 		EndVerse     int32
 		Text         string
 		ReviewAt     *time.Time
+		Interval     int
 	}
 
 	type PartialTemplateData struct {
@@ -29,6 +30,7 @@ func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
 		Reference string
 		Text      string
 		ReviewAt  string
+		Interval  int
 	}
 
 	type TemplateData struct {
@@ -56,7 +58,7 @@ func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		query := "SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text, review_at FROM passage WHERE id = $1 AND user_id = $2"
+		query := "SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text, review_at, interval FROM passage WHERE id = $1 AND user_id = $2"
 		rows, _ := ctx.Conn.Query(context.Background(), query, id, *session.user_id)
 		defer rows.Close()
 
@@ -79,6 +81,7 @@ func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
 			Id:        passage.Id,
 			Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
 			Text:      passage.Text,
+			Interval:  passage.Interval,
 			ReviewAt:  reviewAt,
 		}
 
@@ -96,6 +99,5 @@ func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
 		} else {
 			tmpl.ExecuteTemplate(w, "edit_passage_partial.html", partialTemplateData)
 		}
-
 	}).Methods("Get")
 }
