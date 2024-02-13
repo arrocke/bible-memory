@@ -4,12 +4,9 @@ import (
 	"context"
 	"errors"
 	"html/template"
-	"math"
 	"net/http"
 	"strconv"
 	"time"
-
-	"main/fsrs"
 
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5"
@@ -22,8 +19,7 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 		Id         int32
 		ReviewedAt *time.Time
 		ReviewAt   *time.Time
-		Difficulty *float64
-		Stability  *float64
+		Interval   *int
 	}
 
 	type TemplateData struct {
@@ -52,7 +48,7 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		query := "SELECT id, reviewed_at, review_at, difficulty, stability FROM passage WHERE id = $1 AND user_id = $2"
+		query := "SELECT id, reviewed_at, review_at, interval FROM passage WHERE id = $1 AND user_id = $2"
 		rows, _ := ctx.Conn.Query(context.Background(), query, id, *session.user_id)
 		defer rows.Close()
 
@@ -74,7 +70,7 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 		grade := int(_grade)
 
 		if r.FormValue("mode") != "review" {
-			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetTZ(r))
+			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetClientDate(r))
 			if err != nil {
 				http.Error(w, "Database Error", http.StatusInternalServerError)
 				return
@@ -83,11 +79,10 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		location := time.FixedZone("Temp", GetTZ(r)*60)
-		now := time.Now().In(location)
+		now := GetClientDate(r)
 
-		if passage.ReviewedAt != nil && passage.ReviewedAt.Day() == now.Day() && passage.ReviewedAt.Month() == now.Month() && passage.ReviewedAt.Year() == now.Year() {
-			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetTZ(r))
+		if passage.ReviewedAt != nil && *passage.ReviewedAt == now {
+			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetClientDate(r))
 			if err != nil {
 				http.Error(w, "Database Error", http.StatusInternalServerError)
 				return
@@ -96,30 +91,17 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		var memoryState = fsrs.MemoryState{}
-		if passage.Difficulty == nil || passage.Stability == nil || passage.ReviewedAt == nil {
-			memoryState = fsrs.InitialMemoryState(grade)
-		} else {
-			memoryState = fsrs.MemoryState{
-				Difficulty: *passage.Difficulty,
-				Stability:  *passage.Stability,
-			}
+		interval := GetNextInterval(now, grade, passage.Interval, passage.ReviewedAt)
+		newDate := now.AddDate(0, 0, interval)
 
-			days := int(math.Ceil(now.Sub(*passage.ReviewedAt).Hours() / 24))
-
-			memoryState.Review(grade, days)
-		}
-
-		newDate := now.AddDate(0, 0, int(max(1, math.Floor(memoryState.Interval(0.9)))))
-
-		query = "UPDATE passage SET review_at = $2, reviewed_at = $3, difficulty = $4, stability = $5 WHERE id = $1"
-		_, err = ctx.Conn.Exec(context.Background(), query, id, newDate, now, memoryState.Difficulty, memoryState.Stability)
+		query = "UPDATE passage SET review_at = $2, reviewed_at = $3, interval = $4 WHERE id = $1"
+		_, err = ctx.Conn.Exec(context.Background(), query, id, newDate, now, interval)
 		if err != nil {
 			http.Error(w, "Database Error", http.StatusInternalServerError)
 			return
 		}
 
-		passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetTZ(r))
+		passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetClientDate(r))
 		if err != nil {
 			http.Error(w, "Database Error", http.StatusInternalServerError)
 			return

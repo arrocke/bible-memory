@@ -44,7 +44,7 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 		PassagesTemplateData
 	}
 
-	var wordRegex = regexp.MustCompile(`(?:(\d+)\s?)?([^A-Za-zÀ-ÖØ-öø-ÿ\s]+)?([A-Za-zÀ-ÖØ-öø-ÿ]+(?:(?:'|’|-)[A-Za-zÀ-ÖØ-öø-ÿ]+)?(?:'|’)?)([^A-Za-zÀ-ÖØ-öø-ÿ0-9]*\s+)?`)
+	wordRegex := regexp.MustCompile(`(?:(\d+)\s?)?([^A-Za-zÀ-ÖØ-öø-ÿ\s]+)?([A-Za-zÀ-ÖØ-öø-ÿ]+(?:(?:'|’|-)[A-Za-zÀ-ÖØ-öø-ÿ]+)?(?:'|’)?)([^A-Za-zÀ-ÖØ-öø-ÿ0-9]*\s+)?`)
 
 	parseWords := func(text string) []ReviewWord {
 		matches := wordRegex.FindAllStringSubmatch(text, -1)
@@ -99,19 +99,17 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		location := time.FixedZone("Temp", GetTZ(r)*60)
-		now := time.Now().In(location)
-
+		now := GetClientDate(r)
 
 		partialTemplateData := PartialTemplateData{
-			Id:        passage.Id,
-			Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
-			Words:     parseWords(passage.Text),
-			AlreadyReviewed: passage.ReviewedAt != nil && passage.ReviewedAt.Day() == now.Day() && passage.ReviewedAt.Month() == now.Month() && passage.ReviewedAt.Year() == now.Year(),
+			Id:              passage.Id,
+			Reference:       FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
+			Words:           parseWords(passage.Text),
+			AlreadyReviewed: passage.ReviewedAt != nil && *passage.ReviewedAt == now,
 		}
 
 		if r.Header.Get("Hx-Current-Url") == "" {
-			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetTZ(r))
+			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetClientDate(r))
 			if err != nil {
 				http.Error(w, "Database Error", http.StatusInternalServerError)
 				return

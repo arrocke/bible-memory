@@ -22,7 +22,7 @@ func GetCreatePassage(router *mux.Router, ctx *ServerContext) {
 		}
 
 		if r.Header.Get("Hx-Current-Url") == "" {
-			templateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetTZ(r))
+			templateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetClientDate(r))
 			if err != nil {
 				http.Error(w, "Database Error", http.StatusInternalServerError)
 			}

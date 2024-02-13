@@ -23,7 +23,7 @@ type PassagesTemplateData struct {
 	LayoutTemplateData
 }
 
-func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32, tz_offset int) (*PassagesTemplateData, error) {
+func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32, clientDate time.Time) (*PassagesTemplateData, error) {
 	type PassageModel struct {
 		Id           int32
 		Book         string
@@ -59,8 +59,7 @@ func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32, tz_offset int) 
 		Passages:           make([]PassageListItem, len(passages)),
 		LayoutTemplateData: *layoutTemplateData,
 	}
-	location := time.FixedZone("temp", tz_offset)
-	now := time.Now().In(location)
+
 	for i, passage := range passages {
 		passageData := PassageListItem{
 			Id:        passage.Id,
@@ -68,7 +67,7 @@ func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32, tz_offset int) 
 		}
 		if passage.ReviewAt != nil {
 			passageData.ReviewAt = passage.ReviewAt.Format("01-02-2006")
-			passageData.ReviewDue = now.Compare(*passage.ReviewAt) > 0
+			passageData.ReviewDue = clientDate.Compare(*passage.ReviewAt) > 0
 		}
 		templateData.Passages[i] = passageData
 	}
@@ -90,7 +89,7 @@ func GetPassages(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		data, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetTZ(r))
+		data, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetClientDate(r))
 		data.StartOpen = true
 		if err != nil {
 			http.Error(w, "Database Error", http.StatusInternalServerError)
