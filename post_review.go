@@ -81,7 +81,7 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 
 		now := GetClientDate(r)
 
-		if passage.ReviewedAt != nil && *passage.ReviewedAt == now {
+		if passage.ReviewedAt != nil && passage.ReviewedAt.Equal(now) {
 			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetClientDate(r))
 			if err != nil {
 				http.Error(w, "Database Error", http.StatusInternalServerError)

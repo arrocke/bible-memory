@@ -109,7 +109,7 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 			Id:              passage.Id,
 			Reference:       FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
 			Words:           parseWords(passage.Text),
-			AlreadyReviewed: passage.ReviewedAt != nil && *passage.ReviewedAt == now,
+			AlreadyReviewed: passage.ReviewedAt != nil && passage.ReviewedAt.Equal(now),
 			HardInterval:    GetNextInterval(now, 2, passage.Interval, passage.ReviewedAt),
 			GoodInterval:    GetNextInterval(now, 3, passage.Interval, passage.ReviewedAt),
 			EasyInterval:    GetNextInterval(now, 4, passage.Interval, passage.ReviewedAt),

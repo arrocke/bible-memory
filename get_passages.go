@@ -67,7 +67,7 @@ func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32, clientDate time
 		}
 		if passage.ReviewAt != nil {
 			passageData.ReviewAt = passage.ReviewAt.Format("01-02-2006")
-			passageData.ReviewDue = clientDate.Compare(*passage.ReviewAt) > 0
+			passageData.ReviewDue = clientDate.Compare(*passage.ReviewAt) >= 0
 		}
 		templateData.Passages[i] = passageData
 	}
