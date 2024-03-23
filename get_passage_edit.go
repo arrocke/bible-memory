@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"html/template"
+	"main/domain_model"
 	"net/http"
 	"strconv"
 	"time"
@@ -16,10 +17,10 @@ func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
 	type PassageModel struct {
 		Id           int32
 		Book         string
-		StartChapter int32
-		StartVerse   int32
-		EndChapter   int32
-		EndVerse     int32
+		StartChapter uint
+		StartVerse   uint
+		EndChapter   uint
+		EndVerse     uint
 		Text         string
 		ReviewAt     *time.Time
 		Interval     *int
@@ -79,7 +80,7 @@ func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
 
 		partialTemplateData := PartialTemplateData{
 			Id:        passage.Id,
-			Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
+			Reference: domain_model.PassageReference{passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse}.String(),
 			Text:      passage.Text,
 			Interval:  passage.Interval,
 			ReviewAt:  reviewAt,

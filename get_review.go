@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"html/template"
+	"main/domain_model"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -17,10 +18,10 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 	type PassageModel struct {
 		Id           int32
 		Book         string
-		StartChapter int32
-		StartVerse   int32
-		EndChapter   int32
-		EndVerse     int32
+		StartChapter uint
+		StartVerse   uint
+		EndChapter   uint
+		EndVerse     uint
 		Text         string
 		ReviewedAt   *time.Time
 		Interval     *int
@@ -107,7 +108,7 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 
 		partialTemplateData := PartialTemplateData{
 			Id:              passage.Id,
-			Reference:       FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
+			Reference: domain_model.PassageReference{passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse}.String(),
 			Words:           parseWords(passage.Text),
 			AlreadyReviewed: passage.ReviewedAt != nil && passage.ReviewedAt.Equal(now),
 			HardInterval:    GetNextInterval(now, 2, passage.Interval, passage.ReviewedAt),

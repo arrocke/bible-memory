@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"main/domain_model"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -20,7 +21,7 @@ func PostCreatePassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		reference, err := ParseReference(r.FormValue("reference"))
+		reference, err := domain_model.ParsePassageReference(r.FormValue("reference"))
 		if err != nil {
 			http.Error(w, "Invalid reference", http.StatusBadRequest)
 			return

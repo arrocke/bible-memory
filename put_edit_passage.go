@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"main/domain_model"
 	"net/http"
 	"strconv"
 
@@ -40,7 +41,7 @@ func PutEditPassage(router *mux.Router, ctx *ServerContext) {
 			interval = &parsedInterval
 		}
 
-		reference, err := ParseReference(r.FormValue("reference"))
+		reference, err := domain_model.ParsePassageReference(r.FormValue("reference"))
 		if err != nil {
 			http.Error(w, "Invalid reference", http.StatusBadRequest)
 			return

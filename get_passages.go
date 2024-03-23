@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+    "main/domain_model"
 )
 
 type PassageListItem struct {
@@ -27,10 +28,10 @@ func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32, clientDate time
 	type PassageModel struct {
 		Id           int32
 		Book         string
-		StartChapter int32
-		StartVerse   int32
-		EndChapter   int32
-		EndVerse     int32
+		StartChapter uint
+		StartVerse   uint
+		EndChapter   uint
+		EndVerse     uint
 		ReviewAt     *time.Time
 	}
 
@@ -63,7 +64,7 @@ func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32, clientDate time
 	for i, passage := range passages {
 		passageData := PassageListItem{
 			Id:        passage.Id,
-			Reference: FormatReference(passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse),
+			Reference: domain_model.PassageReference{passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse}.String(),
 		}
 		if passage.ReviewAt != nil {
 			passageData.ReviewAt = passage.ReviewAt.Format("01-02-2006")
