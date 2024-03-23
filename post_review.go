@@ -48,26 +48,11 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		query := "SELECT id, reviewed_at, review_at, interval FROM passage WHERE id = $1 AND user_id = $2"
-		rows, _ := ctx.Conn.Query(context.Background(), query, id, *session.user_id)
-		defer rows.Close()
-
-		passage, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[PassageModel])
+        passage, err := ctx.PassageRepo.Get(uint(id))
 		if err != nil {
-			if errors.Is(err, pgx.ErrNoRows) {
-				http.Error(w, "Not Found", http.StatusNotFound)
-			} else {
-				http.Error(w, "Database Error", http.StatusInternalServerError)
-			}
+			http.Error(w, "Database Error", http.StatusInternalServerError)
 			return
 		}
-
-		_grade, err := strconv.ParseInt(r.FormValue("grade"), 10, 32)
-		if err != nil || _grade < 0 || _grade > 4 {
-			http.Error(w, "Invalid grade", http.StatusBadRequest)
-			return
-		}
-		grade := int(_grade)
 
 		if r.FormValue("mode") != "review" {
 			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetClientDate(r))
@@ -81,25 +66,22 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 
 		now := GetClientDate(r)
 
-		if passage.ReviewedAt != nil && passage.ReviewedAt.Equal(now) {
-			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetClientDate(r))
-			if err != nil {
-				http.Error(w, "Database Error", http.StatusInternalServerError)
-				return
-			}
-			tmpl.ExecuteTemplate(w, "review_result.html", TemplateData{ReviewAt: passage.ReviewAt.Format("01-02-2006"), PassagesTemplateData: *passagesTemplateData})
-			return
-		}
-
-		interval := GetNextInterval(now, grade, passage.Interval, passage.ReviewedAt)
-		newDate := now.AddDate(0, 0, interval)
-
-		query = "UPDATE passage SET review_at = $2, reviewed_at = $3, interval = $4 WHERE id = $1"
-		_, err = ctx.Conn.Exec(context.Background(), query, id, newDate, now, interval)
+		grade, err := strconv.ParseInt(r.FormValue("grade"), 10, 32)
 		if err != nil {
-			http.Error(w, "Database Error", http.StatusInternalServerError)
+			http.Error(w, "Invalid grade", http.StatusBadRequest)
 			return
 		}
+
+        if err := passage.DoReview(uint(grade), now); err != nil {
+			http.Error(w, "Failed to process review", http.StatusInternalServerError)
+            return
+        }
+
+        err = ctx.PassageRepo.Commit(&passage)
+        if err != nil {
+			http.Error(w, "Database Error", http.StatusInternalServerError)
+            return
+        }
 
 		passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetClientDate(r))
 		if err != nil {
@@ -107,6 +89,6 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		tmpl.ExecuteTemplate(w, "review_result.html", TemplateData{Grade: grade, ReviewAt: newDate.Format("01-02-2006"), PassagesTemplateData: *passagesTemplateData})
+		tmpl.ExecuteTemplate(w, "review_result.html", TemplateData{Grade: int(grade), ReviewAt: passage.Review.NextReview.Format("01-02-2006"), PassagesTemplateData: *passagesTemplateData})
 	}).Methods("Post")
 }

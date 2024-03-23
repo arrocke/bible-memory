@@ -108,7 +108,7 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 
 		partialTemplateData := PartialTemplateData{
 			Id:              passage.Id,
-			Reference: domain_model.PassageReference{passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse}.String(),
+			Reference:       domain_model.PassageReference{passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse}.String(),
 			Words:           parseWords(passage.Text),
 			AlreadyReviewed: passage.ReviewedAt != nil && passage.ReviewedAt.Equal(now),
 			HardInterval:    GetNextInterval(now, 2, passage.Interval, passage.ReviewedAt),

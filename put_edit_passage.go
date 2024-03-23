@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"main/domain_model"
 	"net/http"
@@ -29,34 +28,40 @@ func PutEditPassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		intervalStr := r.FormValue("interval")
-		var interval *int64 = nil
-		if intervalStr != "" {
-			parsedInterval, err := strconv.ParseInt(intervalStr, 10, 32)
-			if err != nil {
-				http.Error(w, "Invalid interval", http.StatusBadRequest)
-				return
-			}
-
-			interval = &parsedInterval
-		}
+        passage, err := ctx.PassageRepo.Get(uint(id))
+        if err != nil {
+            fmt.Println(err.Error())
+        }
 
 		reference, err := domain_model.ParsePassageReference(r.FormValue("reference"))
 		if err != nil {
 			http.Error(w, "Invalid reference", http.StatusBadRequest)
 			return
 		}
+        passage.SetReference(reference)
 
-		reviewAtString := r.FormValue("review_at")
-		var reviewAt *string
-		if r.FormValue("review_at") != "" {
-			reviewAt = &reviewAtString
-		}
+        passage.SetText(r.FormValue("text"))
 
-		query := "UPDATE passage SET book = $3, start_chapter = $4, start_verse = $5, end_chapter = $6, end_verse = $7, text = $8, review_at = $9, interval = $10 WHERE id = $1 AND user_id = $2"
-		_, err = ctx.Conn.Exec(context.Background(), query, id, *session.user_id, reference.Book, reference.StartChapter, reference.StartVerse, reference.EndChapter, reference.EndVerse, r.FormValue("text"), reviewAt, interval)
+		intervalStr := r.FormValue("interval")
+		reviewAtStr := r.FormValue("review_at")
+        if (intervalStr != "" && reviewAtStr != "") {
+            interval, err := domain_model.ParseReviewInterval(intervalStr)
+            if err != nil {
+				http.Error(w, "Invalid interval", http.StatusBadRequest)
+                return
+            }
+            nextReview, err := domain_model.ParseNextReviewDate(reviewAtStr)
+            if err != nil {
+				http.Error(w, "Invalid review date", http.StatusBadRequest)
+                return
+            }
+
+            passage.SetReview(passage.Review.Update(interval, nextReview))
+        }
+
+        err = ctx.PassageRepo.Commit(&passage)
 		if err != nil {
-			println(err.Error())
+            println(err.Error())
 			http.Error(w, "Database Error", http.StatusInternalServerError)
 			return
 		}

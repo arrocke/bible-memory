@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"main/db"
 	"net/http"
 	"os"
 
@@ -16,6 +17,7 @@ import (
 type ServerContext struct {
 	Conn         *pgxpool.Pool
 	SessionStore *sessions.CookieStore
+    PassageRepo  db.PassageRepo
 }
 
 type FlashMessage struct {
@@ -36,10 +38,12 @@ func main() {
 	defer conn.Close()
 
 	store := sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
+    passageRepo := db.CreatePgPassageRepo(conn)
 
 	ctx := &ServerContext{
 		Conn:         conn,
 		SessionStore: store,
+        PassageRepo: &passageRepo,
 	}
 
 	r := mux.NewRouter()

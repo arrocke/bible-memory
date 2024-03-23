@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"main/domain_model"
 	"net/http"
@@ -27,16 +26,15 @@ func PostCreatePassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		var id int32
-		query := "INSERT INTO passage (book, start_chapter, start_verse, end_chapter, end_verse, text, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
-		err = ctx.Conn.QueryRow(context.Background(), query, reference.Book, reference.StartChapter, reference.StartVerse, reference.EndChapter, reference.EndVerse, r.FormValue("text"), *(session.user_id)).Scan(&id)
+        passage := domain_model.NewPassage(reference, r.FormValue("text"), uint(*session.user_id))
+        fmt.Printf("%v %v %v", passage.Reference.String(), passage.Text, passage.Owner)
 
-		if err != nil {
+        if err = ctx.PassageRepo.Commit(&passage); err != nil {
 			http.Error(w, "Database Error", http.StatusInternalServerError)
 			return
-		}
+        }
 
-		w.Header().Set("Hx-Redirect", fmt.Sprintf("/passages/%d/review", id))
+		w.Header().Set("Hx-Redirect", fmt.Sprintf("/passages/%d/review", passage.Id))
 		w.WriteHeader(http.StatusNoContent)
 	}).Methods("Post")
 }
