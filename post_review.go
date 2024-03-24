@@ -62,7 +62,7 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		now := GetClientDate(r)
+		now := domain_model.NewReviewTimestamp(GetClientDate(r))
 
 		grade, err := domain_model.ParseReviewGrade(r.FormValue("grade"))
 		if err != nil {

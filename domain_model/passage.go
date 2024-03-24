@@ -1,11 +1,23 @@
 package domain_model
 
-import "time"
+import (
+	"strconv"
+)
+
+type PassageId int
+
+func ParsePassageId(idstr string) (PassageId, error) {
+    id, err := strconv.ParseUint(idstr, 10, 32)
+    if err != nil {
+        return 0, err
+    }
+    return PassageId(id), nil
+}
 
 type Passage struct {
     new bool
 
-    Id int
+    Id Id
     Reference PassageReference
     Text string
     Owner int
@@ -34,12 +46,12 @@ func (p *Passage) SetText(text string) {
     p.Text = text
 }
 
-func (p *Passage) OverrideReviewState(interval ReviewInterval, nextReview ReviewTimestamp) {
-    nextReviewState := p.ReviewState.Update(interval, nextReview)
+func (p *Passage) SetReviewState(interval ReviewInterval, nextReview ReviewTimestamp) {
+    nextReviewState := p.ReviewState.Overwrite(interval, nextReview)
     p.ReviewState = &nextReviewState
 }
 
-func (p *Passage) Review(grade ReviewGrade, timestamp time.Time) {
-    nextReview := p.ReviewState.Review(grade, ReviewTimestamp(timestamp))
+func (p *Passage) Review(grade ReviewGrade, timestamp ReviewTimestamp) {
+    nextReview := p.ReviewState.NextAfterReview(grade, timestamp)
     p.ReviewState = &nextReview
 }

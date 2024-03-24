@@ -5,9 +5,28 @@ import (
 	"main/domain_model"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
+
+type editPassageForm struct {
+    Reference string;
+    Text string;
+    Interval *int;
+    ReviewAt *time.Time
+}
+
+func parseEditPassageForm(r *http.Request) (editPassageForm, error) {
+    var form editPassageForm
+
+    if err := r.ParseForm(); err != nil {
+        return form, nil
+    }
+
+    err := decoder.Decode(&form, r.PostForm)
+    return form, err
+}
 
 func PutEditPassage(router *mux.Router, ctx *ServerContext) {
 	router.HandleFunc("/passages/{Id}", func(w http.ResponseWriter, r *http.Request) {
@@ -33,30 +52,31 @@ func PutEditPassage(router *mux.Router, ctx *ServerContext) {
             fmt.Println(err.Error())
         }
 
-		reference, err := domain_model.ParsePassageReference(r.FormValue("reference"))
+        form, err := parseEditPassageForm(r)
+        if err != nil {
+            http.Error(w, "Invalid body", http.StatusBadRequest)
+            return
+        }
+
+		reference, err := domain_model.ParsePassageReference(form.Reference)
 		if err != nil {
 			http.Error(w, "Invalid reference", http.StatusBadRequest)
 			return
 		}
         passage.SetReference(reference)
 
-        passage.SetText(r.FormValue("text"))
+        passage.SetText(form.Text)
 
-		intervalStr := r.FormValue("interval")
-		reviewAtStr := r.FormValue("review_at")
-        if (intervalStr != "" && reviewAtStr != "") {
-            interval, err := domain_model.ParseReviewInterval(intervalStr)
+        if (form.Interval != nil && form.ReviewAt != nil) {
+            interval, err := domain_model.NewReviewInterval(*form.Interval)
             if err != nil {
 				http.Error(w, "Invalid interval", http.StatusBadRequest)
                 return
             }
-            nextReview, err := domain_model.ParseReviewTimestamp(reviewAtStr, "2006-01-02")
-            if err != nil {
-				http.Error(w, "Invalid review date", http.StatusBadRequest)
-                return
-            }
 
-            passage.OverrideReviewState(interval, nextReview)
+            nextReview := domain_model.NewReviewTimestamp(*form.ReviewAt)
+
+            passage.SetReviewState(interval, nextReview)
         }
 
         err = ctx.PassageRepo.Commit(&passage)

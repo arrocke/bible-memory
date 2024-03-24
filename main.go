@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
+    "github.com/gorilla/schema"
 )
 
 type ServerContext struct {
@@ -26,6 +27,8 @@ type FlashMessage struct {
 }
 
 var FlashTemplate = template.Must(template.ParseFiles("templates/flash.html"))
+
+var decoder = schema.NewDecoder()
 
 func main() {
 	godotenv.Load(".env")

@@ -4,6 +4,7 @@ go 1.21.6
 
 require (
 	github.com/gorilla/mux v1.8.1 // indirect
+	github.com/gorilla/schema v1.2.1 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/gorilla/sessions v1.2.2 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
