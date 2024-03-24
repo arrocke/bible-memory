@@ -50,18 +50,17 @@ func PutEditPassage(router *mux.Router, ctx *ServerContext) {
 				http.Error(w, "Invalid interval", http.StatusBadRequest)
                 return
             }
-            nextReview, err := domain_model.ParseNextReviewDate(reviewAtStr)
+            nextReview, err := domain_model.ParseReviewTimestamp(reviewAtStr, "2006-01-02")
             if err != nil {
 				http.Error(w, "Invalid review date", http.StatusBadRequest)
                 return
             }
 
-            passage.SetReview(passage.Review.Update(interval, nextReview))
+            passage.OverrideReviewState(interval, nextReview)
         }
 
         err = ctx.PassageRepo.Commit(&passage)
 		if err != nil {
-            println(err.Error())
 			http.Error(w, "Database Error", http.StatusInternalServerError)
 			return
 		}

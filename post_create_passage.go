@@ -26,13 +26,16 @@ func PostCreatePassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-        passage := domain_model.NewPassage(reference, r.FormValue("text"), uint(*session.user_id))
-        fmt.Printf("%v %v %v", passage.Reference.String(), passage.Text, passage.Owner)
+		passage := domain_model.NewPassage(
+            reference,
+            r.FormValue("text"),
+            int(*session.user_id),
+        )
 
-        if err = ctx.PassageRepo.Commit(&passage); err != nil {
+		if err = ctx.PassageRepo.Commit(&passage); err != nil {
 			http.Error(w, "Database Error", http.StatusInternalServerError)
 			return
-        }
+		}
 
 		w.Header().Set("Hx-Redirect", fmt.Sprintf("/passages/%d/review", passage.Id))
 		w.WriteHeader(http.StatusNoContent)

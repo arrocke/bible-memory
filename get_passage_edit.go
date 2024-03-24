@@ -17,10 +17,10 @@ func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
 	type PassageModel struct {
 		Id           int32
 		Book         string
-		StartChapter uint
-		StartVerse   uint
-		EndChapter   uint
-		EndVerse     uint
+		StartChapter int
+		StartVerse   int
+		EndChapter   int
+		EndVerse     int
 		Text         string
 		ReviewAt     *time.Time
 		Interval     *int

@@ -22,32 +22,29 @@ func CreatePgPassageRepo(pool *pgxpool.Pool) PgPassageRepo {
 	return PgPassageRepo{pool}
 }
 
-func (repo PgPassageRepo) Get(id uint) (domain_model.Passage, error) {
-	type passageModel struct {
-		Id           uint
-		Book         string
-		StartChapter uint
-		StartVerse   uint
-		EndChapter   uint
-		EndVerse     uint
-		Text         string
-		Owner        uint
-		Interval     *uint
-		ReviewedAt   *time.Time
-		NextReview   *time.Time
-	}
+type passageModel struct {
+    Id           int
+    Book         string
+    StartChapter int
+    StartVerse   int
+    EndChapter   int
+    EndVerse     int
+    Text         string
+    Owner        int
+    Interval     *int
+    ReviewedAt   *time.Time
+    NextReview   *time.Time
+}
 
-	query := `
-        SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text, user_id, interval, reviewed_at, review_at
-        FROM passage
-        WHERE id = $1
-    `
-	rows, _ := repo.pool.Query(context.Background(), query, id)
-	dbModel, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByPos[passageModel])
-	if err != nil {
-		return domain_model.Passage{}, err
+func (dbModel *passageModel) toDomain() domain_model.Passage {
+    var reviewState *domain_model.PassageReview
+	if dbModel.Interval != nil && dbModel.NextReview != nil {
+		reviewState = &domain_model.PassageReview{
+            Interval: domain_model.ReviewInterval(*dbModel.Interval),
+			NextReview: domain_model.ReviewTimestamp(*dbModel.NextReview),
+			ReviewedAt: (*domain_model.ReviewTimestamp)(dbModel.NextReview),
+		}
 	}
-
 	passage := domain_model.Passage{
 		Id: dbModel.Id,
 		Reference: domain_model.PassageReference{
@@ -59,15 +56,47 @@ func (repo PgPassageRepo) Get(id uint) (domain_model.Passage, error) {
 		},
 		Text:  dbModel.Text,
 		Owner: dbModel.Owner,
-	}
-	if dbModel.Interval != nil && dbModel.ReviewedAt != nil && dbModel.NextReview != nil {
-		passage.Review = &domain_model.PassageReview{
-            Interval:   *dbModel.Interval,
-			ReviewedAt: dbModel.ReviewedAt,
-            NextReview: *dbModel.NextReview,
-		}
+        ReviewState: reviewState,
 	}
 
+
+    return passage
+}
+
+func toDb(passage *domain_model.Passage) passageModel {
+    dbModel := passageModel {
+        Id: passage.Id,
+        Book: passage.Reference.Book,
+        StartChapter: passage.Reference.StartChapter,
+        StartVerse: passage.Reference.StartVerse,
+        EndChapter: passage.Reference.EndChapter,
+        EndVerse: passage.Reference.EndVerse,
+        Text: passage.Text,
+        Owner: passage.Owner,
+    }
+
+    if passage.ReviewState != nil {
+        dbModel.Interval = (*int)(&passage.ReviewState.Interval)
+        dbModel.ReviewedAt = (*time.Time)(passage.ReviewState.ReviewedAt)
+        dbModel.NextReview = (*time.Time)(&passage.ReviewState.NextReview)
+    }
+
+    return dbModel
+}
+
+func (repo PgPassageRepo) Get(id uint) (domain_model.Passage, error) {
+	query := `
+        SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text, user_id, interval, reviewed_at, review_at
+        FROM passage
+        WHERE id = $1
+    `
+	rows, _ := repo.pool.Query(context.Background(), query, id)
+	dbModel, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByPos[passageModel])
+	if err != nil {
+		return domain_model.Passage{}, err
+	}
+
+    passage := dbModel.toDomain()
 	return passage, nil
 }
 
@@ -95,28 +124,22 @@ func (repo PgPassageRepo) Commit(passage *domain_model.Passage) error {
         `
     }
 
-    var interval *uint
-    var reviewedAt *time.Time
-    var nextReview *time.Time
-    if passage.Review != nil {
-        interval = &passage.Review.Interval
-        reviewedAt = passage.Review.ReviewedAt
-        nextReview = &passage.Review.NextReview
-    }
+
+    dbModel := toDb(passage)
 
     _, err := repo.pool.Exec(
         context.Background(), query,
-        passage.Id,
-        passage.Reference.Book,
-        passage.Reference.StartChapter,
-        passage.Reference.StartVerse,
-        passage.Reference.EndChapter,
-        passage.Reference.EndVerse,
-        passage.Text,
-        passage.Owner,
-        interval,
-        reviewedAt,
-        nextReview,
+        dbModel.Id,
+        dbModel.Book,
+        dbModel.StartChapter,
+        dbModel.StartVerse,
+        dbModel.EndChapter,
+        dbModel.EndVerse,
+        dbModel.Text,
+        dbModel.Owner,
+        dbModel.Interval,
+        dbModel.ReviewedAt,
+        dbModel.NextReview,
     )
 
 	return err

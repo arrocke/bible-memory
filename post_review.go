@@ -1,15 +1,13 @@
 package main
 
 import (
-	"context"
-	"errors"
 	"html/template"
+	"main/domain_model"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/jackc/pgx/v5"
 )
 
 var REVIEW_MAP = [...]int{1, 1, 1, 2, 2, 3, 5, 8, 13, 21, 34, 55}
@@ -48,7 +46,7 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-        passage, err := ctx.PassageRepo.Get(uint(id))
+		passage, err := ctx.PassageRepo.Get(uint(id))
 		if err != nil {
 			http.Error(w, "Database Error", http.StatusInternalServerError)
 			return
@@ -66,22 +64,19 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 
 		now := GetClientDate(r)
 
-		grade, err := strconv.ParseInt(r.FormValue("grade"), 10, 32)
+		grade, err := domain_model.ParseReviewGrade(r.FormValue("grade"))
 		if err != nil {
 			http.Error(w, "Invalid grade", http.StatusBadRequest)
 			return
 		}
 
-        if err := passage.DoReview(uint(grade), now); err != nil {
-			http.Error(w, "Failed to process review", http.StatusInternalServerError)
-            return
-        }
+		passage.Review(grade, now)
 
-        err = ctx.PassageRepo.Commit(&passage)
-        if err != nil {
+		err = ctx.PassageRepo.Commit(&passage)
+		if err != nil {
 			http.Error(w, "Database Error", http.StatusInternalServerError)
-            return
-        }
+			return
+		}
 
 		passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetClientDate(r))
 		if err != nil {
@@ -89,6 +84,10 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		tmpl.ExecuteTemplate(w, "review_result.html", TemplateData{Grade: int(grade), ReviewAt: passage.Review.NextReview.Format("01-02-2006"), PassagesTemplateData: *passagesTemplateData})
+		tmpl.ExecuteTemplate(w, "review_result.html", TemplateData{
+			Grade:                int(grade),
+			ReviewAt:             passage.ReviewState.NextReview.Value().Format("01-02-2006"),
+			PassagesTemplateData: *passagesTemplateData,
+		})
 	}).Methods("Post")
 }

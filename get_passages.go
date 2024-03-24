@@ -28,10 +28,10 @@ func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32, clientDate time
 	type PassageModel struct {
 		Id           int32
 		Book         string
-		StartChapter uint
-		StartVerse   uint
-		EndChapter   uint
-		EndVerse     uint
+		StartChapter int
+		StartVerse   int
+		EndChapter   int
+		EndVerse     int
 		ReviewAt     *time.Time
 	}
 

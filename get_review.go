@@ -18,10 +18,10 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 	type PassageModel struct {
 		Id           int32
 		Book         string
-		StartChapter uint
-		StartVerse   uint
-		EndChapter   uint
-		EndVerse     uint
+		StartChapter int
+		StartVerse   int
+		EndChapter   int
+		EndVerse     int
 		Text         string
 		ReviewedAt   *time.Time
 		Interval     *int
@@ -111,9 +111,11 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 			Reference:       domain_model.PassageReference{passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse}.String(),
 			Words:           parseWords(passage.Text),
 			AlreadyReviewed: passage.ReviewedAt != nil && passage.ReviewedAt.Equal(now),
+            /*
 			HardInterval:    GetNextInterval(now, 2, passage.Interval, passage.ReviewedAt),
 			GoodInterval:    GetNextInterval(now, 3, passage.Interval, passage.ReviewedAt),
 			EasyInterval:    GetNextInterval(now, 4, passage.Interval, passage.ReviewedAt),
+            */
 		}
 
 		if r.Header.Get("Hx-Current-Url") == "" {

@@ -8,10 +8,10 @@ import (
 
 type PassageReference struct {
 	Book         string
-	StartChapter uint
-	StartVerse   uint
-	EndChapter   uint
-	EndVerse     uint
+	StartChapter int
+	StartVerse   int
+	EndChapter   int
+	EndVerse     int
 }
 
 func (r PassageReference) String() string {
@@ -55,10 +55,10 @@ func ParsePassageReference(str string) (PassageReference, error) {
 
 	return PassageReference{
 			Book:         match[1],
-			StartChapter: uint(startChapter),
-			StartVerse:   uint(startVerse),
-			EndChapter:   uint(endChapter),
-			EndVerse:     uint(endVerse),
+			StartChapter: int(startChapter),
+			StartVerse:   int(startVerse),
+			EndChapter:   int(endChapter),
+			EndVerse:     int(endVerse),
 		},
 		nil
 }
