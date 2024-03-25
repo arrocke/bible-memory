@@ -1,7 +1,6 @@
 package domain_model
 
 import (
-	"fmt"
 	"math"
 	"time"
 )
@@ -24,5 +23,4 @@ func (t ReviewTimestamp) IntervalToDate(other ReviewTimestamp) ReviewInterval {
 func (t ReviewTimestamp) AfterInterval(interval ReviewInterval) ReviewTimestamp {
 	return ReviewTimestamp(t.Value().AddDate(0, 0, interval.Value()))
 }
-
 

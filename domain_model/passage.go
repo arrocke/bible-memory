@@ -1,57 +1,42 @@
 package domain_model
 
-import (
-	"strconv"
-)
-
-type PassageId int
-
-func ParsePassageId(idstr string) (PassageId, error) {
-    id, err := strconv.ParseUint(idstr, 10, 32)
-    if err != nil {
-        return 0, err
-    }
-    return PassageId(id), nil
-}
-
 type Passage struct {
     new bool
 
-    Id Id
-    Reference PassageReference
-    Text string
-    Owner int
-    ReviewState *PassageReview
-}
-
-func (p Passage) IsNew() bool {
-    return p.new
+    id int
+    reference PassageReference
+    text string
+    owner int
+    reviewState *PassageReview
 }
 
 func NewPassage(reference PassageReference, text string, owner int) Passage {
     return Passage {
-        new: true,
-
-        Reference: reference,
-        Text: text,
-        Owner: owner,
+        reference: reference,
+        text: text,
+        owner: owner,
     }
 }
 
 func (p *Passage) SetReference(reference PassageReference) {
-    p.Reference = reference
+    p.reference = reference
 }
 
 func (p *Passage) SetText(text string) {
-    p.Text = text
+    p.text = text
 }
 
 func (p *Passage) SetReviewState(interval ReviewInterval, nextReview ReviewTimestamp) {
-    nextReviewState := p.ReviewState.Overwrite(interval, nextReview)
-    p.ReviewState = &nextReviewState
+    nextReviewState := p.reviewState.Overwrite(interval, nextReview)
+    p.reviewState = &nextReviewState
 }
 
 func (p *Passage) Review(grade ReviewGrade, timestamp ReviewTimestamp) {
-    nextReview := p.ReviewState.NextAfterReview(grade, timestamp)
-    p.ReviewState = &nextReview
+    if p.reviewState == nil {
+        nextReview := FirstReview(grade, timestamp)
+        p.reviewState = &nextReview
+    } else {
+        nextReview := p.reviewState.NextAfterReview(grade, timestamp)
+        p.reviewState = &nextReview
+    }
 }
