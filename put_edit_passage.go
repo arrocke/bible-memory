@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"main/domain_model"
+	"main/services"
 	"net/http"
 	"strconv"
 	"time"
@@ -47,43 +47,21 @@ func PutEditPassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-        passage, err := ctx.PassageRepo.Get(uint(id))
-        if err != nil {
-            fmt.Println(err.Error())
-        }
-
         form, err := parseEditPassageForm(r)
         if err != nil {
             http.Error(w, "Invalid body", http.StatusBadRequest)
             return
         }
 
-		reference, err := domain_model.ParsePassageReference(form.Reference)
-		if err != nil {
-			http.Error(w, "Invalid reference", http.StatusBadRequest)
-			return
-		}
-        passage.SetReference(reference)
-
-        passage.SetText(form.Text)
-
-        if (form.Interval != nil && form.ReviewAt != nil) {
-            interval, err := domain_model.NewReviewInterval(*form.Interval)
-            if err != nil {
-				http.Error(w, "Invalid interval", http.StatusBadRequest)
-                return
-            }
-
-            nextReview := domain_model.NewReviewTimestamp(*form.ReviewAt)
-
-            passage.SetReviewState(interval, nextReview)
+        if err := ctx.PassageService.Update(services.UpdatePassageRequest{
+            Id: int(id),
+            Reference: form.Reference,
+            Text: form.Text,
+            Interval: form.Interval,
+            ReviewAt: form.ReviewAt,
+        }); err != nil {
+            http.Error(w, "Error", http.StatusBadRequest)
         }
-
-        err = ctx.PassageRepo.Commit(&passage)
-		if err != nil {
-			http.Error(w, "Database Error", http.StatusInternalServerError)
-			return
-		}
 
 		w.Header().Set("Hx-Redirect", fmt.Sprintf("/passages/%d/review", id))
 		w.WriteHeader(http.StatusNoContent)

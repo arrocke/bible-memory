@@ -9,29 +9,10 @@ const GRADE_HARD = ReviewGrade(2)
 const GRADE_OK = ReviewGrade(3)
 const GRADE_EASY = ReviewGrade(4)
 
-type InvalidReviewGradeError struct {
-	Grade string
-}
-
-func (e InvalidReviewGradeError) Error() string {
-	return fmt.Sprintf("Invalid review grade: %v", e.Grade)
-}
-
-func ParseReviewGrade(gradestr string) (ReviewGrade, error) {
-	var grade int
-	switch gradestr {
-	case "1":
-		grade = 1
-	case "2":
-		grade = 2
-	case "3":
-		grade = 3
-	case "4":
-		grade = 4
-	default:
-		return 0, InvalidReviewGradeError{Grade: gradestr}
-	}
-
+func NewReviewGrade(grade int) (ReviewGrade, error) {
+    if grade <= 0 || grade > 4 {
+        return 0, fmt.Errorf("Invalid review grade: %v", grade)
+    }
 	return ReviewGrade(grade), nil
 }
 

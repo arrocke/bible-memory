@@ -1,42 +1,39 @@
 package domain_model
 
 type Passage struct {
-    new bool
-
-    id int
-    reference PassageReference
-    text string
-    owner int
-    reviewState *PassageReview
+    Id int
+    Reference PassageReference
+    Text string
+    Owner int
+    ReviewState *PassageReview
 }
 
 func NewPassage(reference PassageReference, text string, owner int) Passage {
     return Passage {
-        reference: reference,
-        text: text,
-        owner: owner,
+        Reference: reference,
+        Text: text,
+        Owner: owner,
     }
 }
 
 func (p *Passage) SetReference(reference PassageReference) {
-    p.reference = reference
+    p.Reference = reference
 }
 
 func (p *Passage) SetText(text string) {
-    p.text = text
+    p.Text = text
 }
 
-func (p *Passage) SetReviewState(interval ReviewInterval, nextReview ReviewTimestamp) {
-    nextReviewState := p.reviewState.Overwrite(interval, nextReview)
-    p.reviewState = &nextReviewState
+func (p *Passage) SetReviewState(reviewState *PassageReview) {
+    p.ReviewState = reviewState
 }
 
 func (p *Passage) Review(grade ReviewGrade, timestamp ReviewTimestamp) {
-    if p.reviewState == nil {
+    if p.ReviewState == nil {
         nextReview := FirstReview(grade, timestamp)
-        p.reviewState = &nextReview
+        p.ReviewState = &nextReview
     } else {
-        nextReview := p.reviewState.NextAfterReview(grade, timestamp)
-        p.reviewState = &nextReview
+        nextReview := p.ReviewState.NextAfterReview(grade, timestamp)
+        p.ReviewState = &nextReview
     }
 }

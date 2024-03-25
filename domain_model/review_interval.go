@@ -10,22 +10,14 @@ func (i ReviewInterval) Value() int {
 	return int(i)
 }
 
-type InvalidReviewIntervalError struct {
-	Interval int
-}
-
-func (e InvalidReviewIntervalError) Error() string {
-	return fmt.Sprintf("Invalid review interval: %v", e.Interval)
-}
-
 func NewReviewInterval(interval int) (ReviewInterval, error) {
     if interval <= 0 || interval > 4 {
-        return 0, InvalidReviewIntervalError{ interval }
+        return 0, fmt.Errorf("Invalid review interval: %v", interval)
     }
     return ReviewInterval(interval), nil
 }
 
-func FirstInterval(grade ReviewGrade) ReviewInterval {
+func FirstReviewInterval(grade ReviewGrade) ReviewInterval {
     switch grade {
     case GRADE_FAIL:
         return 1

@@ -7,10 +7,10 @@ type PassageReview struct {
 }
 
 func FirstReview(grade ReviewGrade, timestamp ReviewTimestamp) PassageReview {
-    interval := FirstInterval(grade)
+    interval := FirstReviewInterval(grade)
     return PassageReview {
         Interval: interval,
-        NextReview: timestamp.AfterInterval(interval),
+        NextReview: timestamp.AddInterval(interval),
         ReviewedAt: &timestamp,
     }
 }
@@ -25,15 +25,20 @@ func (current PassageReview) NextAfterReview(grade ReviewGrade, timestamp Review
 
     return PassageReview {
         Interval: nextInterval,
-        NextReview: timestamp.AfterInterval(nextInterval),
+        NextReview: timestamp.AddInterval(nextInterval),
         ReviewedAt: &timestamp,
     }
 }
 
-func (r PassageReview) Overwrite(interval ReviewInterval, nextReview ReviewTimestamp) PassageReview {
+func (r *PassageReview) Overwrite(interval ReviewInterval, nextReview ReviewTimestamp) PassageReview {
+    var reviewedAt *ReviewTimestamp
+    if r != nil {
+        reviewedAt = r.ReviewedAt
+    }
+
 	return PassageReview{
 		Interval:   interval,
-		ReviewedAt: r.ReviewedAt,
+		ReviewedAt: reviewedAt,
 		NextReview: nextReview,
 	}
 }

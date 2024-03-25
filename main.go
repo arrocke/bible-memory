@@ -5,20 +5,21 @@ import (
 	"fmt"
 	"html/template"
 	"main/db"
+	"main/services"
 	"net/http"
 	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/schema"
 	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
-    "github.com/gorilla/schema"
 )
 
 type ServerContext struct {
 	Conn         *pgxpool.Pool
 	SessionStore *sessions.CookieStore
-    PassageRepo  db.PassageRepo
+    PassageService *services.PassagesService
 }
 
 type FlashMessage struct {
@@ -42,11 +43,12 @@ func main() {
 
 	store := sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
     passageRepo := db.CreatePgPassageRepo(conn)
+    passageService := services.CreatePassagesService(passageRepo)
 
 	ctx := &ServerContext{
 		Conn:         conn,
 		SessionStore: store,
-        PassageRepo: &passageRepo,
+        PassageService: &passageService,
 	}
 
 	r := mux.NewRouter()

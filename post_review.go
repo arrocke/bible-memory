@@ -2,7 +2,7 @@ package main
 
 import (
 	"html/template"
-	"main/domain_model"
+	"main/services"
 	"net/http"
 	"strconv"
 	"time"
@@ -46,12 +46,6 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		passage, err := ctx.PassageRepo.Get(uint(id))
-		if err != nil {
-			http.Error(w, "Database Error", http.StatusInternalServerError)
-			return
-		}
-
 		if r.FormValue("mode") != "review" {
 			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetClientDate(r))
 			if err != nil {
@@ -62,21 +56,21 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		now := domain_model.NewReviewTimestamp(GetClientDate(r))
-
-		grade, err := domain_model.ParseReviewGrade(r.FormValue("grade"))
+		grade, err := strconv.ParseInt(r.FormValue("grade"), 10, 32)
 		if err != nil {
 			http.Error(w, "Invalid grade", http.StatusBadRequest)
 			return
 		}
 
-		passage.Review(grade, now)
+        tz := GetClientTZ(r)
 
-		err = ctx.PassageRepo.Commit(&passage)
-		if err != nil {
-			http.Error(w, "Database Error", http.StatusInternalServerError)
-			return
-		}
+        if err := ctx.PassageService.Review(services.ReviewPassageRequest{
+            Id: int(id),
+            Grade: int(grade),
+            Tz: tz,
+        }); err != nil {
+            http.Error(w, "Error", http.StatusBadRequest)
+        }
 
 		passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetClientDate(r))
 		if err != nil {
@@ -86,7 +80,8 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 
 		tmpl.ExecuteTemplate(w, "review_result.html", TemplateData{
 			Grade:                int(grade),
-			ReviewAt:             passage.ReviewState.NextReview.Value().Format("01-02-2006"),
+            // TODO: reload passage to send to client
+			// ReviewAt:             passage.ReviewState.NextReview.Value().Format("01-02-2006"),
 			PassagesTemplateData: *passagesTemplateData,
 		})
 	}).Methods("Post")

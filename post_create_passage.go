@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"main/domain_model"
+	"main/services"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -20,24 +20,16 @@ func PostCreatePassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		reference, err := domain_model.ParsePassageReference(r.FormValue("reference"))
-		if err != nil {
-			http.Error(w, "Invalid reference", http.StatusBadRequest)
-			return
-		}
+        id, err := ctx.PassageService.Create(services.CreatePassageRequest{
+            Reference: r.FormValue("reference"),
+            Text: r.FormValue("text"),
+            UserId: int(*session.user_id),
+        })
+        if err != nil {
+            http.Error(w, "Error", http.StatusBadRequest)
+        }
 
-		passage := domain_model.NewPassage(
-            reference,
-            r.FormValue("text"),
-            int(*session.user_id),
-        )
-
-		if err = ctx.PassageRepo.Commit(&passage); err != nil {
-			http.Error(w, "Database Error", http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Hx-Redirect", fmt.Sprintf("/passages/%d/review", passage.Id))
+		w.Header().Set("Hx-Redirect", fmt.Sprintf("/passages/%d/review", id))
 		w.WriteHeader(http.StatusNoContent)
 	}).Methods("Post")
 }
