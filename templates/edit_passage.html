@@ -1,3 +1,39 @@
 {{define "main"}}
-{{template "edit_passage_partial.html" .}}
+{{template "edit_passage" .}}
+{{end}}
+
+{{define "edit_passage"}}
+<div class="p-4">
+  <h2 class="view-heading">Edit {{.Reference}}</h2>
+  <form hx-put="/passages/{{.Id}}">
+    <div class="mb-4">
+      <label class="form-label" for="reference">Reference</label>
+      <div>
+        <input class="text-input" id="reference" type="text" name="reference" value="{{.Reference}}" required
+          pattern="(.+?)\s*(\d+)[.:](\d+)(?:\s*-\s*(?:(\d+)[.:])?(\d+))?" />
+      </div>
+    </div>
+    <div class="mb-4 flex gap-4">
+      <div>
+        <label class="form-label" for="review-at">Next Review</label>
+        <div>
+          <input class="text-input" id="review-at" type="date" name="review_at" value="{{.ReviewAt}}" />
+        </div>
+      </div>
+      <div>
+        <label class="form-label" for="interval">Interval</label>
+        <div>
+          <input class="text-input w-16" id="interval" type="number" name="interval" value="{{.Interval}}" min="1" step="1" />
+          days
+        </div>
+      </div>
+    </div>
+    <div class="mb-4">
+      <label class="form-label" for="text">Text</label>
+      <textarea class="text-input h-64 min-h-32 resize-y block w-full" id="text" name="text"
+        required>{{.Text}}</textarea>
+    </div>
+    <button class="button">Update</button>
+  </form>
+</div>
 {{end}}

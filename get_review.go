@@ -70,7 +70,7 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 		return words
 	}
 
-	tmpl := template.Must(template.ParseFiles("templates/review_partial.html", "templates/review.html", "templates/passage_list_partial.html", "templates/passages.html", "templates/layout.html"))
+	tmpl := template.Must(template.ParseFiles("templates/review.html", "templates/passage_list_partial.html", "templates/passages.html", "templates/layout.html"))
 
 	router.HandleFunc("/passages/{Id}/{Mode}", func(w http.ResponseWriter, r *http.Request) {
 		session, err := GetSession(r, ctx)
@@ -130,7 +130,7 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 				*passagesTemplateData,
 			})
 		} else {
-			tmpl.ExecuteTemplate(w, "review_partial.html", partialTemplateData)
+			tmpl.ExecuteTemplate(w, "review", partialTemplateData)
 		}
 	}).Methods("Get")
 }

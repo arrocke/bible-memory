@@ -1,3 +1,66 @@
 {{define "main"}}
-{{template "review_partial.html" .}}
+{{template "review" .}}
+{{end}}
+
+{{define "review"}}
+<div class="p-4 absolute w-full flex flex-col h-full min-h-0">
+  <h2 class="view-heading">Review {{.Reference}}</h2>
+  <div id="result"></div>
+  <div id="mode-select" class="flex">
+    <button
+      class="border border-slate-500 border-r-0 last:border-r px-4 h-8 font-bold first:rounded-l last:rounded-r"
+      type="button" data-mode="learn">Learn</button>
+    <button
+      class="border border-slate-500 border-r-0 last:border-r px-4 h-8 font-bold first:rounded-l last:rounded-r"
+      type="button" data-mode="recall">Recall</button>
+    <button
+      class="border border-slate-500 border-r-0 last:border-r px-4 h-8 font-bold first:rounded-l last:rounded-r"
+      type="button" data-mode="review">Review</button>
+  </div>
+  <div id="typer" class="flex-1 min-h-0"> </div>
+</div>
+
+<script type="text/javascript">
+  {
+    let selectModeRoot = document.querySelector('#mode-select')
+    selectModeRoot.addEventListener('click', e => {
+      const mode = e.target.dataset.mode
+      if (mode) {
+        selectModeRoot.style.display = 'none'
+        initTyper(mode)
+      }
+    })
+
+    let words = [
+      {{range .Words}}
+      {
+        word: "{{.Word}}",
+        {{if .Number}}number: "{{.Number}}",{{end}}
+        {{if .Prefix}}prefix: "{{.Prefix}}",{{end}}
+        {{if .Suffix}}suffix: "{{.Suffix}}"{{end}}
+      },
+      {{end}}
+    ]
+
+  function initTyper(mode) {
+    Typer({
+      el: document.querySelector('#typer'),
+      alreadyReviewed: {{.AlreadyReviewed}},
+      words,
+      mode,
+      intervals: {
+        hard: {{.HardInterval}},
+        good: {{.GoodInterval}},
+        easy: {{.EasyInterval}},
+      },
+      onComplete({ grade }) {
+        htmx.ajax("POST", "/passages/{{.Id}}/review", {
+          values: { grade, mode },
+          target: '#result'
+        })
+      }
+    })
+  }
+  }
+</script>
 {{end}}
