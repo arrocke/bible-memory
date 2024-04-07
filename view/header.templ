@@ -1,0 +1,60 @@
+package view
+
+templ header(model AppModel) {
+    <header class="px-4 py-2 border-b border-slate-300 flex items-baseline">
+        if model.User == nil {
+            <h1 class="text-2xl font-bold">Bible Memory</h1>
+        } else {
+            <a href="/passages">
+                <h1 class="text-2xl font-bold">Bible Memory</h1>
+            </a>
+            <nav class="flex-grow flex justify-end items-baseline" aria-label="Header Navigation">
+              <div class="relative">
+                <button class="font-bold hover:underline focus:underline flex items-end gap-1" id="user-dropdown"
+                  data-menu="user-menu">
+                  {model.User.FirstName} {model.User.LastName}
+                  <svg class="icon mb-1" aria-hidden="true">
+                    <use id="user-dropdown-icon" href="/assets/icons.svg#caret-down" />
+                  </svg>
+                </button>
+                <ul id="user-menu"
+                  class="invisible z-10 box-content absolute bg-white p-2 w-full -left-2 top-[34px] flex flex-col gap-3 border border-t-0 border-slate-300 rounded-b">
+                  <li>
+                    <a class="font-bold hover:underline focus:underline" href="/users/profile">Profile</a>
+                  </li>
+                  <li>
+                    <button class="font-bold hover:underline focus:underline" hx-post="/users/logout">Logout</button>
+                  </li>
+                </ul>
+              </div>
+            </nav>
+            <script type="text/javascript">
+                {
+                  const userDropdownButton = document.querySelector('#user-dropdown')
+                  const icon = document.querySelector('#user-dropdown-icon')
+                  let isOpen = false
+                  userDropdownButton?.addEventListener('click', e => {
+                    if (isOpen) return
+
+                    const menu = document.getElementById(e.target.dataset.menu)
+                    menu.classList.remove('invisible')
+                    isOpen = true
+                    icon.setAttribute('href', "/assets/icons.svg#caret-up")
+
+                    setTimeout(() => {
+                      const handler = e => {
+                        if (!menu.contains(e.target) && menu !== e.target) {
+                          isOpen = false
+                          menu.classList.add('invisible')
+                          icon.setAttribute('href', "/assets/icons.svg#caret-down")
+                          window.removeEventListener('click', handler)
+                        }
+                      }
+                      window.addEventListener('click', handler)
+                    })
+                  })
+                }
+            </script>
+        }
+    </header>
+}

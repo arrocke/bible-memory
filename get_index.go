@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"html/template"
+	"main/view"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -43,8 +43,6 @@ func LoadLayoutTemplateData(conn *pgxpool.Pool, user_id *int32) (*LayoutTemplate
 }
 
 func GetIndex(router *mux.Router, ctx *ServerContext) {
-	tmpl := template.Must(template.ParseFiles("templates/public_index.html", "templates/layout.html"))
-
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		session, err := GetSession(r, ctx)
 		if err != nil {
@@ -53,9 +51,12 @@ func GetIndex(router *mux.Router, ctx *ServerContext) {
 		}
 
 		if session == nil {
-			tmpl.ExecuteTemplate(w, "layout.html", LayoutTemplateData{})
+			view.App(view.AppModel{
+				Page: view.PublicIndexModel{},
+			}).Render(r.Context(), w)
 		} else {
 			http.Redirect(w, r, "/passages", http.StatusFound)
 		}
+
 	}).Methods("Get")
 }

@@ -1,15 +1,13 @@
 package main
 
 import (
-	"html/template"
+	"main/view"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
 func GetRegister(router *mux.Router, ctx *ServerContext) {
-	tmpl := template.Must(template.ParseFiles("templates/register.html", "templates/layout.html"))
-
 	router.HandleFunc("/users/register", func(w http.ResponseWriter, r *http.Request) {
 		session, err := GetSession(r, ctx)
 		if err != nil {
@@ -21,6 +19,8 @@ func GetRegister(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		tmpl.ExecuteTemplate(w, "layout.html", LayoutTemplateData{})
+        view.App(view.AppModel{
+            Page: view.RegisterPageModel{},
+        }).Render(r.Context(), w)
 	}).Methods("Get")
 }

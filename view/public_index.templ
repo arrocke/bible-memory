@@ -1,0 +1,11 @@
+package view
+
+type PublicIndexModel struct {}
+
+templ publicIndex(model PublicIndexModel) {
+    <div class="p-4 flex flex-col items-center gap-4">
+      <a href="/users/register" class="button">Register</a>
+      or
+      <a href="/users/login" class="button">Log In</a>
+    </div>
+}

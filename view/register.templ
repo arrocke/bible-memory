@@ -1,0 +1,65 @@
+package view
+
+type RegisterPageModel struct {}
+
+templ register(model RegisterPageModel) {
+    <div class="p-4 flex justify-center">
+      <div>
+        <h2 class="view-heading">Register</h2>
+        <form action="/users/register" method="POST">
+          <div class="mb-4">
+            <label class="form-label" for="email">Email</label>
+            <div>
+              <input type="email" id="email" class="text-input" name="email" required />
+            </div>
+          </div>
+          <div class="mb-4 flex gap-4">
+            <div class="flex-1 flex-shrink-0">
+              <label class="form-label" for="first-name">First Name</label>
+              <div>
+                <input id="first-name" class="text-input" name="first_name" required />
+              </div>
+            </div>
+            <div class="flex-1 flex-shrink-0">
+              <label class="form-label" for="last-name">Last Name</label>
+              <div>
+                <input id="last-name" class="text-input" name="last_name" required />
+              </div>
+            </div>
+          </div>
+          <div class="mb-4 flex gap-4">
+            <div class="flex-1 flex-shrink-0">
+              <label class="form-label" for="password">Password</label>
+              <div>
+                <input id="password" type="password" class="text-input" name="password" required />
+              </div>
+            </div>
+            <div class="flex-1 flex-shrink-0">
+              <label class="form-label" for="confirm_password">Confirm Password</label>
+              <div>
+                <input id="confirm_password" type="password" class="text-input" name="confirm_password" required />
+              </div>
+            </div>
+          </div>
+          <button class="button">Register</button>
+        </form>
+      </div>
+    </div>
+    <script type="text/javascript">
+      {
+        const password = document.querySelector('#password')
+        const confirmPassword = document.querySelector('#confirm_password')
+
+        function checkPasswordConfirmation() {
+          if (password.value !== confirmPassword.value) {
+            confirmPassword.setCustomValidity("password confirmation doesn't match")
+          } else {
+            confirmPassword.setCustomValidity("")
+          }
+        }
+
+        password.addEventListener('change', checkPasswordConfirmation)
+        confirmPassword.addEventListener('input', checkPasswordConfirmation)
+      }
+    </script>
+}

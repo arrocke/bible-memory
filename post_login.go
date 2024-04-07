@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"main/view"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -31,7 +32,12 @@ func PostLogin(router *mux.Router, ctx *ServerContext) {
 		user, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[DbUser])
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
-				LoginTemplate.ExecuteTemplate(w, "layout.html", LoginTemplateData{Email: form.Email, Error: "Invalid email or password"})
+                view.App(view.AppModel{
+                    Page: view.LoginPageModel{
+                        Email: form.Email,
+                        Error: "Invalid email or password",
+                    },
+                }).Render(r.Context(), w)
 			} else {
 				println(err.Error())
 				http.Error(w, "Database Error", http.StatusInternalServerError)
@@ -40,7 +46,12 @@ func PostLogin(router *mux.Router, ctx *ServerContext) {
 		}
 
 		if user.Password != form.Password {
-			LoginTemplate.ExecuteTemplate(w, "layout.html", LoginTemplateData{Email: form.Email, Error: "Invalid email or password"})
+            view.App(view.AppModel{
+                Page: view.LoginPageModel{
+                    Email: form.Email,
+                    Error: "Invalid email or password",
+                },
+            }).Render(r.Context(), w)
 			return
 		}
 

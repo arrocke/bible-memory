@@ -1,7 +1,7 @@
 package main
 
 import (
-	"html/template"
+	"main/view"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -13,8 +13,6 @@ type LoginTemplateData struct {
 	LayoutTemplateData
 }
 
-var LoginTemplate = template.Must(template.ParseFiles("templates/login.html", "templates/layout.html"))
-
 func GetLogin(router *mux.Router, ctx *ServerContext) {
 	router.HandleFunc("/users/login", func(w http.ResponseWriter, r *http.Request) {
 		session, err := GetSession(r, ctx)
@@ -23,11 +21,13 @@ func GetLogin(router *mux.Router, ctx *ServerContext) {
 			http.Error(w, "Session Error", http.StatusInternalServerError)
 			return
 		}
-		if session != nil {
-			http.Redirect(w, r, "/passages", http.StatusFound)
-			return
-		}
 
-		LoginTemplate.ExecuteTemplate(w, "layout.html", LoginTemplateData{})
+		if session == nil {
+			view.App(view.AppModel{
+				Page: view.LoginPageModel{},
+			}).Render(r.Context(), w)
+		} else {
+			http.Redirect(w, r, "/passages", http.StatusFound)
+		}
 	}).Methods("Get")
 }

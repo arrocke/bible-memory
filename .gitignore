@@ -2,3 +2,4 @@
 assets/styles.css
 bin/tailwindcss
 tmp/
+*_templ.go
