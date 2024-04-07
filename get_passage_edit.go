@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"errors"
-	"html/template"
 	"main/domain_model"
+	"main/view"
 	"net/http"
 	"strconv"
 	"time"
@@ -14,8 +14,8 @@ import (
 )
 
 func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
-	type PassageModel struct {
-		Id           int32
+	type passageModel struct {
+		Id           int
 		Book         string
 		StartChapter int
 		StartVerse   int
@@ -25,21 +25,6 @@ func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
 		ReviewAt     *time.Time
 		Interval     *int
 	}
-
-	type PartialTemplateData struct {
-		Id        int32
-		Reference string
-		Text      string
-		ReviewAt  string
-		Interval  *int
-	}
-
-	type TemplateData struct {
-		PartialTemplateData
-		PassagesTemplateData
-	}
-
-	tmpl := template.Must(template.ParseFiles("templates/edit_passage.html", "templates/passage_list_partial.html", "templates/passages.html", "templates/layout.html"))
 
 	router.HandleFunc("/passages/{Id}", func(w http.ResponseWriter, r *http.Request) {
 		session, err := GetSession(r, ctx)
@@ -63,7 +48,7 @@ func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
 		rows, _ := ctx.Conn.Query(context.Background(), query, id, *session.user_id)
 		defer rows.Close()
 
-		passage, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[PassageModel])
+		passage, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[passageModel])
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				http.Error(w, "Not Found", http.StatusNotFound)
@@ -73,32 +58,24 @@ func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		reviewAt := ""
-		if passage.ReviewAt != nil {
-			reviewAt = passage.ReviewAt.Format("2006-01-02")
-		}
-
-		partialTemplateData := PartialTemplateData{
+		model := view.EditPassagePageModel {
 			Id:        passage.Id,
 			Reference: domain_model.PassageReference{passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse}.String(),
 			Text:      passage.Text,
 			Interval:  passage.Interval,
-			ReviewAt:  reviewAt,
+			ReviewAt:  passage.ReviewAt,
 		}
 
 		if r.Header.Get("Hx-Current-Url") == "" {
-			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetClientDate(r))
-			if err != nil {
-				http.Error(w, "Database Error", http.StatusInternalServerError)
-				return
-			}
+            model, err := LoadPassagesPageModel(ctx.Conn, *session.user_id, GetClientDate(r), model)
+            if err != nil {
+                http.Error(w, "Database Error", http.StatusInternalServerError)
+                return
+            }
 
-			tmpl.ExecuteTemplate(w, "layout.html", TemplateData{
-				partialTemplateData,
-				*passagesTemplateData,
-			})
+            view.App(model).Render(r.Context(), w)
 		} else {
-			tmpl.ExecuteTemplate(w, "edit_passage", partialTemplateData)
+            view.EditPassagePage(model).Render(r.Context(), w)
 		}
 	}).Methods("Get")
 }

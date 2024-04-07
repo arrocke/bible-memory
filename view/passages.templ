@@ -15,12 +15,16 @@ templ passageListItem(model PassageListItemModel) {
         templ.KV("bg-green-300", model.ReviewDue)
     }>
       <div class="flex items-center mb-1">
-        <a class="flex-grow" href="/passages/{{.Id}}/review" hx-target="#main">
+        <a
+            class="flex-grow"
+            href={templ.URL(fmt.Sprintf("/passages/%v/review", model.Id))}
+            hx-target="#main"
+        >
           {model.Reference}
         </a>
         <a
             class="w-6 h-6 flex items-center justify-center"
-            href={templ.URL(fmt.Sprintf("/passages/%s", model.Id))}
+            href={templ.URL(fmt.Sprintf("/passages/%v", model.Id))}
             hx-target="#main"
         >
           <span class="sr-only">Edit</span>
@@ -30,7 +34,7 @@ templ passageListItem(model PassageListItemModel) {
         </a>
         <button
             class="-mr-1 w-6 h-6 text-red-700 flex items-center justify-center"
-            hx-delete={string(templ.URL(fmt.Sprintf("/passages/%s", model.Id)))}
+            hx-delete={string(templ.URL(fmt.Sprintf("/passages/%v", model.Id)))}
             hx-target="closest li" hx-swap="outerHTML" hx-confirm="Are you sure you want to delete {{.Reference}}?"
             title="Delete"
         >
@@ -101,6 +105,8 @@ templ passages(model PassagesPageModel) {
         switch page := model.Page.(type) {
             case AddPassagePageModel:
                 @AddPassagePage(page)
+            case EditPassagePageModel:
+                @EditPassagePage(page)
         }
       </main>
     </div>
