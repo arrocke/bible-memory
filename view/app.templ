@@ -51,6 +51,8 @@ templ App(model AppModel) {
                 switch page := model.Page.(type) {
                     case ProfilePageModel:
                         @profile(page)
+                    case PassagesPageModel:
+                        @passages(page)
                 }
             }
         </div>

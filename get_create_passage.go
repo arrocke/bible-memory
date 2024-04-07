@@ -1,15 +1,13 @@
 package main
 
 import (
-	"html/template"
+	"main/view"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
 func GetCreatePassage(router *mux.Router, ctx *ServerContext) {
-	tmpl := template.Must(template.ParseFiles("templates/add_passage.html", "templates/passage_list_partial.html", "templates/passages.html", "templates/layout.html"))
-
 	router.HandleFunc("/passages/new", func(w http.ResponseWriter, r *http.Request) {
 		session, err := GetSession(r, ctx)
 		if err != nil {
@@ -22,14 +20,15 @@ func GetCreatePassage(router *mux.Router, ctx *ServerContext) {
 		}
 
 		if r.Header.Get("Hx-Current-Url") == "" {
-			templateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetClientDate(r))
-			if err != nil {
-				http.Error(w, "Database Error", http.StatusInternalServerError)
-			}
+            model, err := LoadPassagesPageModel(ctx.Conn, *session.user_id, GetClientDate(r), view.AddPassagePageModel{})
+            if err != nil {
+                http.Error(w, "Database Error", http.StatusInternalServerError)
+                return
+            }
 
-			tmpl.ExecuteTemplate(w, "layout.html", templateData)
+            view.App(model).Render(r.Context(), w)
 		} else {
-			tmpl.ExecuteTemplate(w, "add_passage", nil)
+            view.AddPassagePage(view.AddPassagePageModel{}).Render(r.Context(), w)
 		}
 
 	}).Methods("Get")

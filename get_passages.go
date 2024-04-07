@@ -2,14 +2,15 @@ package main
 
 import (
 	"context"
-	"html/template"
 	"net/http"
 	"time"
+
+	"main/domain_model"
+	"main/view"
 
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-    "main/domain_model"
 )
 
 type PassageListItem struct {
@@ -76,8 +77,68 @@ func LoadPassagesTemplateData(conn *pgxpool.Pool, user_id int32, clientDate time
 	return &templateData, nil
 }
 
+func LoadPassagesPageModel(conn *pgxpool.Pool, user_id int32, clientDate time.Time, page interface{},) (view.AppModel, error) {
+	type passageModel struct {
+		Id           int
+		Book         string
+		StartChapter int
+		StartVerse   int
+		EndChapter   int
+		EndVerse     int
+		ReviewAt     *time.Time
+	}
+
+    query := `SELECT first_name, last_name FROM "user" WHERE id = $1`
+    rows, _ := conn.Query(context.Background(), query, user_id)
+    user, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[view.UserModel])
+    if err != nil {
+        return view.AppModel{},err
+    }
+
+    query = `
+        SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, review_at
+        FROM passage
+        WHERE user_id = $1
+        ORDER BY book, start_chapter, start_verse, end_chapter, end_verse
+    `
+    rows, _ = conn.Query(context.Background(), query, user_id)
+    dbpassages, err := pgx.CollectRows(rows, pgx.RowToStructByName[passageModel])
+    if err != nil {
+        return view.AppModel{},err
+    }
+
+    passages := make([]view.PassageListItemModel, len(dbpassages))
+    for i, dbpassage := range dbpassages {
+        passageData := view.PassageListItemModel{
+            Id:        dbpassage.Id,
+            Reference: domain_model.PassageReference{dbpassage.Book, dbpassage.StartChapter, dbpassage.StartVerse, dbpassage.EndChapter, dbpassage.EndVerse}.String(),
+        }
+        if dbpassage.ReviewAt != nil {
+            passageData.ReviewAt = dbpassage.ReviewAt.Format("01-02-2006")
+            passageData.ReviewDue = clientDate.Compare(*dbpassage.ReviewAt) >= 0
+        }
+        passages[i] = passageData
+    }
+
+    return view.AppModel {
+        Page: view.PassagesPageModel{
+            Passages: passages,
+            Page: page,
+        },
+        User: &user,
+    }, nil
+}
+
 func GetPassages(router *mux.Router, ctx *ServerContext) {
-	tmpl := template.Must(template.ParseFiles("templates/passage_list_partial.html", "templates/passages.html", "templates/layout.html"))
+	type passageModel struct {
+		Id           int
+		Book         string
+		StartChapter int
+		StartVerse   int
+		EndChapter   int
+		EndVerse     int
+		ReviewAt     *time.Time
+	}
 
 	router.HandleFunc("/passages", func(w http.ResponseWriter, r *http.Request) {
 		session, err := GetSession(r, ctx)
@@ -90,13 +151,16 @@ func GetPassages(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		data, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetClientDate(r))
-		data.StartOpen = true
-		if err != nil {
+        model, err := LoadPassagesPageModel(ctx.Conn, *session.user_id, GetClientDate(r), nil)
+        if err != nil {
 			http.Error(w, "Database Error", http.StatusInternalServerError)
 			return
-		}
+        }
 
-		tmpl.ExecuteTemplate(w, "layout.html", data)
+        if page, ok := model.Page.(view.PassagesPageModel); ok {
+            page.StartOpen = true
+        }
+
+        view.App(model).Render(r.Context(), w)
 	}).Methods("GET")
 }
