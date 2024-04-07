@@ -3,10 +3,9 @@ package main
 import (
 	"context"
 	"errors"
-	"html/template"
 	"main/domain_model"
+	"main/view"
 	"net/http"
-	"regexp"
 	"strconv"
 	"time"
 
@@ -16,7 +15,7 @@ import (
 
 func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 	type PassageModel struct {
-		Id           int32
+		Id           int
 		Book         string
 		StartChapter int
 		StartVerse   int
@@ -26,51 +25,6 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 		ReviewedAt   *time.Time
 		Interval     *int
 	}
-
-	type ReviewWord struct {
-		Number      string
-		Prefix      string
-		Word        string
-		Suffix      string
-		FirstLetter string
-		RestOfWord  string
-	}
-	type PartialTemplateData struct {
-		Id              int32
-		Reference       string
-		Words           []ReviewWord
-		AlreadyReviewed bool
-		HardInterval    int
-		GoodInterval    int
-		EasyInterval    int
-	}
-	type TemplateData struct {
-		PartialTemplateData
-		PassagesTemplateData
-	}
-
-	wordRegex := regexp.MustCompile(`(?:(\d+)\s?)?([^A-Za-zÀ-ÖØ-öø-ÿ\s]+)?([A-Za-zÀ-ÖØ-öø-ÿ]+(?:(?:'|’|-)[A-Za-zÀ-ÖØ-öø-ÿ]+)?(?:'|’)?)([^A-Za-zÀ-ÖØ-öø-ÿ0-9]*\s+)?`)
-
-	parseWords := func(text string) []ReviewWord {
-		matches := wordRegex.FindAllStringSubmatch(text, -1)
-
-		words := make([]ReviewWord, len(matches))
-
-		for i, match := range matches {
-			words[i] = ReviewWord{
-				Number:      match[1],
-				Prefix:      match[2],
-				Word:        match[3],
-				Suffix:      match[4],
-				FirstLetter: match[3][0:1],
-				RestOfWord:  match[3][1:],
-			}
-		}
-
-		return words
-	}
-
-	tmpl := template.Must(template.ParseFiles("templates/review.html", "templates/passage_list_partial.html", "templates/passages.html", "templates/layout.html"))
 
 	router.HandleFunc("/passages/{Id}/{Mode}", func(w http.ResponseWriter, r *http.Request) {
 		session, err := GetSession(r, ctx)
@@ -106,10 +60,10 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 
 		now := GetClientDate(r)
 
-		partialTemplateData := PartialTemplateData{
+		model := view.ReviewPassagePageModel{
 			Id:              passage.Id,
 			Reference:       domain_model.PassageReference{passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse}.String(),
-			Words:           parseWords(passage.Text),
+            Text: passage.Text,
 			AlreadyReviewed: passage.ReviewedAt != nil && passage.ReviewedAt.Equal(now),
             /*
 			HardInterval:    GetNextInterval(now, 2, passage.Interval, passage.ReviewedAt),
@@ -119,18 +73,15 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 		}
 
 		if r.Header.Get("Hx-Current-Url") == "" {
-			passagesTemplateData, err := LoadPassagesTemplateData(ctx.Conn, *session.user_id, GetClientDate(r))
-			if err != nil {
-				http.Error(w, "Database Error", http.StatusInternalServerError)
-				return
-			}
+            model, err := LoadPassagesPageModel(ctx.Conn, *session.user_id, GetClientDate(r), model)
+            if err != nil {
+                http.Error(w, "Database Error", http.StatusInternalServerError)
+                return
+            }
 
-			tmpl.ExecuteTemplate(w, "layout.html", TemplateData{
-				partialTemplateData,
-				*passagesTemplateData,
-			})
+            view.App(model).Render(r.Context(), w)
 		} else {
-			tmpl.ExecuteTemplate(w, "review", partialTemplateData)
+            view.ReviewPassagePage(model).Render(r.Context(), w)
 		}
 	}).Methods("Get")
 }
