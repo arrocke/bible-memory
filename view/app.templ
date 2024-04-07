@@ -47,6 +47,11 @@ templ App(model AppModel) {
                     case RegisterPageModel:
                         @register(page)
                 }
+            } else {
+                switch page := model.Page.(type) {
+                    case ProfilePageModel:
+                        @profile(page)
+                }
             }
         </div>
     </body>

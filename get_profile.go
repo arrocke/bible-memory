@@ -1,24 +1,18 @@
 package main
 
 import (
-	"html/template"
+	"main/view"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/jackc/pgx/v5"
 )
 
 func GetProfile(router *mux.Router, ctx *ServerContext) {
-	tmpl := template.Must(template.ParseFiles("templates/profile.html", "templates/layout.html"))
-
-	type UserProfile struct {
+	type userModel struct {
 		Email     string
 		FirstName string
 		LastName  string
-	}
-
-	type TemplateData struct {
-		LayoutTemplateData
-		User UserProfile
 	}
 
 	router.HandleFunc("/users/profile", func(w http.ResponseWriter, r *http.Request) {
@@ -32,12 +26,24 @@ func GetProfile(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		templateData, err := LoadLayoutTemplateData(ctx.Conn, session.user_id)
+        query := `SELECT email, first_name, last_name FROM "user" WHERE id = $1`
+        rows, _ := ctx.Conn.Query(r.Context(), query, session.user_id)
+        user, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[userModel])
 		if err != nil {
 			http.Error(w, "Database Error", http.StatusInternalServerError)
 			return
 		}
 
-		tmpl.ExecuteTemplate(w, "layout.html", templateData)
+        view.App(view.AppModel {
+            Page: view.ProfilePageModel{
+                Email: user.Email,
+                FirstName: user.FirstName,
+                LastName: user.LastName,
+            },
+            User: &view.UserModel{
+                FirstName: user.FirstName,
+                LastName: user.LastName,
+            },
+        }).Render(r.Context(), w)
 	}).Methods("Get")
 }
