@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"html/template"
 	"main/db"
 	"main/services"
 	"net/http"
@@ -26,8 +25,6 @@ type FlashMessage struct {
 	Type string
 	Text string
 }
-
-var FlashTemplate = template.Must(template.ParseFiles("templates/flash.html"))
 
 var decoder = schema.NewDecoder()
 
