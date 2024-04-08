@@ -32,12 +32,10 @@ func PostLogin(router *mux.Router, ctx *ServerContext) {
 		user, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[DbUser])
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
-                view.App(view.AppModel{
-                    Page: view.LoginPageModel{
-                        Email: form.Email,
-                        Error: "Invalid email or password",
-                    },
-                }).Render(r.Context(), w)
+                view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderLoginError(
+                    "Invalid email or password",
+                    form.Email,
+                )
 			} else {
 				println(err.Error())
 				http.Error(w, "Database Error", http.StatusInternalServerError)
@@ -46,12 +44,10 @@ func PostLogin(router *mux.Router, ctx *ServerContext) {
 		}
 
 		if user.Password != form.Password {
-            view.App(view.AppModel{
-                Page: view.LoginPageModel{
-                    Email: form.Email,
-                    Error: "Invalid email or password",
-                },
-            }).Render(r.Context(), w)
+            view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderLoginError(
+                "Invalid email or password",
+                form.Email,
+            )
 			return
 		}
 

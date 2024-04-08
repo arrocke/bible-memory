@@ -19,8 +19,6 @@ func GetRegister(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-        view.App(view.AppModel{
-            Page: view.RegisterPageModel{},
-        }).Render(r.Context(), w)
+        view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderRegister()
 	}).Methods("Get")
 }

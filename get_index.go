@@ -51,9 +51,7 @@ func GetIndex(router *mux.Router, ctx *ServerContext) {
 		}
 
 		if session == nil {
-			view.App(view.AppModel{
-				Page: view.PublicIndexModel{},
-			}).Render(r.Context(), w)
+			view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderIndex()
 		} else {
 			http.Redirect(w, r, "/passages", http.StatusFound)
 		}

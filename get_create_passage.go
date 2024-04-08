@@ -20,15 +20,9 @@ func GetCreatePassage(router *mux.Router, ctx *ServerContext) {
 		}
 
 		if r.Header.Get("Hx-Current-Url") == "" {
-            model, err := LoadPassagesPageModel(ctx.Conn, *session.user_id, GetClientDate(r), view.AddPassagePageModel{})
-            if err != nil {
-                http.Error(w, "Database Error", http.StatusInternalServerError)
-                return
-            }
-
-            view.App(model).Render(r.Context(), w)
+            view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderCreatePassage(int(*session.user_id), GetClientDate(r))
 		} else {
-            view.AddPassagePage(view.AddPassagePageModel{}).Render(r.Context(), w)
+            view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderCreatePassagePartial()
 		}
 
 	}).Methods("Get")

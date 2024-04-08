@@ -1,7 +1,6 @@
 package main
 
 import (
-	"main/domain_model"
 	"main/services"
 	"main/view"
 	"net/http"
@@ -9,7 +8,6 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/jackc/pgx/v5"
 )
 
 var REVIEW_MAP = [...]int{1, 1, 1, 2, 2, 3, 5, 8, 13, 21, 34, 55}
@@ -44,37 +42,7 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 		}
 
 		if r.FormValue("mode") != "review" {
-			query := `
-                SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, review_at
-                FROM passage
-                WHERE user_id = $1
-                ORDER BY book, start_chapter, start_verse, end_chapter, end_verse
-            `
-			rows, _ := ctx.Conn.Query(r.Context(), query, session.user_id)
-			dbpassages, err := pgx.CollectRows(rows, pgx.RowToStructByName[passageModel])
-			if err != nil {
-				http.Error(w, "Error", http.StatusBadRequest)
-				return
-			}
-
-			clientDate := GetClientDate(r)
-
-			passages := make([]view.PassageListItemModel, len(dbpassages))
-			for i, dbpassage := range dbpassages {
-				passageData := view.PassageListItemModel{
-					Id:        dbpassage.Id,
-					Reference: domain_model.PassageReference{dbpassage.Book, dbpassage.StartChapter, dbpassage.StartVerse, dbpassage.EndChapter, dbpassage.EndVerse}.String(),
-				}
-				if dbpassage.ReviewAt != nil {
-					passageData.ReviewAt = dbpassage.ReviewAt.Format("01-02-2006")
-					passageData.ReviewDue = clientDate.Compare(*dbpassage.ReviewAt) >= 0
-				}
-				passages[i] = passageData
-			}
-
-			view.ReviewResult(view.ReviewResultModel{
-				Passages: passages,
-			}).Render(r.Context(), w)
+            view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderReviewResult(int(*session.user_id), GetClientDate(r))
 			return
 		}
 
@@ -95,37 +63,6 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-		query := `
-            SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, review_at
-            FROM passage
-            WHERE user_id = $1
-            ORDER BY book, start_chapter, start_verse, end_chapter, end_verse
-        `
-		rows, _ := ctx.Conn.Query(r.Context(), query, session.user_id)
-		dbpassages, err := pgx.CollectRows(rows, pgx.RowToStructByName[passageModel])
-		if err != nil {
-			http.Error(w, "Error", http.StatusBadRequest)
-			return
-		}
-
-		clientDate := GetClientDate(r)
-
-		passages := make([]view.PassageListItemModel, len(dbpassages))
-		for i, dbpassage := range dbpassages {
-			passageData := view.PassageListItemModel{
-				Id:        dbpassage.Id,
-				Reference: domain_model.PassageReference{dbpassage.Book, dbpassage.StartChapter, dbpassage.StartVerse, dbpassage.EndChapter, dbpassage.EndVerse}.String(),
-			}
-			if dbpassage.ReviewAt != nil {
-				passageData.ReviewAt = dbpassage.ReviewAt.Format("01-02-2006")
-				passageData.ReviewDue = clientDate.Compare(*dbpassage.ReviewAt) >= 0
-			}
-			passages[i] = passageData
-		}
-
-		view.ReviewResult(view.ReviewResultModel{
-			// ReviewAt:             passage.ReviewState.NextReview.Value().Format("01-02-2006"),
-			Passages: passages,
-		}).Render(r.Context(), w)
+        view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderReviewResult(int(*session.user_id), GetClientDate(r))
 	}).Methods("Post")
 }

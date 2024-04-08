@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/jackc/pgx/v5"
 )
 
 func GetProfile(router *mux.Router, ctx *ServerContext) {
@@ -26,24 +25,11 @@ func GetProfile(router *mux.Router, ctx *ServerContext) {
 			return
 		}
 
-        query := `SELECT email, first_name, last_name FROM "user" WHERE id = $1`
-        rows, _ := ctx.Conn.Query(r.Context(), query, session.user_id)
-        user, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[userModel])
-		if err != nil {
-			http.Error(w, "Database Error", http.StatusInternalServerError)
-			return
-		}
+        engine := view.CreateViewEngine(ctx.Conn, r.Context(), w)
 
-        view.App(view.AppModel {
-            Page: view.ProfilePageModel{
-                Email: user.Email,
-                FirstName: user.FirstName,
-                LastName: user.LastName,
-            },
-            User: &view.UserModel{
-                FirstName: user.FirstName,
-                LastName: user.LastName,
-            },
-        }).Render(r.Context(), w)
+        if err = engine.RenderProfile((int)(*session.user_id)); err != nil {
+			http.Error(w, "Server Error", http.StatusInternalServerError)
+			return
+        }
 	}).Methods("Get")
 }
