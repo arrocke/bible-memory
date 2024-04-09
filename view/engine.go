@@ -2,7 +2,6 @@ package view
 
 import (
 	"context"
-	"main/domain_model"
 	"net/http"
 	"time"
 
@@ -74,7 +73,13 @@ func (eng ViewEngine) LoadPassagesPageModel(user_id int, clientDate time.Time, p
     for i, dbpassage := range dbpassages {
         passageData := PassageListItemModel{
             Id:        dbpassage.Id,
-            Reference: domain_model.PassageReference{dbpassage.Book, dbpassage.StartChapter, dbpassage.StartVerse, dbpassage.EndChapter, dbpassage.EndVerse}.String(),
+            Reference: PassageReference{
+                Book: dbpassage.Book, 
+                StartChapter: dbpassage.StartChapter,
+                StartVerse: dbpassage.StartVerse,
+                EndChapter: dbpassage.EndChapter,
+                EndVerse: dbpassage.EndVerse,
+            }.String(),
         }
         if dbpassage.ReviewAt != nil {
             passageData.ReviewAt = dbpassage.ReviewAt.Format("01-02-2006")
@@ -121,7 +126,13 @@ func (eng ViewEngine) LoadEditPassageModel(userId int, passageId int) (EditPassa
 
     model := EditPassagePageModel {
         Id:        passage.Id,
-        Reference: domain_model.PassageReference{passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse}.String(),
+        Reference: PassageReference{
+            Book: passage.Book, 
+            StartChapter: passage.StartChapter,
+            StartVerse: passage.StartVerse,
+            EndChapter: passage.EndChapter,
+            EndVerse: passage.EndVerse,
+        }.String(),
         Text:      passage.Text,
         Interval:  passage.Interval,
         ReviewAt:  passage.ReviewAt,
@@ -154,7 +165,13 @@ func (eng ViewEngine) LoadReviewPassageModel(userId int, passageId int, clientDa
 
     model := ReviewPassagePageModel{
         Id:              passage.Id,
-        Reference:       domain_model.PassageReference{passage.Book, passage.StartChapter, passage.StartVerse, passage.EndChapter, passage.EndVerse}.String(),
+        Reference: PassageReference{
+            Book: passage.Book, 
+            StartChapter: passage.StartChapter,
+            StartVerse: passage.StartVerse,
+            EndChapter: passage.EndChapter,
+            EndVerse: passage.EndVerse,
+        }.String(),
         Text: passage.Text,
         AlreadyReviewed: passage.ReviewedAt != nil && passage.ReviewedAt.Equal(clientDate),
         /*
@@ -323,7 +340,13 @@ func (eng ViewEngine) RenderReviewResult(userId int, clientDate time.Time) error
     for i, dbpassage := range dbpassages {
         passageData := PassageListItemModel{
             Id:        dbpassage.Id,
-            Reference: domain_model.PassageReference{dbpassage.Book, dbpassage.StartChapter, dbpassage.StartVerse, dbpassage.EndChapter, dbpassage.EndVerse}.String(),
+            Reference: PassageReference{
+                Book: dbpassage.Book, 
+                StartChapter: dbpassage.StartChapter,
+                StartVerse: dbpassage.StartVerse,
+                EndChapter: dbpassage.EndChapter,
+                EndVerse: dbpassage.EndVerse,
+            }.String(),
         }
         if dbpassage.ReviewAt != nil {
             passageData.ReviewAt = dbpassage.ReviewAt.Format("01-02-2006")
