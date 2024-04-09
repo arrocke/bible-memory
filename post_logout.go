@@ -7,22 +7,22 @@ import (
 )
 
 func PostLogout(router *mux.Router, ctx *ServerContext) {
-	router.HandleFunc("/users/logout", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/users/logout", HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
 		session, err := ctx.SessionStore.Get(r, "session")
 		if err != nil {
-			http.Error(w, "Session error", http.StatusInternalServerError)
-			return
+			return err
 		}
 
 		if session != nil {
 			delete(session.Values, "user_id")
-			err = session.Save(r, w)
-			if err != nil {
-				http.Error(w, "Session Error", http.StatusInternalServerError)
+            if err := session.Save(r, w); err != nil {
+                return err
 			}
 		}
 
 		w.Header().Set("Hx-Redirect", "/")
 		w.WriteHeader(http.StatusNoContent)
-	}).Methods("Post")
+
+        return nil
+	})).Methods("Post")
 }

@@ -8,22 +8,27 @@ import (
 )
 
 func GetCreatePassage(router *mux.Router, ctx *ServerContext) {
-	router.HandleFunc("/passages/new", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/passages/new", HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
 		session, err := GetSession(r, ctx)
 		if err != nil {
-			http.Error(w, "Session Error", http.StatusInternalServerError)
-			return
+			return err
 		}
 		if session == nil {
 			http.Redirect(w, r, "/", http.StatusFound)
-			return
+			return nil
 		}
 
+        engine := view.CreateViewEngine(ctx.Conn, r.Context(), w)
 		if r.Header.Get("Hx-Current-Url") == "" {
-            view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderCreatePassage(int(*session.user_id), GetClientDate(r))
+            if err := engine.RenderCreatePassage(int(*session.user_id), GetClientDate(r)); err != nil {
+                return err
+            }
 		} else {
-            view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderCreatePassagePartial()
+            if err := engine.RenderCreatePassagePartial(); err != nil {
+                return err
+            }
 		}
 
-	}).Methods("Get")
+        return nil
+	})).Methods("Get")
 }

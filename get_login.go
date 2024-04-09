@@ -8,18 +8,20 @@ import (
 )
 
 func GetLogin(router *mux.Router, ctx *ServerContext) {
-	router.HandleFunc("/users/login", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/users/login", HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
 		session, err := GetSession(r, ctx)
 		if err != nil {
-			println(err.Error())
-			http.Error(w, "Session Error", http.StatusInternalServerError)
-			return
+			return err
 		}
 
 		if session == nil {
-            view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderLogin()
+            if err := view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderLogin(); err != nil {
+                return err
+            }
 		} else {
 			http.Redirect(w, r, "/passages", http.StatusFound)
 		}
-	}).Methods("Get")
+
+        return nil
+	})).Methods("Get")
 }

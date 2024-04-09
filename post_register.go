@@ -8,7 +8,7 @@ import (
 )
 
 func PostRegister(router *mux.Router, ctx *ServerContext) {
-	type RegisterForm struct {
+	type registerForm struct {
 		Email           string
 		FirstName       string
 		LastName        string
@@ -16,8 +16,8 @@ func PostRegister(router *mux.Router, ctx *ServerContext) {
 		ConfirmPassword string
 	}
 
-	router.HandleFunc("/users/register", func(w http.ResponseWriter, r *http.Request) {
-		form := RegisterForm{
+	router.HandleFunc("/users/register", HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
+		form := registerForm{
 			Email:           r.FormValue("email"),
 			FirstName:       r.FormValue("first_name"),
 			LastName:        r.FormValue("last_name"),
@@ -29,26 +29,22 @@ func PostRegister(router *mux.Router, ctx *ServerContext) {
 		query := `INSERT INTO "user" (email, first_name, last_name, password) VALUES ($1, $2, $3, $4) RETURNING id`
 		err := ctx.Conn.QueryRow(context.Background(), query, form.Email, form.FirstName, form.LastName, form.Password).Scan(&id)
 		if err != nil {
-			println(err.Error())
-			http.Error(w, "Database Error", http.StatusInternalServerError)
-			return
+			return err
 		}
 
 		session, err := ctx.SessionStore.New(r, "session")
 		if err != nil {
-			http.Error(w, "Session error", http.StatusInternalServerError)
-			return
+			return err
 		}
 
 		session.Values["user_id"] = id
-		err = session.Save(r, w)
-		if err != nil {
-			println(err.Error())
-			http.Error(w, "Session Error", http.StatusInternalServerError)
-			return
+        if err := session.Save(r, w); err != nil {
+			return err
 		}
 
 		w.Header().Set("Hx-Redirect", "/passages")
 		w.WriteHeader(http.StatusNoContent)
-	}).Methods("Post")
+
+        return nil
+	})).Methods("Post")
 }

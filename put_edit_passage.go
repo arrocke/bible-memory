@@ -29,28 +29,27 @@ func parseEditPassageForm(r *http.Request) (editPassageForm, error) {
 }
 
 func PutEditPassage(router *mux.Router, ctx *ServerContext) {
-	router.HandleFunc("/passages/{Id}", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/passages/{Id}", HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
 		session, err := GetSession(r, ctx)
 		if err != nil {
-			http.Error(w, "Session Error", http.StatusInternalServerError)
-			return
+			return err
 		}
 		if session == nil {
 			http.Redirect(w, r, "/", http.StatusFound)
-			return
+			return nil
 		}
 
 		vars := mux.Vars(r)
 		id, err := strconv.ParseInt(vars["Id"], 10, 32)
 		if err != nil {
 			http.Error(w, "Not Found", http.StatusNotFound)
-			return
+			return nil
 		}
 
         form, err := parseEditPassageForm(r)
         if err != nil {
             http.Error(w, "Invalid body", http.StatusBadRequest)
-            return
+            return nil
         }
 
         if err := ctx.PassageService.Update(services.UpdatePassageRequest{
@@ -61,9 +60,12 @@ func PutEditPassage(router *mux.Router, ctx *ServerContext) {
             ReviewAt: form.ReviewAt,
         }); err != nil {
             http.Error(w, "Error", http.StatusBadRequest)
+            return nil
         }
 
 		w.Header().Set("Hx-Redirect", fmt.Sprintf("/passages/%d/review", id))
 		w.WriteHeader(http.StatusNoContent)
-	}).Methods("Put")
+
+        return nil
+	})).Methods("Put")
 }

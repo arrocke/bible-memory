@@ -9,15 +9,14 @@ import (
 )
 
 func PostCreatePassage(router *mux.Router, ctx *ServerContext) {
-	router.HandleFunc("/passages", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/passages", HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
 		session, err := GetSession(r, ctx)
 		if err != nil {
-			http.Error(w, "Session Error", http.StatusInternalServerError)
-			return
+			return err
 		}
 		if session == nil {
 			http.Redirect(w, r, "/", http.StatusFound)
-			return
+			return nil
 		}
 
         id, err := ctx.PassageService.Create(services.CreatePassageRequest{
@@ -31,5 +30,7 @@ func PostCreatePassage(router *mux.Router, ctx *ServerContext) {
 
 		w.Header().Set("Hx-Redirect", fmt.Sprintf("/passages/%d/review", id))
 		w.WriteHeader(http.StatusNoContent)
-	}).Methods("Post")
+
+        return nil
+	})).Methods("Post")
 }

@@ -14,22 +14,21 @@ func GetProfile(router *mux.Router, ctx *ServerContext) {
 		LastName  string
 	}
 
-	router.HandleFunc("/users/profile", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/users/profile", HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
 		session, err := GetSession(r, ctx)
 		if err != nil {
-			http.Error(w, "Session Error", http.StatusInternalServerError)
-			return
+			return err
 		}
 		if session == nil {
 			http.Redirect(w, r, "/", http.StatusFound)
-			return
+			return nil
 		}
 
         engine := view.CreateViewEngine(ctx.Conn, r.Context(), w)
-
         if err = engine.RenderProfile((int)(*session.user_id)); err != nil {
-			http.Error(w, "Server Error", http.StatusInternalServerError)
-			return
+            return err
         }
-	}).Methods("Get")
+
+        return nil
+	})).Methods("Get")
 }
