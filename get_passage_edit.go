@@ -9,28 +9,34 @@ import (
 )
 
 func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
-	router.HandleFunc("/passages/{Id}", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/passages/{Id}", HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
 		session, err := GetSession(r, ctx)
 		if err != nil {
-			http.Error(w, "Session Error", http.StatusInternalServerError)
-			return
+			return err
 		}
 		if session == nil {
 			http.Redirect(w, r, "/", http.StatusFound)
-			return
+			return nil
 		}
 
 		vars := mux.Vars(r)
 		id, err := strconv.ParseInt(vars["Id"], 10, 32)
 		if err != nil {
 			http.Error(w, "Not Found", http.StatusNotFound)
-			return
+			return nil
 		}
 
+        engine := view.CreateViewEngine(ctx.Conn, r.Context(), w)
 		if r.Header.Get("Hx-Current-Url") == "" {
-            view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderPassageEdit(int(*session.user_id), int(id), GetClientDate(r))
+            if err := engine.RenderPassageEdit(int(*session.user_id), int(id), GetClientDate(r)); err != nil {
+                return err
+            }
 		} else {
-            view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderPassageEditPartial(int(*session.user_id), int(id))
+            if err := engine.RenderPassageEditPartial(int(*session.user_id), int(id)); err != nil {
+                return err
+            }
 		}
-	}).Methods("Get")
+
+        return nil
+	})).Methods("Get")
 }

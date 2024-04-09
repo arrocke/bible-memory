@@ -21,12 +21,17 @@ type ServerContext struct {
     PassageService *services.PassagesService
 }
 
-type FlashMessage struct {
-	Type string
-	Text string
-}
-
 var decoder = schema.NewDecoder()
+
+
+func HandleErrors(handler func(w http.ResponseWriter, r *http.Request) error) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        if err := handler(w, r); err != nil {
+            fmt.Printf("Server Error: %v\n", err.Error())
+            http.Error(w, "Server Error", http.StatusInternalServerError)
+        }
+    }
+}
 
 func main() {
 	godotenv.Load(".env")
