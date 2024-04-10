@@ -9,15 +9,8 @@ import (
 )
 
 func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
-	router.HandleFunc("/passages/{Id}", HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
-		session, err := GetSession(r, ctx)
-		if err != nil {
-			return err
-		}
-		if session == nil {
-			http.Redirect(w, r, "/", http.StatusFound)
-			return nil
-		}
+	router.Handle("/passages/{Id}", AuthMiddleware(true, HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
+        userId := GetUserId(r)
 
 		vars := mux.Vars(r)
 		id, err := strconv.ParseInt(vars["Id"], 10, 32)
@@ -28,15 +21,9 @@ func GetPassageEdit(router *mux.Router, ctx *ServerContext) {
 
         engine := view.CreateViewEngine(ctx.Conn, r.Context(), w)
 		if r.Header.Get("Hx-Current-Url") == "" {
-            if err := engine.RenderPassageEdit(int(*session.user_id), int(id), GetClientDate(r)); err != nil {
-                return err
-            }
+            return engine.RenderPassageEdit(userId, int(id), GetClientDate(r))
 		} else {
-            if err := engine.RenderPassageEditPartial(int(*session.user_id), int(id)); err != nil {
-                return err
-            }
+            return engine.RenderPassageEditPartial(userId, int(id))
 		}
-
-        return nil
-	})).Methods("Get")
+	}))).Methods("Get")
 }

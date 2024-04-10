@@ -17,20 +17,20 @@ import (
 
 type ServerContext struct {
 	Conn         *pgxpool.Pool
-	SessionStore *sessions.CookieStore
+	SessionManager *SessionManager
     PassageService *services.PassagesService
 }
 
 var decoder = schema.NewDecoder()
 
 
-func HandleErrors(handler func(w http.ResponseWriter, r *http.Request) error) http.HandlerFunc {
-    return func(w http.ResponseWriter, r *http.Request) {
+func HandleErrors(handler func(w http.ResponseWriter, r *http.Request) error) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         if err := handler(w, r); err != nil {
             fmt.Printf("Server Error: %v\n", err.Error())
             http.Error(w, "Server Error", http.StatusInternalServerError)
         }
-    }
+    })
 }
 
 func main() {
@@ -49,7 +49,7 @@ func main() {
 
 	ctx := &ServerContext{
 		Conn:         conn,
-		SessionStore: store,
+		SessionManager: CreateSessionManager(store),
         PassageService: &passageService,
 	}
 
@@ -90,5 +90,5 @@ func main() {
 
 	fmt.Printf("Server started on port %v\n", port)
 
-	http.ListenAndServe(":"+port, r)
+	http.ListenAndServe(":"+port, ctx.SessionManager.SessionMiddleware(r))
 }

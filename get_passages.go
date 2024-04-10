@@ -9,20 +9,11 @@ import (
 
 
 func GetPassages(router *mux.Router, ctx *ServerContext) {
-	router.HandleFunc("/passages", HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
-		session, err := GetSession(r, ctx)
-		if err != nil {
-            return err
-		}
-		if session == nil {
-			http.Redirect(w, r, "/", http.StatusFound)
-			return nil
-		}
+	router.Handle("/passages", AuthMiddleware(true, HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
+        userId := GetUserId(r)
+        clientDate := GetClientDate(r)
 
-        if err := view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderPassages(int(*session.user_id), GetClientDate(r)); err != nil {
-            return err
-        }
-
-        return nil
-	})).Methods("GET")
+        engine := view.CreateViewEngine(ctx.Conn, r.Context(), w)
+        return engine.RenderPassages(userId, clientDate)
+	}))).Methods("GET")
 }

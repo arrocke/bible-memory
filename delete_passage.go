@@ -11,15 +11,8 @@ import (
 )
 
 func DeletePassage(router *mux.Router, ctx *ServerContext) {
-	router.HandleFunc("/passages/{Id}", HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
-		session, err := GetSession(r, ctx)
-		if err != nil {
-			return err
-		}
-		if session == nil {
-			http.Redirect(w, r, "/", http.StatusFound)
-			return nil
-		}
+	router.Handle("/passages/{Id}", AuthMiddleware(true, HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
+        userId := GetUserId(r)
 
 		vars := mux.Vars(r)
 		id, err := strconv.ParseInt(vars["Id"], 10, 32)
@@ -29,7 +22,7 @@ func DeletePassage(router *mux.Router, ctx *ServerContext) {
 		}
 
 		query := "DELETE FROM passage WHERE id = $1 AND user_id = $2"
-		_, err = ctx.Conn.Exec(context.Background(), query, id, *session.user_id)
+		_, err = ctx.Conn.Exec(context.Background(), query, id, userId)
 		if err != nil {
 			return err
 		}
@@ -40,5 +33,5 @@ func DeletePassage(router *mux.Router, ctx *ServerContext) {
 		w.WriteHeader(http.StatusOK)
 
         return nil
-	})).Methods("Delete")
+	}))).Methods("Delete")
 }

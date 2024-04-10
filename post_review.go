@@ -10,15 +10,8 @@ import (
 )
 
 func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
-	router.HandleFunc("/passages/{Id}/review", HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
-		session, err := GetSession(r, ctx)
-		if err != nil {
-			return err
-		}
-		if session == nil {
-			http.Redirect(w, r, "/", http.StatusFound)
-			return nil
-		}
+	router.Handle("/passages/{Id}/review", AuthMiddleware(true, HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
+        userId := GetUserId(r)
 
 		vars := mux.Vars(r)
 		id, err := strconv.ParseInt(vars["Id"], 10, 32)
@@ -28,10 +21,7 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 		}
 
 		if r.FormValue("mode") != "review" {
-            if err := view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderReviewResult(int(*session.user_id), GetClientDate(r)); err != nil {
-                return err
-            }
-			return nil
+            return view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderReviewResult(userId, GetClientDate(r))
 		}
 
 		grade, err := strconv.ParseInt(r.FormValue("grade"), 10, 32)
@@ -51,10 +41,6 @@ func PostReviewPassage(router *mux.Router, ctx *ServerContext) {
 			return nil
 		}
 
-        if err := view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderReviewResult(int(*session.user_id), GetClientDate(r)); err != nil {
-            return err
-        }
-
-        return nil
-	})).Methods("Post")
+        return view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderReviewResult(userId, GetClientDate(r))
+	}))).Methods("Post")
 }

@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/sessions"
 )
 
 func GetClientDate(r *http.Request) time.Time {
@@ -26,24 +29,94 @@ func GetClientTZ(r *http.Request) int {
 }
 
 type Session struct {
-	ID      string
-	user_id *int32
+	Id      string
+	UserId  *int
 }
 
-func GetSession(r *http.Request, ctx *ServerContext) (*Session, error) {
-	session, err := ctx.SessionStore.Get(r, "session")
-	if err != nil {
-		return nil, err
-	}
-
-	if session == nil {
-		return nil, nil
-	}
-
-	user_id, ok := session.Values["user_id"].(int32)
-	if !ok {
-		return nil, nil
-	}
-
-	return &Session{ID: session.ID, user_id: &user_id}, nil
+type SessionManager struct {
+    store *sessions.CookieStore
 }
+
+func CreateSessionManager(store *sessions.CookieStore) *SessionManager {
+    return &SessionManager{store}
+}
+
+func (manager SessionManager) LogOut(w http.ResponseWriter, r *http.Request) (Session, error) {
+    session, err := manager.store.Get(r, "session")
+    if err != nil {
+        return Session{}, err
+    }
+
+    delete(session.Values, "user_id")
+    if err := session.Save(r, w); err != nil {
+        return Session{}, err
+    }
+
+    return Session{ Id: session.ID }, nil
+}
+
+func (manager SessionManager) LogIn(w http.ResponseWriter, r *http.Request, userId int) (Session, error) {
+    session, err := manager.store.New(r, "session")
+    if err != nil {
+        return Session{}, err
+    }
+
+    session.Values["user_id"] = userId
+    if err := session.Save(r, w); err != nil {
+        return Session{}, err
+    }
+
+    return Session{
+        Id: session.ID,
+        UserId: &userId,
+    }, nil
+}
+
+func (manager SessionManager) SessionMiddleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func (w http.ResponseWriter, r *http.Request) {
+        session, err := manager.store.Get(r, "session")
+        if err != nil {
+            http.Error(w, "Error loading session", http.StatusInternalServerError)
+            return
+        }
+
+        sessionData := Session {
+            Id: session.ID,
+        }
+
+        userId, ok := session.Values["user_id"].(int)
+        if ok {
+            sessionData.UserId = &userId
+        }
+
+        newRequest := r.WithContext(context.WithValue(r.Context(), "session", sessionData))
+
+        next.ServeHTTP(w, newRequest)
+    })
+}
+
+func GetSession(r *http.Request) Session {
+    return r.Context().Value("session").(Session)
+}
+
+func GetUserId(r *http.Request) int {
+    session := GetSession(r)
+    return *session.UserId
+}
+
+func AuthMiddleware(requireAuth bool, next http.Handler) http.Handler {
+    return http.HandlerFunc(func (w http.ResponseWriter, r *http.Request) {
+        session := GetSession(r)
+
+        if requireAuth && session.UserId == nil {
+            http.Redirect(w, r, "/", http.StatusFound)
+            return
+        } else if !requireAuth && session.UserId != nil {
+            http.Redirect(w, r, "/passages", http.StatusFound)
+            return
+        }
+
+        next.ServeHTTP(w, r)
+    })
+}
+

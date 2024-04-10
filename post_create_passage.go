@@ -9,20 +9,13 @@ import (
 )
 
 func PostCreatePassage(router *mux.Router, ctx *ServerContext) {
-	router.HandleFunc("/passages", HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
-		session, err := GetSession(r, ctx)
-		if err != nil {
-			return err
-		}
-		if session == nil {
-			http.Redirect(w, r, "/", http.StatusFound)
-			return nil
-		}
+	router.Handle("/passages", AuthMiddleware(true, HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
+        userId := GetUserId(r)
 
         id, err := ctx.PassageService.Create(services.CreatePassageRequest{
             Reference: r.FormValue("reference"),
             Text: r.FormValue("text"),
-            UserId: int(*session.user_id),
+            UserId: userId,
         })
         if err != nil {
             http.Error(w, "Error", http.StatusBadRequest)
@@ -32,5 +25,5 @@ func PostCreatePassage(router *mux.Router, ctx *ServerContext) {
 		w.WriteHeader(http.StatusNoContent)
 
         return nil
-	})).Methods("Post")
+	}))).Methods("Post")
 }

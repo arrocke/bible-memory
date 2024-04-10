@@ -29,16 +29,7 @@ func parseEditPassageForm(r *http.Request) (editPassageForm, error) {
 }
 
 func PutEditPassage(router *mux.Router, ctx *ServerContext) {
-	router.HandleFunc("/passages/{Id}", HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
-		session, err := GetSession(r, ctx)
-		if err != nil {
-			return err
-		}
-		if session == nil {
-			http.Redirect(w, r, "/", http.StatusFound)
-			return nil
-		}
-
+	router.Handle("/passages/{Id}", AuthMiddleware(true, HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
 		vars := mux.Vars(r)
 		id, err := strconv.ParseInt(vars["Id"], 10, 32)
 		if err != nil {
@@ -67,5 +58,5 @@ func PutEditPassage(router *mux.Router, ctx *ServerContext) {
 		w.WriteHeader(http.StatusNoContent)
 
         return nil
-	})).Methods("Put")
+	}))).Methods("Put")
 }

@@ -21,7 +21,7 @@ func PostLogin(router *mux.Router, ctx *ServerContext) {
 		Password string
 	}
 
-	router.HandleFunc("/users/login", HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
+	router.Handle("/users/login", AuthMiddleware(false, HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
 		form := LoginForm{
 			Email:    r.FormValue("email"),
 			Password: r.FormValue("password"),
@@ -54,19 +54,13 @@ func PostLogin(router *mux.Router, ctx *ServerContext) {
 			return nil
 		}
 
-		session, err := ctx.SessionStore.New(r, "session")
-		if err != nil {
-			return err
-		}
-
-		session.Values["user_id"] = user.ID
-        if err := session.Save(r, w); err != nil {
-			return err
-		}
+        if _, err = ctx.SessionManager.LogIn(w, r, int(user.ID)); err != nil {
+            return err
+        }
 
 		w.Header().Set("Hx-Redirect", "/passages")
 		w.WriteHeader(http.StatusNoContent)
 
         return nil
-	})).Methods("Post")
+	}))).Methods("Post")
 }

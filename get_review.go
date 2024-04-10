@@ -9,15 +9,8 @@ import (
 )
 
 func GetPassageReview(router *mux.Router, ctx *ServerContext) {
-	router.HandleFunc("/passages/{Id}/{Mode}", HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
-		session, err := GetSession(r, ctx)
-		if err != nil {
-			return err
-		}
-		if session == nil {
-			http.Redirect(w, r, "/", http.StatusFound)
-			return nil
-		}
+	router.Handle("/passages/{Id}/{Mode}", AuthMiddleware(true, HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
+        userId := GetUserId(r)
 
 		vars := mux.Vars(r)
 		id, err := strconv.ParseInt(vars["Id"], 10, 32)
@@ -28,15 +21,9 @@ func GetPassageReview(router *mux.Router, ctx *ServerContext) {
 
         engine := view.CreateViewEngine(ctx.Conn, r.Context(), w)
 		if r.Header.Get("Hx-Current-Url") == "" {
-            if err := engine.RenderReviewPassage(int(*session.user_id), int(id), GetClientDate(r)); err != nil {
-                return err
-            }
+            return engine.RenderReviewPassage(userId, int(id), GetClientDate(r))
 		} else {
-            if err := engine.RenderReviewPassagePartial(int(*session.user_id), int(id), GetClientDate(r)); err != nil {
-                return err
-            }
+            return engine.RenderReviewPassagePartial(userId, int(id), GetClientDate(r))
 		}
-
-        return nil
-	})).Methods("Get")
+	}))).Methods("Get")
 }
