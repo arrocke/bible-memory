@@ -3,7 +3,7 @@ package domain_model
 type UserProps struct {
     Id int
     Name UserName
-    EmailAddress string
+    EmailAddress UserEmail
     Password string
 }
 
@@ -22,7 +22,7 @@ func UserFactory(props UserProps) User {
 
 type NewUserProps struct {
     Name UserName
-    EmailAddress string
+    EmailAddress UserEmail
     Password string
 }
 
@@ -57,7 +57,7 @@ func (u *User) ChangeName(name UserName) {
     u.props.Name = name
 }
 
-func (u *User) ChangeEmail(email string) {
+func (u *User) ChangeEmail(email UserEmail) {
     u.props.EmailAddress = email
 }
 

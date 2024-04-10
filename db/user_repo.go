@@ -36,10 +36,15 @@ func (dbModel *userModel) toDomain() (domain_model.User, error) {
         return domain_model.User{}, nil
     }
 
+    email, err := domain_model.NewUserEmail(dbModel.Email)
+    if err != nil {
+        return domain_model.User{}, nil
+    }
+
     user := domain_model.UserFactory(domain_model.UserProps{
         Id: dbModel.Id,
         Name: name,
-        EmailAddress: dbModel.Email,
+        EmailAddress: email,
         Password: dbModel.Password,
     })
 
@@ -52,7 +57,7 @@ func userToDb(user *domain_model.User) userModel {
         Id: props.Id,
         FirstName: props.Name.FirstName(),
         LastName: props.Name.LastName(),
-        Email: props.EmailAddress,
+        Email: props.EmailAddress.Value(),
         Password: props.Password,
     }
 

@@ -26,9 +26,14 @@ func (service *UserService) Create(request CreateUserRequest) (int, error) {
         return 0, err
     }
 
+    email, err := domain_model.NewUserEmail(request.EmailAddress)
+    if err != nil {
+        return 0, err
+    }
+
     user := domain_model.NewUser(domain_model.NewUserProps{
         Name: name,
-        EmailAddress: request.EmailAddress,
+        EmailAddress: email,
         Password: request.Password,
     })
 
@@ -58,8 +63,13 @@ func (service *UserService) UpdateProfile(request UpdateProfileRequest) error {
         return err
     }
 
+    email, err := domain_model.NewUserEmail(request.EmailAddress)
+    if err != nil {
+        return err
+    }
+
     user.ChangeName(name)
-    user.ChangeEmail(request.EmailAddress)
+    user.ChangeEmail(email)
     if (request.Password != "") {
         user.ChangePassword(request.Password)
     }
