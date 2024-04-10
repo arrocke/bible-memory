@@ -3,7 +3,9 @@ package view
 templ header(model AppModel) {
     <header class="px-4 py-2 border-b border-slate-300 flex items-baseline">
         if model.User == nil {
-            <h1 class="text-2xl font-bold">Bible Memory</h1>
+            <a href="/">
+                <h1 class="text-2xl font-bold">Bible Memory</h1>
+            </a>
         } else {
             <a href="/passages">
                 <h1 class="text-2xl font-bold">Bible Memory</h1>

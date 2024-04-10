@@ -32,26 +32,20 @@ func PostLogin(router *mux.Router, ctx *ServerContext) {
 		user, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[DbUser])
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
-                if err := view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderLoginError(
+                return view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderLoginError(
                     "Invalid email or password",
                     form.Email,
-                ); err != nil {
-                    return err
-                }
-                return nil
+                )
 			} else {
                 return err
 			}
 		}
 
 		if user.Password != form.Password {
-            if err := view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderLoginError(
+            return view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderLoginError(
                 "Invalid email or password",
                 form.Email,
-            ); err != nil {
-                return err
-            }
-			return nil
+            )
 		}
 
         if _, err = ctx.SessionManager.LogIn(w, r, int(user.ID)); err != nil {

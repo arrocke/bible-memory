@@ -190,25 +190,32 @@ func (eng ViewEngine) RenderIndex() error {
     }).Render(eng.context, eng.writer)
 }
 
-func (eng ViewEngine) RenderLogin() error {
-    return App(AppModel {
-        Page: LoginPageModel{},
-    }).Render(eng.context, eng.writer)
+func (eng ViewEngine) RenderLogin(useLayout bool) error {
+    if useLayout {
+        return App(AppModel {
+            Page: LoginPageModel{},
+        }).Render(eng.context, eng.writer)
+    } else {
+        return login(LoginPageModel{}).Render(eng.context, eng.writer)
+    }
 }
 
 func (eng ViewEngine) RenderLoginError(error string, email string) error {
-    return App(AppModel {
-        Page: LoginPageModel{
-            Error: error,
-            Email: email,
-        },
+    return login(LoginPageModel{
+        Error: error,
+        Email: email,
+        Replace: true,
     }).Render(eng.context, eng.writer)
 }
 
-func (eng ViewEngine) RenderRegister() error {
-    return App(AppModel {
-        Page: RegisterPageModel{},
-    }).Render(eng.context, eng.writer)
+func (eng ViewEngine) RenderRegister(useLayout bool) error {
+    if useLayout {
+        return App(AppModel {
+            Page: RegisterPageModel{},
+        }).Render(eng.context, eng.writer)
+    } else {
+        return register(RegisterPageModel{}).Render(eng.context, eng.writer)
+    }
 }
 
 func (eng ViewEngine) RenderProfile(user_id int) error {

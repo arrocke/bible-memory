@@ -37,7 +37,7 @@ templ App(model AppModel) {
 
     <body hx-boost="true" class="flex flex-col items-stretch h-full">
         @header(model)
-        <div class="flex-grow">
+        <div id="page" class="flex-grow">
             if model.User == nil {
                 switch page := model.Page.(type) {
                     case PublicIndexModel:

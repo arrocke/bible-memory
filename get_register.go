@@ -9,6 +9,7 @@ import (
 
 func GetRegister(router *mux.Router, ctx *ServerContext) {
 	router.Handle("/users/register", AuthMiddleware(false, HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
-        return view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderRegister()
+        engine := view.CreateViewEngine(ctx.Conn, r.Context(), w)
+        return engine.RenderRegister(r.Header.Get("Hx-Request") != "true")
 	}))).Methods("Get")
 }

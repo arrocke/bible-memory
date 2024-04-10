@@ -109,10 +109,12 @@ func AuthMiddleware(requireAuth bool, next http.Handler) http.Handler {
         session := GetSession(r)
 
         if requireAuth && session.UserId == nil {
-            http.Redirect(w, r, "/", http.StatusFound)
+            w.Header().Set("Hx-Redirect", "/")
+            w.WriteHeader(http.StatusNoContent)
             return
         } else if !requireAuth && session.UserId != nil {
-            http.Redirect(w, r, "/passages", http.StatusFound)
+            w.Header().Set("Hx-Redirect", "/passages")
+            w.WriteHeader(http.StatusNoContent)
             return
         }
 
