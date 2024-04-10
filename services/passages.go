@@ -25,13 +25,17 @@ func (service *PassagesService) Create(request CreatePassageRequest) (int, error
 	if err != nil {
 		return 0, err
 	}
-	passage := domain_model.NewPassage(reference, request.Text, request.UserId)
+	passage := domain_model.NewPassage(domain_model.NewPassageProps{
+        Reference: reference,
+        Text: request.Text,
+        Owner: request.UserId,
+    })
 
-	if err := service.passageRepo.Create(&passage); err != nil {
+	if err := service.passageRepo.Commit(&passage); err != nil {
 		return 0, nil
 	}
 
-	return passage.Id, nil
+	return passage.Id(), nil
 }
 
 type UpdatePassageRequest struct {
@@ -62,7 +66,7 @@ func (service *PassagesService) Update(request UpdatePassageRequest) error {
 
 		reviewAt := domain_model.NewReviewTimestamp(*request.ReviewAt)
 
-		reviewState := passage.ReviewState.Overwrite(interval, reviewAt)
+		reviewState := passage.Props().ReviewState.Overwrite(interval, reviewAt)
 		nextReview = &reviewState
 	}
 
@@ -70,7 +74,7 @@ func (service *PassagesService) Update(request UpdatePassageRequest) error {
 	passage.SetText(request.Text)
 	passage.SetReviewState(nextReview)
 
-	return service.passageRepo.Update(&passage)
+	return service.passageRepo.Commit(&passage)
 }
 
 type ReviewPassageRequest struct {
@@ -94,7 +98,7 @@ func (service *PassagesService) Review(request ReviewPassageRequest) error {
 
     passage.Review(grade, timestamp) 
     
-    err = service.passageRepo.Update(&passage)
+    err = service.passageRepo.Commit(&passage)
     if err != nil {
         return err
     }

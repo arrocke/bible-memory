@@ -1,6 +1,6 @@
 package domain_model
 
-type Passage struct {
+type PassageProps struct {
     Id int
     Reference PassageReference
     Text string
@@ -8,32 +8,65 @@ type Passage struct {
     ReviewState *PassageReview
 }
 
-func NewPassage(reference PassageReference, text string, owner int) Passage {
+type Passage struct {
+    props PassageProps
+    isNew bool
+}
+
+func PassageFactory(props PassageProps) Passage {
     return Passage {
-        Reference: reference,
-        Text: text,
-        Owner: owner,
+        props: props,
+        isNew: false,
     }
 }
 
+type NewPassageProps struct {
+    Reference PassageReference
+    Text string
+    Owner int
+}
+
+func NewPassage(props NewPassageProps) Passage {
+    return Passage{
+        props: PassageProps {
+            Reference: props.Reference,
+            Text: props.Text,
+            Owner: props.Owner,
+        },
+        isNew: true,
+    }
+}
+
+func (u *Passage) IsNew() bool {
+    return u.isNew
+}
+
+func (u *Passage) Id() int {
+    return u.props.Id
+}
+
+func (u *Passage) Props() PassageProps {
+    return u.props
+}
+
 func (p *Passage) SetReference(reference PassageReference) {
-    p.Reference = reference
+    p.props.Reference = reference
 }
 
 func (p *Passage) SetText(text string) {
-    p.Text = text
+    p.props.Text = text
 }
 
 func (p *Passage) SetReviewState(reviewState *PassageReview) {
-    p.ReviewState = reviewState
+    p.props.ReviewState = reviewState
 }
 
 func (p *Passage) Review(grade ReviewGrade, timestamp ReviewTimestamp) {
-    if p.ReviewState == nil {
+    if p.props.ReviewState == nil {
         nextReview := FirstReview(grade, timestamp)
-        p.ReviewState = &nextReview
+        p.props.ReviewState = &nextReview
     } else {
-        nextReview := p.ReviewState.NextAfterReview(grade, timestamp)
-        p.ReviewState = &nextReview
+        nextReview := p.props.ReviewState.NextAfterReview(grade, timestamp)
+        p.props.ReviewState = &nextReview
     }
 }
