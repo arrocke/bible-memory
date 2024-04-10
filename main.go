@@ -19,6 +19,7 @@ type ServerContext struct {
 	Conn         *pgxpool.Pool
 	SessionManager *SessionManager
     PassageService *services.PassagesService
+    UserService *services.UserService
 }
 
 var decoder = schema.NewDecoder()
@@ -45,12 +46,15 @@ func main() {
 
 	store := sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
     passageRepo := db.CreatePgPassageRepo(conn)
+    userRepo := db.CreatePgUserRepo(conn)
     passageService := services.CreatePassagesService(passageRepo)
+    userService := services.CreateUsersService(userRepo)
 
 	ctx := &ServerContext{
 		Conn:         conn,
 		SessionManager: CreateSessionManager(store),
         PassageService: &passageService,
+        UserService: &userService,
 	}
 
 	r := mux.NewRouter()

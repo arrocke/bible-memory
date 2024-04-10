@@ -22,39 +22,28 @@ func PostLogin(router *mux.Router, ctx *ServerContext) {
 	}
 
 	router.Handle("/users/login", AuthMiddleware(false, HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
-		form := LoginForm{
-			Email:    r.FormValue("email"),
-			Password: r.FormValue("password"),
-		}
+		email := r.FormValue("email")
+		password := r.FormValue("password")
 
-		query := `SELECT id, password FROM "user" WHERE email = $1`
-		rows, _ := ctx.Conn.Query(context.Background(), query, form.Email)
-		user, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[DbUser])
+		id, err := ctx.UserService.ValidatePassword(email, password)
 		if err != nil {
-			if errors.Is(err, pgx.ErrNoRows) {
-                return view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderLoginError(
-                    "Invalid email or password",
-                    form.Email,
-                )
-			} else {
-                return err
-			}
+			return err
 		}
 
-		if user.Password != form.Password {
-            return view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderLoginError(
-                "Invalid email or password",
-                form.Email,
-            )
+		if id == nil {
+			return view.CreateViewEngine(ctx.Conn, r.Context(), w).RenderLoginError(
+				"Invalid email or password",
+				email,
+			)
 		}
 
-        if _, err = ctx.SessionManager.LogIn(w, r, int(user.ID)); err != nil {
-            return err
-        }
+		if _, err = ctx.SessionManager.LogIn(w, r, *id); err != nil {
+			return err
+		}
 
 		w.Header().Set("Hx-Redirect", "/passages")
 		w.WriteHeader(http.StatusNoContent)
 
-        return nil
+		return nil
 	}))).Methods("Post")
 }

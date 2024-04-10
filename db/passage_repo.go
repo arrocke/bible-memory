@@ -63,7 +63,7 @@ func (dbModel *passageModel) toDomain() domain_model.Passage {
 	return passage
 }
 
-func toDb(passage *domain_model.Passage) passageModel {
+func passageToDb(passage *domain_model.Passage) passageModel {
 	dbModel := passageModel{
 		Id:           passage.Id,
 		Book:         passage.Reference.Book,
@@ -105,7 +105,7 @@ func (repo PgPassageRepo) Create(passage *domain_model.Passage) error {
         INSERT INTO passage (id, book, start_chapter, start_verse, end_chapter, end_verse, text, user_id, interval, reviewed_at, review_at)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
     `
-	dbModel := toDb(passage)
+	dbModel := passageToDb(passage)
 	_, err := repo.pool.Exec(
 		context.Background(),
         query,
@@ -139,7 +139,7 @@ func (repo PgPassageRepo) Update(passage *domain_model.Passage) error {
             review_at = $11
         WHERE id = $1
     `
-	dbModel := toDb(passage)
+	dbModel := passageToDb(passage)
 	_, err := repo.pool.Exec(
 		context.Background(),
         query,

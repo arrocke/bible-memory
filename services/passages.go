@@ -70,12 +70,7 @@ func (service *PassagesService) Update(request UpdatePassageRequest) error {
 	passage.SetText(request.Text)
 	passage.SetReviewState(nextReview)
 
-	err = service.passageRepo.Update(&passage)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return service.passageRepo.Update(&passage)
 }
 
 type ReviewPassageRequest struct {
