@@ -2,8 +2,7 @@ package domain_model
 
 type UserProps struct {
     Id int
-    FirstName string
-    LastName string
+    Name UserName
     EmailAddress string
     Password string
 }
@@ -22,8 +21,7 @@ func UserFactory(props UserProps) User {
 
 
 type NewUserProps struct {
-    FirstName string
-    LastName string
+    Name UserName
     EmailAddress string
     Password string
 }
@@ -32,8 +30,7 @@ func NewUser(props NewUserProps) User {
     return User {
         props: UserProps {
             EmailAddress: props.EmailAddress,
-            FirstName: props.FirstName,
-            LastName: props.LastName,
+            Name: props.Name,
             Password: props.Password,
         },
         isNew: true,
@@ -56,9 +53,8 @@ func (u *User) ValidatePassword(attempt string) bool {
     return u.props.Password == attempt
 }
 
-func (u *User) ChangeName(firstName string, lastName string) {
-    u.props.FirstName = firstName
-    u.props.LastName = lastName
+func (u *User) ChangeName(name UserName) {
+    u.props.Name = name
 }
 
 func (u *User) ChangeEmail(email string) {

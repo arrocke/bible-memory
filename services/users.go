@@ -21,9 +21,13 @@ type CreateUserRequest struct {
 }
 
 func (service *UserService) Create(request CreateUserRequest) (int, error) {
+    name, err := domain_model.NewUserName(request.FirstName, request.LastName)
+    if err != nil {
+        return 0, err
+    }
+
     user := domain_model.NewUser(domain_model.NewUserProps{
-        FirstName: request.FirstName,
-        LastName: request.LastName,
+        Name: name,
         EmailAddress: request.EmailAddress,
         Password: request.Password,
     })
@@ -49,7 +53,12 @@ func (service *UserService) UpdateProfile(request UpdateProfileRequest) error {
 		return err
 	}
 
-    user.ChangeName(request.FirstName, request.LastName)
+    name, err := domain_model.NewUserName(request.FirstName, request.LastName)
+    if err != nil {
+        return err
+    }
+
+    user.ChangeName(name)
     user.ChangeEmail(request.EmailAddress)
     if (request.Password != "") {
         user.ChangePassword(request.Password)

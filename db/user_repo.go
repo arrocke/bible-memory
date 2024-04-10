@@ -30,24 +30,28 @@ type userModel struct {
     Password string
 }
 
-func (dbModel *userModel) toDomain() domain_model.User {
+func (dbModel *userModel) toDomain() (domain_model.User, error) {
+    name, err := domain_model.NewUserName(dbModel.FirstName, dbModel.LastName)
+    if err != nil {
+        return domain_model.User{}, nil
+    }
+
     user := domain_model.UserFactory(domain_model.UserProps{
         Id: dbModel.Id,
-        FirstName: dbModel.FirstName,
-        LastName: dbModel.LastName,
+        Name: name,
         EmailAddress: dbModel.Email,
         Password: dbModel.Password,
     })
 
-    return user
+    return user, nil
 }
 
 func userToDb(user *domain_model.User) userModel {
     props := user.Props()
     dbModel := userModel{
         Id: props.Id,
-        FirstName: props.FirstName,
-        LastName: props.LastName,
+        FirstName: props.Name.FirstName(),
+        LastName: props.Name.LastName(),
         Email: props.EmailAddress,
         Password: props.Password,
     }
@@ -67,7 +71,11 @@ func (repo PgUserRepo) Get(id int) (*domain_model.User, error) {
 		return nil, err
 	}
 
-	user := dbModel.toDomain()
+	user, err := dbModel.toDomain()
+    if err != nil {
+        return nil, err
+    }
+
 	return &user, nil
 }
 
@@ -83,7 +91,11 @@ func (repo PgUserRepo) GetByEmail(email string) (*domain_model.User, error) {
 		return nil, err
 	}
 
-	user := dbModel.toDomain()
+	user, err := dbModel.toDomain()
+    if err != nil {
+        return nil, err
+    }
+
 	return &user, nil
 }
 
