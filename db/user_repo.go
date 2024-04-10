@@ -11,8 +11,7 @@ import (
 type UserRepo interface {
     Get(id int) (*domain_model.User, error)
     GetByEmail(email string) (*domain_model.User, error)
-    Create(*domain_model.User) error
-    Update(*domain_model.User) error
+    Commit(*domain_model.User) error
 }
 
 type PgUserRepo struct {
@@ -32,24 +31,25 @@ type userModel struct {
 }
 
 func (dbModel *userModel) toDomain() domain_model.User {
-    user := domain_model.User{
+    user := domain_model.UserFactory(domain_model.UserProps{
         Id: dbModel.Id,
         FirstName: dbModel.FirstName,
         LastName: dbModel.LastName,
         EmailAddress: dbModel.Email,
         Password: dbModel.Password,
-    }
+    })
 
     return user
 }
 
 func userToDb(user *domain_model.User) userModel {
+    props := user.Props()
     dbModel := userModel{
-        Id: user.Id,
-        FirstName: user.FirstName,
-        LastName: user.LastName,
-        Email: user.EmailAddress,
-        Password: user.Password,
+        Id: props.Id,
+        FirstName: props.FirstName,
+        LastName: props.LastName,
+        Email: props.EmailAddress,
+        Password: props.Password,
     }
 
     return dbModel
@@ -58,7 +58,7 @@ func userToDb(user *domain_model.User) userModel {
 func (repo PgUserRepo) Get(id int) (*domain_model.User, error) {
 	query := `
         SELECT id, first_name, last_name, email, password
-        FROM user
+        FROM "user"
         WHERE id = $1
     `
 	rows, _ := repo.pool.Query(context.Background(), query, id)
@@ -74,7 +74,7 @@ func (repo PgUserRepo) Get(id int) (*domain_model.User, error) {
 func (repo PgUserRepo) GetByEmail(email string) (*domain_model.User, error) {
 	query := `
         SELECT id, first_name, last_name, email, password
-        FROM user
+        FROM "user"
         WHERE email = $1
     `
 	rows, _ := repo.pool.Query(context.Background(), query, email)
@@ -87,33 +87,25 @@ func (repo PgUserRepo) GetByEmail(email string) (*domain_model.User, error) {
 	return &user, nil
 }
 
-func (repo PgUserRepo) Create(user *domain_model.User) error {
-	query := `
-        INSERT INTO passage (id, first_name, last_name, email, password)
-        VALUES ($1, $2, $3, $4, $5)
-    `
-	dbModel := userToDb(user)
-	_, err := repo.pool.Exec(
-		context.Background(),
-        query,
-		dbModel.Id,
-		dbModel.FirstName,
-		dbModel.LastName,
-		dbModel.Email,
-		dbModel.Password,
-	)
-	return err
-}
+func (repo PgUserRepo) Commit(user *domain_model.User) error {
+    var query = ""
 
-func (repo PgUserRepo) Update(user *domain_model.User) error {
-	query := `
-        UPDATE passage
-            SET first_name = $2,
-            last_name = $3,
-            email = $4,
-            password = $5
-        WHERE id = $1
-    `
+    if user.IsNew() {
+        query = `
+            INSERT INTO "user" (id, first_name, last_name, email, password)
+            VALUES ($1, $2, $3, $4, $5)
+        `
+    } else {
+        query = `
+            UPDATE "user"
+                SET first_name = $2,
+                last_name = $3,
+                email = $4,
+                password = $5
+            WHERE id = $1
+        `
+    }
+
 	dbModel := userToDb(user)
 	_, err := repo.pool.Exec(
 		context.Background(),

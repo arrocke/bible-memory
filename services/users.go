@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"main/db"
 	"main/domain_model"
 )
@@ -22,13 +21,18 @@ type CreateUserRequest struct {
 }
 
 func (service *UserService) Create(request CreateUserRequest) (int, error) {
-    user := domain_model.NewUser(request.FirstName, request.LastName, request.EmailAddress, request.Password)
+    user := domain_model.NewUser(domain_model.NewUserProps{
+        FirstName: request.FirstName,
+        LastName: request.LastName,
+        EmailAddress: request.EmailAddress,
+        Password: request.Password,
+    })
 
-    if err := service.userRepo.Create(&user); err != nil {
+    if err := service.userRepo.Commit(&user); err != nil {
         return 0, nil
     }
     
-    return user.Id, nil
+    return user.Id(), nil
 }
 
 type UpdateProfileRequest struct {
@@ -51,7 +55,7 @@ func (service *UserService) UpdateProfile(request UpdateProfileRequest) error {
         user.ChangePassword(request.Password)
     }
 
-	return service.userRepo.Update(user)
+	return service.userRepo.Commit(user)
 }
 
 func (service *UserService) ValidatePassword(email string, password string) (*int, error) {
@@ -60,8 +64,9 @@ func (service *UserService) ValidatePassword(email string, password string) (*in
 		return nil, err
 	}
 
+    id := user.Id()
     if user.ValidatePassword(password) {
-        return &user.Id, nil
+        return &id, nil
     }
 
     return nil, nil

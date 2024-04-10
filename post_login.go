@@ -1,13 +1,10 @@
 package main
 
 import (
-	"context"
-	"errors"
 	"main/view"
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/jackc/pgx/v5"
 )
 
 func PostLogin(router *mux.Router, ctx *ServerContext) {
