@@ -1,5 +1,7 @@
 package domain_model
 
+import "math/rand"
+
 type PassageProps struct {
     Id int
     Reference PassageReference
@@ -27,8 +29,10 @@ type NewPassageProps struct {
 }
 
 func NewPassage(props NewPassageProps) Passage {
+    id := rand.Int()
     return Passage{
         props: PassageProps {
+            Id: id,
             Reference: props.Reference,
             Text: props.Text,
             Owner: props.Owner,

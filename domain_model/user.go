@@ -1,5 +1,7 @@
 package domain_model
 
+import "math/rand"
+
 type UserProps struct {
     Id int
     Name UserName
@@ -27,8 +29,10 @@ type NewUserProps struct {
 }
 
 func NewUser(props NewUserProps) User {
+    id := rand.Int()
     return User {
         props: UserProps {
+            Id: id,
             EmailAddress: props.EmailAddress,
             Name: props.Name,
             Password: props.Password,
