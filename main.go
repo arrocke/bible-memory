@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"main/db"
 	"main/services"
+	"main/view"
 	"net/http"
 	"os"
 
+	"github.com/a-h/templ"
 	"github.com/gorilla/schema"
 	"github.com/gorilla/sessions"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 )
@@ -21,6 +24,32 @@ type ServerContext struct {
 	UserService    *services.UserService
 	UserRepo       db.UserRepo
 }
+
+func (ctx ServerContext) RenderPage(w http.ResponseWriter, r *http.Request, page templ.Component) error {
+    if r.Header.Get("Hx-Request") == "true" {
+        return page.Render(r.Context(), w)
+    } else {
+        session := GetSession(r)
+
+        model := view.AppModel{}
+
+        if session.UserId != nil {
+            query := `SELECT first_name, last_name FROM "user" WHERE id = $1`
+            rows, _ := ctx.Conn.Query(r.Context(), query, session.UserId)
+            user, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[view.UserModel])
+            if err != nil {
+                return err
+            }
+
+            model.User = &user
+        }
+
+
+        app := view.Page(model, page)
+        return app.Render(r.Context(), w)
+    }
+}
+
 
 var decoder = schema.NewDecoder()
 
@@ -59,26 +88,9 @@ func main() {
 
 	r := http.NewServeMux()
 
-	indexRoutes(r, ctx)
-	registerRoutes(r, ctx)
-
-    /*
-	GetLogin(r, ctx)
-	GetProfile(r, ctx)
-	PostRegister(r, ctx)
-	PostLogin(r, ctx)
-	PostLogout(r, ctx)
-	PutProfile(r, ctx)
-
-	GetPassages(r, ctx)
-	GetPassageReview(r, ctx)
-	GetCreatePassage(r, ctx)
-	GetPassageEdit(r, ctx)
-	PostCreatePassage(r, ctx)
-	PostReviewPassage(r, ctx)
-	PutEditPassage(r, ctx)
-	DeletePassage(r, ctx)
-    */
+	ctx.indexRoutes(r)
+	ctx.userRoutes(r)
+	ctx.passagesRoutes(r)
 
 	fs := http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets/")))
 

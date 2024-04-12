@@ -184,24 +184,6 @@ func (eng ViewEngine) LoadReviewPassageModel(userId int, passageId int, clientDa
     return model, nil
 }
 
-func (eng ViewEngine) RenderLogin(useLayout bool) error {
-    if useLayout {
-        return App(AppModel {
-            Page: LoginPageModel{},
-        }).Render(eng.context, eng.writer)
-    } else {
-        return login(LoginPageModel{}).Render(eng.context, eng.writer)
-    }
-}
-
-func (eng ViewEngine) RenderLoginError(error string, email string) error {
-    return login(LoginPageModel{
-        Error: error,
-        Email: email,
-        Replace: true,
-    }).Render(eng.context, eng.writer)
-}
-
 func (eng ViewEngine) RenderProfileForm(user_id int, error string) error {
     page, err := eng.LoadProfilePageModel(user_id)
     if err != nil {
