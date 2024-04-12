@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"main/domain_model"
 
 	"github.com/jackc/pgx/v5"
@@ -11,7 +12,7 @@ import (
 type UserRepo interface {
     Get(id int) (*domain_model.User, error)
     GetByEmail(email string) (*domain_model.User, error)
-    Commit(*domain_model.User) error
+    Commit(domain_model.User) error
 }
 
 type PgUserRepo struct {
@@ -30,7 +31,7 @@ type userModel struct {
     Password string
 }
 
-func (dbModel *userModel) toDomain() (domain_model.User, error) {
+func (dbModel userModel) toDomain() (domain_model.User, error) {
     name, err := domain_model.NewUserName(dbModel.FirstName, dbModel.LastName)
     if err != nil {
         return domain_model.User{}, nil
@@ -51,7 +52,7 @@ func (dbModel *userModel) toDomain() (domain_model.User, error) {
     return user, nil
 }
 
-func userToDb(user *domain_model.User) userModel {
+func userToDb(user domain_model.User) userModel {
     props := user.Props()
     dbModel := userModel{
         Id: props.Id,
@@ -73,7 +74,11 @@ func (repo PgUserRepo) Get(id int) (*domain_model.User, error) {
 	rows, _ := repo.pool.Query(context.Background(), query, id)
 	dbModel, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByPos[userModel])
 	if err != nil {
-		return nil, err
+        if errors.Is(err, pgx.ErrNoRows) {
+            return nil, nil
+        } else {
+		    return nil, err
+        }
 	}
 
 	user, err := dbModel.toDomain()
@@ -93,7 +98,11 @@ func (repo PgUserRepo) GetByEmail(email string) (*domain_model.User, error) {
 	rows, _ := repo.pool.Query(context.Background(), query, email)
 	dbModel, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByPos[userModel])
 	if err != nil {
-		return nil, err
+        if errors.Is(err, pgx.ErrNoRows) {
+            return nil, nil
+        } else {
+		    return nil, err
+        }
 	}
 
 	user, err := dbModel.toDomain()
@@ -104,7 +113,7 @@ func (repo PgUserRepo) GetByEmail(email string) (*domain_model.User, error) {
 	return &user, nil
 }
 
-func (repo PgUserRepo) Commit(user *domain_model.User) error {
+func (repo PgUserRepo) Commit(user domain_model.User) error {
     var query = ""
 
     if user.IsNew() {

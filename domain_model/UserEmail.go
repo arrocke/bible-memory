@@ -1,7 +1,6 @@
 package domain_model
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -9,13 +8,13 @@ type UserEmail string
 
 func NewUserEmail(email string) (UserEmail, error) {
     if len(email) == 0 {
-        return UserEmail(""),fmt.Errorf("email is required")
+        return UserEmail(""), CreateDomainError("UserEmail", "Empty")
     }
     if !strings.Contains(email, "@") {
-        return UserEmail(""),fmt.Errorf("invalid email format")
+        return UserEmail(""), CreateDomainError("UserEmail", "InvalidFormat")
     }
 
-    return UserEmail(email),nil
+    return UserEmail(email), nil
 }
 
 func (e UserEmail) Value() string {

@@ -6,49 +6,46 @@ type ProfilePageModel struct {
     LastName string;
 }
 
-templ profile(model ProfilePageModel) {
-    <div class="p-4 flex justify-center">
-      <div>
-        <h2 class="view-heading">My Profile</h2>
-        <form hx-put="/users/profile">
-          <div class="mb-4">
-            <label class="form-label" for="email">Email</label>
-            <div>
-              <input id="email" class="text-input" name="email" type="email" value={model.Email} />
-            </div>
-          </div>
-          <div class="mb-4 flex gap-4">
-            <div class="flex-1 flex-shrink-0">
-              <label class="form-label" for="first-name">First Name</label>
-              <div>
-                <input id="first-name" class="text-input" name="first_name" required value={model.FirstName} />
-              </div>
-            </div>
-            <div class="flex-1 flex-shrink-0">
-              <label class="form-label" for="last-name">Last Name</label>
-              <div>
-                <input id="last-name" class="text-input" name="last_name" required value={model.LastName} />
-              </div>
-            </div>
-          </div>
-          <div class="mb-4 flex gap-4">
-            <div class="flex-1 flex-shrink-0">
-              <label class="form-label" for="password">New Password</label>
-              <div>
-                <input id="password" type="password" class="text-input" name="password" />
-              </div>
-            </div>
-            <div class="flex-1 flex-shrink-0">
-              <label class="form-label" for="confirm_password">Confirm Password</label>
-              <div>
-                <input id="confirm_password" type="password" class="text-input" name="confirm_password" />
-              </div>
-            </div>
-          </div>
-          <button class="button">Update</button>
-        </form>
+templ profileForm(model ProfilePageModel, err string) {
+    <form hx-put="/users/profile" hx-swap="outerHTML">
+        if err != "" {
+            <div class="text-red-700 font-bold mb-2">{err}</div>
+        }
+      <div class="mb-4">
+        <label class="form-label" for="email">Email</label>
+        <div>
+          <input id="email" class="text-input" name="email" type="email" value={model.Email} />
+        </div>
       </div>
-    </div>
+      <div class="mb-4 flex gap-4">
+        <div class="flex-1 flex-shrink-0">
+          <label class="form-label" for="first-name">First Name</label>
+          <div>
+            <input id="first-name" class="text-input" name="first_name" required value={model.FirstName} />
+          </div>
+        </div>
+        <div class="flex-1 flex-shrink-0">
+          <label class="form-label" for="last-name">Last Name</label>
+          <div>
+            <input id="last-name" class="text-input" name="last_name" required value={model.LastName} />
+          </div>
+        </div>
+      </div>
+      <div class="mb-4 flex gap-4">
+        <div class="flex-1 flex-shrink-0">
+          <label class="form-label" for="password">New Password</label>
+          <div>
+            <input id="password" type="password" class="text-input" name="password" />
+          </div>
+        </div>
+        <div class="flex-1 flex-shrink-0">
+          <label class="form-label" for="confirm_password">Confirm Password</label>
+          <div>
+            <input id="confirm_password" type="password" class="text-input" name="confirm_password" />
+          </div>
+        </div>
+      </div>
+      <button class="button">Update</button>
     <script type="text/javascript">
       {
         const password = document.querySelector('#password')
@@ -66,4 +63,14 @@ templ profile(model ProfilePageModel) {
         confirmPassword.addEventListener('input', checkPasswordConfirmation)
       }
     </script>
+    </form>
+}
+
+templ profile(model ProfilePageModel) {
+    <div class="p-4 flex justify-center">
+      <div>
+        <h2 class="view-heading">My Profile</h2>
+        @profileForm(model, "")
+      </div>
+    </div>
 }

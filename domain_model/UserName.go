@@ -1,15 +1,16 @@
 package domain_model
 
-import "fmt"
-
 type UserName struct {
     firstName string
     lastName string
 }
 
 func NewUserName(firstName string, lastName string) (UserName, error) {
-    if len(firstName) == 0 || len(lastName) == 0 {
-        return UserName{},fmt.Errorf("UserName requires first and last name")
+    if len(firstName) == 0 {
+        return UserName{}, CreateDomainError("UserName", "FirstNameEmpty")
+    }
+    if len(lastName) == 0 {
+        return UserName{}, CreateDomainError("UserName", "LastNameEmpty")
     }
 
     return UserName{firstName: firstName, lastName: lastName}, nil

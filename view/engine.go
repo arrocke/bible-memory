@@ -218,6 +218,15 @@ func (eng ViewEngine) RenderRegister(useLayout bool) error {
     }
 }
 
+func (eng ViewEngine) RenderProfileForm(user_id int, error string) error {
+    page, err := eng.LoadProfilePageModel(user_id)
+    if err != nil {
+        return err
+    }
+
+    return profileForm(page, error).Render(eng.context, eng.writer)
+}
+
 func (eng ViewEngine) RenderProfile(user_id int) error {
     page, err := eng.LoadProfilePageModel(user_id)
     if err != nil {

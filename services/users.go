@@ -37,7 +37,7 @@ func (service *UserService) Create(request CreateUserRequest) (int, error) {
         Password: request.Password,
     })
 
-    if err := service.userRepo.Commit(&user); err != nil {
+    if err := service.userRepo.Commit(user); err != nil {
         return 0, nil
     }
     
@@ -57,6 +57,9 @@ func (service *UserService) UpdateProfile(request UpdateProfileRequest) error {
 	if err != nil {
 		return err
 	}
+    if user == nil {
+        return NotFoundError{ Resource: "User" }
+    }
 
     name, err := domain_model.NewUserName(request.FirstName, request.LastName)
     if err != nil {
@@ -74,7 +77,7 @@ func (service *UserService) UpdateProfile(request UpdateProfileRequest) error {
         user.ChangePassword(request.Password)
     }
 
-	return service.userRepo.Commit(user)
+	return service.userRepo.Commit(*user)
 }
 
 func (service *UserService) ValidatePassword(email string, password string) (*int, error) {
@@ -82,9 +85,12 @@ func (service *UserService) ValidatePassword(email string, password string) (*in
 	if err != nil {
 		return nil, err
 	}
+    if user == nil {
+        return nil, nil
+    }
 
-    id := user.Id()
     if user.ValidatePassword(password) {
+        id := user.Id()
         return &id, nil
     }
 
