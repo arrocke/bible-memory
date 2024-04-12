@@ -1,6 +1,6 @@
 module main
 
-go 1.21.6
+go 1.22.2
 
 require (
 	github.com/gorilla/mux v1.8.1
@@ -11,7 +11,7 @@ require (
 )
 
 require (
-	github.com/a-h/templ v0.2.648 // indirect
+	github.com/a-h/templ v0.2.663 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect

@@ -10,6 +10,12 @@ type AppModel struct {
     User *UserModel
 }
 
+templ Page(model AppModel, page templ.Component) {
+    @App(model) {
+        @page
+    }
+}
+
 templ App(model AppModel) {
     <!DOCTYPE html>
     <html lang="en" class="h-full">
@@ -38,23 +44,7 @@ templ App(model AppModel) {
     <body hx-boost="true" class="flex flex-col items-stretch h-full">
         @header(model)
         <div id="page" class="flex-grow">
-            if model.User == nil {
-                switch page := model.Page.(type) {
-                    case PublicIndexModel:
-                        @publicIndex(page)
-                    case LoginPageModel:
-                        @login(page)
-                    case RegisterPageModel:
-                        @register(page)
-                }
-            } else {
-                switch page := model.Page.(type) {
-                    case ProfilePageModel:
-                        @profile(page)
-                    case PassagesPageModel:
-                        @passages(page)
-                }
-            }
+            {children...}
         </div>
     </body>
 

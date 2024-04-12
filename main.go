@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
 	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -16,22 +15,22 @@ import (
 )
 
 type ServerContext struct {
-	Conn         *pgxpool.Pool
+	Conn           *pgxpool.Pool
 	SessionManager *SessionManager
-    PassageService *services.PassagesService
-    UserService *services.UserService
+	PassageService *services.PassagesService
+	UserService    *services.UserService
+	UserRepo       db.UserRepo
 }
 
 var decoder = schema.NewDecoder()
 
-
 func HandleErrors(handler func(w http.ResponseWriter, r *http.Request) error) http.Handler {
-    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        if err := handler(w, r); err != nil {
-            fmt.Printf("Server Error: %v\n", err.Error())
-            http.Error(w, "Server Error", http.StatusInternalServerError)
-        }
-    })
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := handler(w, r); err != nil {
+			fmt.Printf("Server Error: %v\n", err.Error())
+			http.Error(w, "Server Error", http.StatusInternalServerError)
+		}
+	})
 }
 
 func main() {
@@ -45,23 +44,25 @@ func main() {
 	defer conn.Close()
 
 	store := sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
-    passageRepo := db.CreatePgPassageRepo(conn)
-    userRepo := db.CreatePgUserRepo(conn)
-    passageService := services.CreatePassagesService(passageRepo)
-    userService := services.CreateUsersService(userRepo)
+	passageRepo := db.CreatePgPassageRepo(conn)
+	userRepo := db.CreatePgUserRepo(conn)
+	passageService := services.CreatePassagesService(passageRepo)
+	userService := services.CreateUsersService(userRepo)
 
 	ctx := &ServerContext{
-		Conn:         conn,
+		Conn:           conn,
 		SessionManager: CreateSessionManager(store),
-        PassageService: &passageService,
-        UserService: &userService,
+		PassageService: &passageService,
+		UserService:    &userService,
+		UserRepo:       &userRepo,
 	}
 
-	r := mux.NewRouter()
+	r := http.NewServeMux()
 
-	GetIndex(r, ctx)
+	indexRoutes(r, ctx)
+	registerRoutes(r, ctx)
 
-	GetRegister(r, ctx)
+    /*
 	GetLogin(r, ctx)
 	GetProfile(r, ctx)
 	PostRegister(r, ctx)
@@ -77,15 +78,19 @@ func main() {
 	PostReviewPassage(r, ctx)
 	PutEditPassage(r, ctx)
 	DeletePassage(r, ctx)
+    */
+
+	fs := http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets/")))
 
 	env := os.Getenv("ENV")
-	fs := http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets/")))
-	r.PathPrefix("/assets/").Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if env == "production" {
+    if env == "production" {
+        r.HandleFunc("GET /assets/", func (w http.ResponseWriter, r *http.Request) {
 			w.Header().Add("Cache-Control", "public, max-age=31536000")
-		}
-		fs.ServeHTTP(w, r)
-	}))
+            fs.ServeHTTP(w, r)
+        })
+    } else {
+        r.Handle("GET /assets/", fs)
+    }
 
 	port := os.Getenv("PORT")
 	if port == "" {

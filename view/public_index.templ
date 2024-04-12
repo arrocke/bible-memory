@@ -1,8 +1,6 @@
 package view
 
-type PublicIndexModel struct {}
-
-templ publicIndex(model PublicIndexModel) {
+templ PublicIndexPage() {
     <div class="p-4 flex flex-col items-center gap-4">
       <a href="/users/register" class="button" hx-target="#page">Register</a>
       or

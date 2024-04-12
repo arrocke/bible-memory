@@ -29,7 +29,7 @@ type NewUserProps struct {
 }
 
 func NewUser(props NewUserProps) User {
-    id := rand.Int()
+    id := int(rand.Int31())
     return User {
         props: UserProps {
             Id: id,
