@@ -91,17 +91,6 @@ func (eng ViewEngine) LoadPassagesPageModel(user_id int, clientDate time.Time, p
     return model, nil
 }
 
-func (eng ViewEngine) LoadProfilePageModel(user_id int) (ProfilePageModel, error) {
-    query := `SELECT email, first_name, last_name FROM "user" WHERE id = $1`
-    rows, _ := eng.conn.Query(eng.context, query, user_id)
-    model, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[ProfilePageModel])
-    if err != nil {
-        return ProfilePageModel{}, err
-    }
-    
-    return model, nil
-}
-
 func (eng ViewEngine) LoadEditPassageModel(userId int, passageId int) (EditPassagePageModel, error) {
 	type passageModel struct {
 		Id           int
@@ -182,30 +171,6 @@ func (eng ViewEngine) LoadReviewPassageModel(userId int, passageId int, clientDa
     }
 
     return model, nil
-}
-
-func (eng ViewEngine) RenderProfileForm(user_id int, error string) error {
-    page, err := eng.LoadProfilePageModel(user_id)
-    if err != nil {
-        return err
-    }
-
-    return profileForm(page, error).Render(eng.context, eng.writer)
-}
-
-func (eng ViewEngine) RenderProfile(user_id int) error {
-    page, err := eng.LoadProfilePageModel(user_id)
-    if err != nil {
-        return err
-    }
-    
-    return App(AppModel {
-        Page: page,
-        User: &UserModel{
-            FirstName: page.FirstName,
-            LastName: page.LastName,
-        },
-    }).Render(eng.context, eng.writer)
 }
 
 func (eng ViewEngine) RenderPassages(user_id int, clientDate time.Time) error {

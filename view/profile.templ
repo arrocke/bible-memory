@@ -6,8 +6,8 @@ type ProfilePageModel struct {
     LastName string;
 }
 
-templ profileForm(model ProfilePageModel, err string) {
-    <form hx-put="/users/profile" hx-swap="outerHTML">
+templ ProfileForm(model ProfilePageModel, err string) {
+    <form hx-put="/profile" hx-swap="outerHTML">
         if err != "" {
             <div class="text-red-700 font-bold mb-2">{err}</div>
         }
@@ -66,11 +66,11 @@ templ profileForm(model ProfilePageModel, err string) {
     </form>
 }
 
-templ profile(model ProfilePageModel) {
+templ ProfilePage(model ProfilePageModel) {
     <div class="p-4 flex justify-center">
       <div>
         <h2 class="view-heading">My Profile</h2>
-        @profileForm(model, "")
+        @ProfileForm(model, "")
       </div>
     </div>
 }

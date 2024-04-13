@@ -4,6 +4,8 @@ import (
 	"main/domain_model"
 	"main/view"
 	"net/http"
+
+	"github.com/jackc/pgx/v5"
 )
 
 func (ctx ServerContext) userRoutes(router *http.ServeMux) {
@@ -88,5 +90,60 @@ func (ctx ServerContext) userRoutes(router *http.ServeMux) {
 		w.WriteHeader(http.StatusNoContent)
 
         return nil
+	})))
+
+    
+	router.Handle("GET /profile", AuthMiddleware(true, HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
+        userId := GetUserId(r)
+
+        query := `SELECT email, first_name, last_name FROM "user" WHERE id = $1`
+        rows, _ := ctx.Conn.Query(r.Context(), query, userId)
+        model, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[view.ProfilePageModel])
+        if err != nil {
+            return err
+        }
+
+        page := view.ProfilePage(model)
+        return ctx.RenderPage(w, r, page)
+	})))
+
+    router.Handle("PUT /profile", AuthMiddleware(true, HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
+		userId := GetUserId(r)
+
+        user, err := ctx.UserRepo.Get(userId)
+        if err != nil {
+            return err
+        }
+
+        if user == nil {
+            // TODO: handle not found
+        }
+
+        name, err := domain_model.NewUserName(r.FormValue("first_name"), r.FormValue("last_name"))
+        if err != nil {
+            return err
+        }
+        user.ChangeName(name)
+
+        email, err := domain_model.NewUserEmail(r.FormValue("email"))
+        if err != nil {
+            return err
+        }
+        user.ChangeEmail(email)
+
+        
+        password := r.FormValue("password")
+        if (password != "") {
+            user.ChangePassword(password)
+        }
+
+        if err := ctx.UserRepo.Commit(*user); err != nil {
+            return err
+        }
+
+		w.Header().Set("Hx-Redirect", "/passages")
+		w.WriteHeader(http.StatusNoContent)
+
+		return nil
 	})))
 }

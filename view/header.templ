@@ -22,7 +22,7 @@ templ header(model AppModel) {
                 <ul id="user-menu"
                   class="invisible z-10 box-content absolute bg-white p-2 w-full -left-2 top-[34px] flex flex-col gap-3 border border-t-0 border-slate-300 rounded-b">
                   <li>
-                    <a class="font-bold hover:underline focus:underline" href="/users/profile">Profile</a>
+                    <a class="font-bold hover:underline focus:underline" href="/profile" hx-target="#page">Profile</a>
                   </li>
                   <li>
                     <button class="font-bold hover:underline focus:underline" hx-post="/logout">Logout</button>
