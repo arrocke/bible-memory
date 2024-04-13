@@ -42,6 +42,7 @@ templ App(model AppModel) {
     </head>
 
     <body hx-boost="true" class="flex flex-col items-stretch h-full">
+        @flashContainer()
         @header(model)
         <div id="page" class="flex-grow">
             {children...}

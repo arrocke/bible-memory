@@ -111,5 +111,7 @@ func main() {
 
 	fmt.Printf("Server started on port %v\n", port)
 
-	http.ListenAndServe(":"+port, ctx.SessionManager.SessionMiddleware(r))
+    if err := http.ListenAndServe(":"+port, ctx.SessionManager.SessionMiddleware(r)); err != nil {
+        fmt.Printf("Error in server: %v", err.Error())
+    }
 }
