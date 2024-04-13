@@ -33,7 +33,7 @@ func stringifyInt(n *int) string {
 templ EditPassagePage(model EditPassagePageModel) {
     <div class="p-4">
       <h2 class="view-heading">Edit {model.Reference}</h2>
-      <form hx-put={string(templ.URL(fmt.Sprintf("/passages/%s", model.Id)))}>
+      <form hx-put={string(templ.URL(fmt.Sprintf("/passages/%v", model.Id)))}>
         <div class="mb-4">
           <label class="form-label" for="reference">Reference</label>
           <div>

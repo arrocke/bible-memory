@@ -11,7 +11,7 @@ func (i ReviewInterval) Value() int {
 }
 
 func NewReviewInterval(interval int) (ReviewInterval, error) {
-    if interval <= 0 || interval > 4 {
+    if interval <= 0 {
         return 0, fmt.Errorf("Invalid review interval: %v", interval)
     }
     return ReviewInterval(interval), nil
