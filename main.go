@@ -55,7 +55,7 @@ type ServerContext struct {
 }
 
 func (ctx ServerContext) RenderPage(w http.ResponseWriter, r *http.Request, page templ.Component) error {
-	if r.Header.Get("Hx-Request") == "true" {
+	if r.Header.Get("hx-target") == "page" {
 		return page.Render(r.Context(), w)
 	} else {
 		session := GetSession(r)

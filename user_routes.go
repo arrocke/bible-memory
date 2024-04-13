@@ -15,23 +15,18 @@ func (ctx ServerContext) userRoutes(router *http.ServeMux) {
 	})))
 
 	router.Handle("POST /register", AuthMiddleware(false, HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
-        firstName := r.FormValue("first_name")
-        lastName := r.FormValue("last_name")
-        email := r.FormValue("email_name")
-        password := r.FormValue("password")
-
-        name, err := domain_model.NewUserName(firstName, lastName)
+        name, err := domain_model.NewUserName(r.FormValue("first_name"), r.FormValue("last_name"))
         if err != nil {
             return err
         }
-        emailAddress, err := domain_model.NewUserEmail(email)
+        email, err := domain_model.NewUserEmail(r.FormValue("email"))
         if err != nil {
             return err
         }
         user := domain_model.NewUser(domain_model.NewUserProps{
             Name: name,
-            EmailAddress: emailAddress,
-            Password: password,
+            EmailAddress: email,
+            Password: r.FormValue("password"),
         })
 
         if err := ctx.UserRepo.Commit(user); err != nil {
@@ -42,7 +37,7 @@ func (ctx ServerContext) userRoutes(router *http.ServeMux) {
 			return err
 		}
 
-		w.Header().Set("Hx-Redirect", "/passages")
+		w.Header().Set("Hx-Location", "/passages")
 		w.WriteHeader(http.StatusNoContent)
 
 		return nil
@@ -67,16 +62,15 @@ func (ctx ServerContext) userRoutes(router *http.ServeMux) {
                 Email: email,
                 Error: "Invalid email or password.",
             }
-            page := view.LoginPage(viewModel)
-            return page.Render(r.Context(), w)
+            return view.LoginForm(viewModel).Render(r.Context(), w)
         }
 
 		if _, err = ctx.SessionManager.LogIn(w, r, user.Id()); err != nil {
 			return err
 		}
 
-		w.Header().Set("Hx-Redirect", "/passages")
-		w.WriteHeader(http.StatusNoContent)
+		w.Header().Set("Hx-Location", "/passages")
+        w.WriteHeader(http.StatusNoContent)
 
 		return nil
 	})))
@@ -86,7 +80,7 @@ func (ctx ServerContext) userRoutes(router *http.ServeMux) {
             return err
         }
 
-		w.Header().Set("Hx-Redirect", "/")
+		w.Header().Set("Hx-Location", "/")
 		w.WriteHeader(http.StatusNoContent)
 
         return nil
@@ -141,7 +135,7 @@ func (ctx ServerContext) userRoutes(router *http.ServeMux) {
             return err
         }
 
-		w.Header().Set("Hx-Redirect", "/passages")
+		w.Header().Set("Hx-Location", "/passages")
 		w.WriteHeader(http.StatusNoContent)
 
 		return nil

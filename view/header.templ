@@ -3,11 +3,11 @@ package view
 templ header(model AppModel) {
     <header class="px-4 py-2 border-b border-slate-300 flex items-baseline">
         if model.User == nil {
-            <a href="/">
+            <a href="/" hx-target="#page">
                 <h1 class="text-2xl font-bold">Bible Memory</h1>
             </a>
         } else {
-            <a href="/passages">
+            <a href="/passages" hx-target="#page">
                 <h1 class="text-2xl font-bold">Bible Memory</h1>
             </a>
             <nav class="flex-grow flex justify-end items-baseline" aria-label="Header Navigation">

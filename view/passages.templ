@@ -102,7 +102,9 @@ templ PassagesPage(model PassagesPageModel, page templ.Component) {
         </ul>
       </div>
       <main id="main" class="flex-grow relative">
-        @page
+        if page != nil {
+            @page
+        }
       </main>
     </div>
     <script type="text/javascript">
