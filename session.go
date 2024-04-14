@@ -108,15 +108,23 @@ func AuthMiddleware(requireAuth bool, next http.Handler) http.Handler {
     return http.HandlerFunc(func (w http.ResponseWriter, r *http.Request) {
         session := GetSession(r)
 
+        var redirect string
         if requireAuth && session.UserId == nil {
-            w.Header().Set("Hx-Redirect", "/")
-            w.WriteHeader(http.StatusNoContent)
-            return
+            redirect = "/"
         } else if !requireAuth && session.UserId != nil {
-            w.Header().Set("Hx-Redirect", "/passages")
-            w.WriteHeader(http.StatusNoContent)
+            redirect = "/passages"
+        }
+
+        if redirect != "" {
+            if r.Header.Get("Hx-Request") == "true" {
+                w.Header().Set("Hx-Redirect", redirect)
+                w.WriteHeader(http.StatusNoContent)
+            } else {
+                http.Redirect(w, r, redirect, http.StatusFound)
+            }
             return
         }
+
 
         next.ServeHTTP(w, r)
     })

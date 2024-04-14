@@ -1,10 +1,6 @@
 package domain_model
 
-import (
-	"fmt"
-	"regexp"
-	"strconv"
-)
+import "fmt"
 
 type PassageReference struct {
 	Book         string
@@ -14,51 +10,18 @@ type PassageReference struct {
 	EndVerse     int
 }
 
-func (r PassageReference) String() string {
-	if r.StartChapter == r.EndChapter && r.StartVerse == r.EndVerse {
-		return fmt.Sprintf("%s %d:%d", r.Book, r.StartChapter, r.StartVerse)
-	} else if r.StartChapter == r.EndChapter {
-		return fmt.Sprintf("%s %d:%d-%d", r.Book, r.StartChapter, r.StartVerse, r.EndVerse)
-	} else {
-		return fmt.Sprintf("%s %d:%d-%d:%d", r.Book, r.StartChapter, r.StartVerse, r.EndChapter, r.EndVerse)
-	}
-}
-
-type PassageReferenceParseError struct {
-	ReferenceString string
-}
-
-func (err *PassageReferenceParseError) Error() string {
-	return fmt.Sprintf("Failed to parse reference '%v'", err.ReferenceString)
-}
-
-var referenceRegexp = regexp.MustCompile(`(.+?)\s*(\d+)[.:](\d+)(?:\s*-\s*(?:(\d+)[.:])?(\d+))?`)
-
-func ParsePassageReference(str string) (PassageReference, error) {
-	match := referenceRegexp.FindStringSubmatch(str)
-	if match == nil {
-		return PassageReference{}, &PassageReferenceParseError{ReferenceString: str}
-	}
-
-	startChapter, _ := strconv.ParseInt(match[2], 10, 32)
-	startVerse, _ := strconv.ParseInt(match[3], 10, 32)
-
-	endChapter := startChapter
-	if match[4] != "" {
-		endChapter, _ = strconv.ParseInt(match[4], 10, 32)
-	}
-
-	endVerse := startVerse
-	if match[5] != "" {
-		endVerse, _ = strconv.ParseInt(match[5], 10, 32)
+func NewPassageReference(book string, startChapter int, startVerse int, endChapter int, endVerse int) (PassageReference, error) {
+	if startChapter > endChapter {
+		return PassageReference{}, fmt.Errorf("end chapter must be on or after start chapter")
+	} else if startVerse > endVerse && startChapter == endChapter {
+		return PassageReference{}, fmt.Errorf("end verse must be on or after start verse")
 	}
 
 	return PassageReference{
-			Book:         match[1],
-			StartChapter: int(startChapter),
-			StartVerse:   int(startVerse),
-			EndChapter:   int(endChapter),
-			EndVerse:     int(endVerse),
-		},
-		nil
+		Book:         book,
+		StartChapter: startChapter,
+		StartVerse:   startVerse,
+		EndChapter:   endChapter,
+		EndVerse:     endVerse,
+	}, nil
 }

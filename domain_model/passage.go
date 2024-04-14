@@ -29,7 +29,7 @@ type NewPassageProps struct {
 }
 
 func NewPassage(props NewPassageProps) Passage {
-    id := rand.Int()
+    id := int(rand.Int31())
     return Passage{
         props: PassageProps {
             Id: id,

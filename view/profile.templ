@@ -4,12 +4,13 @@ type ProfilePageModel struct {
     Email string;
     FirstName string;
     LastName string;
+    Error string;
 }
 
-templ ProfileForm(model ProfilePageModel, err string) {
+templ ProfileForm(model ProfilePageModel) {
     <form hx-put="/profile" hx-swap="outerHTML">
-        if err != "" {
-            <div class="text-red-700 font-bold mb-2">{err}</div>
+        if model.Error != "" {
+            <div class="text-red-700 font-bold mb-2">{model.Error}</div>
         }
       <div class="mb-4">
         <label class="form-label" for="email">Email</label>
@@ -70,7 +71,7 @@ templ ProfilePage(model ProfilePageModel) {
     <div class="p-4 flex justify-center">
       <div>
         <h2 class="view-heading">My Profile</h2>
-        @ProfileForm(model, "")
+        @ProfileForm(model)
       </div>
     </div>
 }
