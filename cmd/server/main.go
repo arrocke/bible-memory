@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"main/db"
+	"main/internal/middleware"
 	"main/internal/route/user"
 	"net/http"
 	"os"
@@ -33,11 +34,15 @@ func main() {
 	}
 	defer conn.Close()
 
+    sessionManager := middleware.InitSessions(os.Getenv("SESSION_KEY"))
+
+    e.Use(sessionManager.Middleware())
+
     g := e.Group("/")
 
     userRepo := db.CreatePgUserRepo(conn)
 
-    user.Init(g, userRepo)
+    user.Init(g, sessionManager, userRepo)
 
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")

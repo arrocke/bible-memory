@@ -54,6 +54,10 @@ func (h UserHandlers) login(g *echo.Group) {
             return view.LoginForm(viewModel).Render(ctx, w)
         }
 
+        if err := h.sessionManager.LogIn(c, user.Id()); err != nil {
+            return err
+        }
+
 		w.Header().Set("Hx-Location", "/passages")
         w.WriteHeader(http.StatusNoContent)
 
