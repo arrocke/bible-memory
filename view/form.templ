@@ -57,9 +57,20 @@ type inputErrorModel struct {
 }
 
 templ inputError(model inputErrorModel) {
-	<div class="text-sm text-red-800">
-		{ model.message }
-	</div>
+    if model.message != "" {
+        <div class="text-sm text-red-800">
+            { model.message }
+        </div>
+    }
+}
+
+
+templ validationError(model validationErrorModel) {
+    if hasValidationError(model) {
+        <div class="text-sm text-red-800">
+            { formatValidationError(model) }
+        </div>
+    }
 }
 
 templ button() {

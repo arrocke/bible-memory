@@ -1,8 +1,11 @@
 package view
 
+import "github.com/go-playground/validator/v10"
+
 type LoginPageModel struct {
 	Email string
 	Error string
+    ValidationErrors *validator.ValidationErrors
 }
 
 templ LoginForm(model LoginPageModel) {
@@ -13,18 +16,47 @@ templ LoginForm(model LoginPageModel) {
             </div>
         }
         <div class="mb-4">
-            <label class="form-label" for="email">Email</label>
-            <div>
-                <input id="email" class="text-input" name="email" value={ model.Email } required/>
-            </div>
+            @label(labelModel{for_: "email"}) {
+                Email
+            }
+            @textInput(textInputModel{
+                id:    "email",
+                class: "block",
+                name:  "email",
+                value: model.Email,
+                type_: "text",
+            })
+            @validationError(validationErrorModel{
+                err: model.ValidationErrors,
+                field: "Email",
+                messages: map[string]string{
+                    "required": "Please enter your email address.",
+                    "email": "Please enter a valid email address",
+                },
+            })
         </div>
         <div class="mb-4">
-            <label class="form-label" for="password">Password</label>
-            <div>
-                <input id="password" type="password" class="text-input" name="password" required/>
-            </div>
+            @label(labelModel{for_: "password"}) {
+                Password
+            }
+            @textInput(textInputModel{
+                id:    "password",
+                class: "block",
+                name:  "password",
+                type_: "password",
+            })
+            @validationError(validationErrorModel{
+                err: model.ValidationErrors,
+                field: "Password",
+                messages: map[string]string{
+                    "required": "Please enter your password.",
+                },
+
+            })
         </div>
-        <button class="button">Log In</button>
+        @button() {
+            Log In 
+        }
     </form>
 }
 
