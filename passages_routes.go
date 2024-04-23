@@ -132,7 +132,6 @@ func (ctx *ServerContext) passagesRoutes(router *http.ServeMux) {
 		if err := ctx.PassageRepo.Commit(&passage); err != nil {
 			return err
 		}
-
         w.Header().Set("Hx-Location", fmt.Sprintf("{\"path\":\"/passages/%d/review\",\"target\":\"#page\"}", passage.Id()))
 		w.WriteHeader(http.StatusNoContent)
 
@@ -149,7 +148,8 @@ func (ctx *ServerContext) passagesRoutes(router *http.ServeMux) {
 
 		id, err := ParseInt(r.PathValue("Id"))
 		if err != nil {
-			http.Error(w, "Not Found", http.StatusNotFound)
+            w.Header().Set("Hx-Location", fmt.Sprintf("{\"path\":\"/passages\",\"target\":\"#page\"}"))
+            w.WriteHeader(http.StatusNoContent)
 			return nil
 		}
 
@@ -187,39 +187,62 @@ func (ctx *ServerContext) passagesRoutes(router *http.ServeMux) {
 			Interval: passage.Interval,
 			ReviewAt: passage.ReviewAt,
 		}
-
-		page := view.EditPassagePage(model)
-
-		return ctx.RenderPassagePage(w, r, page)
+		return ctx.RenderPassagePage(w, r, view.EditPassagePage(model))
 	})))
 
 	router.Handle("PUT /passages/{Id}", AuthMiddleware(true, HandleErrors(func(w http.ResponseWriter, r *http.Request) error {
 		id, err := ParseInt(r.PathValue("Id"))
 		if err != nil {
-			return err
+            w.Header().Set("Hx-Location", fmt.Sprintf("{\"path\":\"/passages\",\"target\":\"#page\"}"))
+            w.WriteHeader(http.StatusNoContent)
+            return nil
 		}
 
 		passage, err := ctx.PassageRepo.Get(id)
 		if err != nil {
-			return err
+            w.Header().Set("Hx-Location", fmt.Sprintf("{\"path\":\"/passages\",\"target\":\"#page\"}"))
+            w.WriteHeader(http.StatusNoContent)
+            return nil
 		}
 
-		reference, err := parseReference(r.FormValue("reference"))
-		if err != nil {
-			return err
+		model := view.EditPassagePageModel{
+			Reference: r.FormValue("reference"),
+			Text:      r.FormValue("text"),
 		}
+		hasError := false
+
+        if model.Text == "" {
+            model.TextError = "Please provide the passage text."
+            hasError = true
+        }
+
+        reference, err := parseReference(model.Reference)
+        if err != nil {
+            model.ReferenceError = err.Error()
+            hasError = true
+        }
 
 		var nextReview *domain_model.PassageReview
 
 		interval, err := ParseOptional(ParseInt, r.FormValue("interval"))
 		if err != nil {
-			return err
+            model.IntervalError = "Interval must be an integer."
+            hasError = true
 		}
+        if interval != nil && *interval <= 0 {
+            model.IntervalError = "Interval must be greater than 0."
+            hasError = true
+        }
 
 		reviewAt, err := ParseOptional(ParseDate, r.FormValue("review_at"))
 		if err != nil {
-			return err
+            model.IntervalError = "Review date must be a valid date."
+            hasError = true
 		}
+
+        if hasError {
+            return view.EditPassageForm(model).Render(r.Context(), w)
+        }
 
 		if interval != nil && reviewAt != nil {
 			nextInterval, err := domain_model.NewReviewInterval(*interval)
