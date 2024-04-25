@@ -1,7 +1,7 @@
 bin/tailwindcss: 
 	./bin/install-tailwind
 
-assets/styles.css: bin/tailwindcss templates/* assets/*.js
+assets/styles.css: bin/tailwindcss assets/*.js
 	./bin/tailwindcss -i ./assets/tailwind.css -o ./assets/styles.css
 
 build-assets: assets/styles.css assets/icons.svg assets/typer.js assets/manifest.json

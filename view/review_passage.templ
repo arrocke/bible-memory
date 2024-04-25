@@ -1,0 +1,94 @@
+package view
+
+import "regexp"
+
+type ReviewPassagePageModel struct {
+    Id int
+    Reference string
+    Text string
+    AlreadyReviewed bool
+    EasyInterval int
+    GoodInterval int
+    HardInterval int
+}
+
+type reviewWord struct {
+    Number string `json:"number"`
+    Prefix string `json:"prefix"`
+    Suffix string `json:"suffix"`
+    Word string `json:"word"`
+    FirstLetter string `json:"firstLetter"`
+    RestOfWord string `json:"restOfWord"`
+}
+
+
+func extractWords(text string) []reviewWord {
+    wordRegex := regexp.MustCompile(`(?:(\d+)\s?)?([^A-Za-zÀ-ÖØ-öø-ÿ\s]+)?([A-Za-zÀ-ÖØ-öø-ÿ]+(?:(?:'|’|-)[A-Za-zÀ-ÖØ-öø-ÿ]+)?(?:'|’)?)([^A-Za-zÀ-ÖØ-öø-ÿ0-9]*\s+)?`)
+    matches := wordRegex.FindAllStringSubmatch(text, -1)
+
+    words := make([]reviewWord, len(matches))
+
+    for i, match := range matches {
+        words[i] = reviewWord{
+            Number:      match[1],
+            Prefix:      match[2],
+            Word:        match[3],
+            Suffix:      match[4],
+            FirstLetter: match[3][0:1],
+            RestOfWord:  match[3][1:],
+        }
+    }
+
+    return words
+}
+
+script typer(model ReviewPassagePageModel, words []reviewWord) {
+    let selectModeRoot = document.querySelector('#mode-select')
+    selectModeRoot.addEventListener('click', e => {
+      const mode = e.target.dataset.mode
+      if (mode) {
+        selectModeRoot.style.display = 'none'
+        initTyper(mode)
+      }
+    })
+
+  function initTyper(mode) {
+    Typer({
+      el: document.querySelector('#typer'),
+      alreadyReviewed: model.AlreadyReviewed,
+      words,
+      mode,
+      intervals: {
+        hard: model.HardInterval,
+        good: model.GoodInterval,
+        easy: model.EasyInterval,
+      },
+      onComplete({ grade }) {
+        htmx.ajax("POST", `/passages/${model.Id}/review`, {
+          values: { grade, mode },
+          target: '#result'
+        })
+      }
+    })
+  }
+}
+
+templ ReviewPassagePage(model ReviewPassagePageModel) {
+    <div class="p-4 absolute w-full flex flex-col h-full min-h-0">
+      <h2 class="view-heading">Review {model.Reference}</h2>
+      <div id="result"></div>
+      <div id="mode-select" class="flex">
+        <button
+          class="border border-slate-500 border-r-0 last:border-r px-4 h-8 font-bold first:rounded-l last:rounded-r"
+          type="button" data-mode="learn">Learn</button>
+        <button
+          class="border border-slate-500 border-r-0 last:border-r px-4 h-8 font-bold first:rounded-l last:rounded-r"
+          type="button" data-mode="recall">Recall</button>
+        <button
+          class="border border-slate-500 border-r-0 last:border-r px-4 h-8 font-bold first:rounded-l last:rounded-r"
+          type="button" data-mode="review">Review</button>
+      </div>
+      <div id="typer" class="flex-1 min-h-0"> </div>
+    </div>
+    @typer(model, extractWords(model.Text))
+}

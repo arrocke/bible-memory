@@ -1,0 +1,59 @@
+package view
+
+type AddPassageFormModel struct {
+	Reference string
+	Text      string
+
+	ReferenceError string
+	TextError      string
+}
+
+templ AddPassageForm(model AddPassageFormModel) {
+	<form class="form" hx-post="/passages" hx-swap="outerHTML">
+		<div class="mb-4">
+			@label(labelModel{for_: "reference"}) {
+				Reference
+			}
+			@textInput(textInputModel{
+				id:    "reference",
+				class: "block",
+				name:  "reference",
+				value: model.Reference,
+			})
+			if model.ReferenceError != "" {
+				@inputError(inputErrorModel{
+					message: model.ReferenceError,
+				})
+			}
+		</div>
+		<div class="mb-4">
+			@label(labelModel{for_: "text"}) {
+				Text
+			}
+			@textInput(textInputModel{
+				multiline: true,
+				id:        "text",
+				class:     "h-32 min-h-32 resize-y block w-full",
+				name:      "text",
+				value:     model.Text,
+			})
+			if model.TextError != "" {
+				@inputError(inputErrorModel{
+					message: model.TextError,
+				})
+			}
+		</div>
+		@button() {
+			Add Passage 
+		}
+	</form>
+}
+
+templ AddPassagePage(model AddPassageFormModel) {
+	<div class="p-4">
+		@pageHeading() {
+			Add Passage 
+		}
+		@AddPassageForm(model)
+	</div>
+}

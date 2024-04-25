@@ -1,0 +1,26 @@
+package view
+
+templ FlashMessages(messages []string) {
+    <div id="flash" hx-swap-oob="beforeend">
+        for _, message := range messages {
+            <div class="flash p-2 bg-red-300 rounded m-2">
+                {message}
+                <button type="button">Close</button>
+            </div>
+        }
+    </div>
+}
+
+templ flashContainer() {
+    <script>
+        function closeFlash(e) {
+            if (e.target.matches('.flash button')) {
+                const msg = e.target.closest('.flash')
+                msg.remove()
+            }
+        }
+    </script>
+    <div id="flash" class="fixed" onclick="closeFlash(event)">
+    </div>
+}
+

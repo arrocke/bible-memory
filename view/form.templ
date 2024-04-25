@@ -1,0 +1,69 @@
+package view
+
+type textInputModel struct {
+	id        string
+	class     string
+	type_     string
+	name      string
+	value     string
+	multiline bool
+}
+
+templ textInput(model textInputModel) {
+	if model.multiline {
+		<textarea
+			id={ model.id }
+			class={ "border border-slate-500 rounded h-8 px-2 py-1", model.class }
+			name={ model.name }
+			if model.type_ == "" {
+				type="text"
+			} else {
+				type={ model.type_ }
+			}
+		>
+			{ model.value }
+		</textarea>
+	} else {
+		<input
+			id={ model.id }
+			class={ "border border-slate-500 rounded h-8 px-2 py-1", model.class }
+			name={ model.name }
+			if model.type_ == "" {
+				type="text"
+			} else {
+				type={ model.type_ }
+			}
+			value={ model.value }
+		/>
+	}
+}
+
+type labelModel struct {
+	class string
+	for_  string
+}
+
+templ label(model labelModel) {
+	<label
+		class={ "font-bold text-sm mb-1 inline-block", model.class }
+		for={ model.for_ }
+	>
+		{ children... }
+	</label>
+}
+
+type inputErrorModel struct {
+	message string
+}
+
+templ inputError(model inputErrorModel) {
+	<div class="text-sm text-red-800">
+		{ model.message }
+	</div>
+}
+
+templ button() {
+	<button class="rounded bg-slate-900 text-white font-bold px-4 py-2 h-8 flex justify-center items-center">
+		{ children... }
+	</button>
+}
