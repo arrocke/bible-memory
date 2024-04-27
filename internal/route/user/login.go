@@ -63,4 +63,16 @@ func (h Handlers) login(g *echo.Group) {
 
         return nil
     })
+
+    g.POST("logout", func(c echo.Context) error {
+        if err:= h.sessionManager.LogOut(c); err != nil {
+            return err
+        }
+
+        w := c.Response().Writer
+		w.Header().Set("Hx-Location", "/")
+        w.WriteHeader(http.StatusNoContent)
+
+        return nil
+    })
 }
