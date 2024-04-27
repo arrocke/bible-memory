@@ -13,7 +13,7 @@ type postLoginRequest struct {
     Password string `form:"password" validate:"required"`
 }
 
-func (h UserHandlers) login(g *echo.Group) {
+func (h Handlers) login(g *echo.Group) {
     g.GET("login", func(c echo.Context) error {
         page := view.LoginPage(view.LoginPageModel{})
 		app := view.Page(view.AppModel{}, page)
@@ -24,15 +24,15 @@ func (h UserHandlers) login(g *echo.Group) {
         w := c.Response().Writer
         ctx := c.Request().Context()
 
-        var r postLoginRequest
-        if err := c.Bind(&r); err != nil {
+        var req postLoginRequest
+        if err := c.Bind(&req); err != nil {
             return c.String(http.StatusBadRequest, "bad request")
         }
 
-        if err := c.Validate(r); err != nil {
+        if err := c.Validate(req); err != nil {
             if errors, ok := err.(validator.ValidationErrors); ok {
                 model := view.LoginPageModel {
-                    Email: r.Email,
+                    Email: req.Email,
                     ValidationErrors: &errors,
                 }
                 return view.LoginForm(model).Render(ctx, w)
@@ -41,14 +41,14 @@ func (h UserHandlers) login(g *echo.Group) {
             }
         }
 
-        user, err := h.userRepo.GetByEmail(r.Email)
+        user, err := h.userRepo.GetByEmail(req.Email)
         if err != nil {
             return err
         }
 
-        if user == nil || !user.ValidatePassword(r.Password) {
+        if user == nil || !user.ValidatePassword(req.Password) {
             viewModel := view.LoginPageModel{
-                Email: r.Email,
+                Email: req.Email,
                 Error: "Invalid email or password.",
             }
             return view.LoginForm(viewModel).Render(ctx, w)

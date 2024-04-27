@@ -1,54 +1,128 @@
 package view
 
+import "github.com/go-playground/validator/v10"
+
 type RegisterPageModel struct {
-    Error string;
     Email string;
     FirstName string;
     LastName string
+
+    Error string;
+    ValidationErrors *validator.ValidationErrors
 }
 
 templ RegisterForm(model RegisterPageModel) {
-    <form action="/register" method="POST" hx-target="#register">
+    <form action="/register" method="POST" hx-swap="outerHTML" hx-target="this">
         if model.Error != "" {
             <div class="text-red-700 mb-4 font-bold">
               {model.Error}
             </div>
         }
       <div class="mb-4">
-        <label class="form-label" for="email" >Email</label>
-        <div>
-          <input type="email" id="email" class="text-input" name="email" value={model.Email} required />
+        @label(labelModel{for_: "email"}) {
+            Email
+        }
+        @textInput(textInputModel{
+            id:    "email",
+            class: "block",
+            name:  "email",
+            value: model.Email,
+            type_: "email",
+        })
+        @validationError(validationErrorModel{
+            err: model.ValidationErrors,
+            field: "Email",
+            messages: map[string]string{
+                "required": "Please enter your email address.",
+                "email": "Please enter a valid email address",
+            },
+        })
+      </div>
+      <div class="mb-4 flex gap-4">
+        <div class="flex-1 flex-shrink-0">
+            @label(labelModel{for_: "first-name"}) {
+                First Name
+            }
+            @textInput(textInputModel{
+                id:    "first-name",
+                class: "block",
+                name:  "first_name",
+                value: model.FirstName,
+                type_: "text",
+            })
+            @validationError(validationErrorModel{
+                err: model.ValidationErrors,
+                field: "FirstName",
+                messages: map[string]string{
+                    "required": "Please enter your first name.",
+                },
+            })
+        </div>
+        <div class="flex-1 flex-shrink-0">
+            @label(labelModel{for_: "last-name"}) {
+                Last Name
+            }
+            @textInput(textInputModel{
+                id:    "last-name",
+                class: "block",
+                name:  "last_name",
+                value: model.LastName,
+                type_: "text",
+            })
+            @validationError(validationErrorModel{
+                err: model.ValidationErrors,
+                field: "LastName",
+                messages: map[string]string{
+                    "required": "Please enter your last name.",
+                },
+            })
         </div>
       </div>
       <div class="mb-4 flex gap-4">
         <div class="flex-1 flex-shrink-0">
-          <label class="form-label" for="first-name">First Name</label>
-          <div>
-            <input id="first-name" class="text-input" name="first_name" value={model.FirstName} required />
-          </div>
+            @label(labelModel{for_: "password"}) {
+                Password
+            }
+            @textInput(textInputModel{
+                id:    "password",
+                class: "block",
+                name:  "password",
+                type_: "password",
+            })
+            @validationError(validationErrorModel{
+                err: model.ValidationErrors,
+                field: "Password",
+                messages: map[string]string{
+                    "required": "Please enter your password.",
+                    "min": "Please use a password of at least {param} characters.",
+                },
+
+            })
         </div>
         <div class="flex-1 flex-shrink-0">
-          <label class="form-label" for="last-name">Last Name</label>
-          <div>
-            <input id="last-name" class="text-input" name="last_name" value={model.LastName} required />
-          </div>
+            @label(labelModel{for_: "confirm-password"}) {
+                Confirm Password
+            }
+            @textInput(textInputModel{
+                id:    "confirm-password",
+                class: "block",
+                name:  "confirm_password",
+                type_: "password",
+            })
+            @validationError(validationErrorModel{
+                err: model.ValidationErrors,
+                field: "ConfirmPassword",
+                messages: map[string]string{
+                    "required": "Please enter your password.",
+                    "eqfield": "Your password confirmation does not match.",
+                },
+
+            })
         </div>
       </div>
-      <div class="mb-4 flex gap-4">
-        <div class="flex-1 flex-shrink-0">
-          <label class="form-label" for="password">Password</label>
-          <div>
-            <input id="password" type="password" class="text-input" name="password" required />
-          </div>
-        </div>
-        <div class="flex-1 flex-shrink-0">
-          <label class="form-label" for="confirm_password">Confirm Password</label>
-          <div>
-            <input id="confirm_password" type="password" class="text-input" name="confirm_password" required />
-          </div>
-        </div>
-      </div>
-      <button class="button">Register</button>
+        @button() {
+            Log In 
+        }
     </form>
 }
 
