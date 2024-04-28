@@ -93,7 +93,6 @@ templ RegisterForm(model RegisterPageModel) {
                 err: model.ValidationErrors,
                 field: "Password",
                 messages: map[string]string{
-                    "required": "Please enter your password.",
                     "min": "Please use a password of at least {param} characters.",
                 },
 
@@ -113,7 +112,6 @@ templ RegisterForm(model RegisterPageModel) {
                 err: model.ValidationErrors,
                 field: "ConfirmPassword",
                 messages: map[string]string{
-                    "required": "Please enter your password.",
                     "eqfield": "Your password confirmation does not match.",
                 },
 
@@ -121,7 +119,7 @@ templ RegisterForm(model RegisterPageModel) {
         </div>
       </div>
         @button() {
-            Log In 
+            Register
         }
     </form>
 }

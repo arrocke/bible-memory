@@ -58,8 +58,8 @@ func (h Handlers) login(g *echo.Group) {
             return err
         }
 
-		w.Header().Set("Hx-Location", "/passages")
-        w.WriteHeader(http.StatusNoContent)
+        c.Response().Header().Set("Hx-Location", "/passages")
+        c.NoContent(http.StatusNoContent)
 
         return nil
     })
@@ -69,9 +69,8 @@ func (h Handlers) login(g *echo.Group) {
             return err
         }
 
-        w := c.Response().Writer
-		w.Header().Set("Hx-Location", "/")
-        w.WriteHeader(http.StatusNoContent)
+        c.Response().Header().Set("Hx-Location", "/")
+        c.NoContent(http.StatusNoContent)
 
         return nil
     })

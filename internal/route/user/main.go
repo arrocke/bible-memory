@@ -20,4 +20,5 @@ func Init(g *echo.Group, sessionManager middleware.SessionManager, userRepo db.U
 
     handlers.login(g)
     handlers.register(g)
+    handlers.profile(g)
 }
