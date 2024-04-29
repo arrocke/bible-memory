@@ -4,7 +4,7 @@ import (
 	"context"
 	"main/db"
 	"main/internal/middleware"
-	"main/internal/route/user"
+	"main/internal/route"
 	"net/http"
 	"os"
 

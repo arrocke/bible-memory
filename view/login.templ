@@ -25,7 +25,7 @@ templ LoginForm(model LoginPageModel) {
                 class: "block",
                 name:  "email",
                 value: model.Email,
-                type_: "text",
+                type_: "email",
             })
             @validationError(validationErrorModel{
                 err: model.ValidationErrors,
