@@ -2,6 +2,7 @@ package user
 
 import (
 	"main/domain_model"
+	"main/internal/middleware"
 	"main/view"
 	"net/http"
 
@@ -18,7 +19,7 @@ type postProfileRequest struct {
 }
 
 func (h Handlers) profile(g *echo.Group) {
-    g.GET("profile", func(c echo.Context) error {
+    g.GET("profile", middleware.AuthMiddleware(true)(func(c echo.Context) error {
         userId := c.Get("user_id").(int)
 
         user, err := h.userRepo.Get(userId)
@@ -34,9 +35,9 @@ func (h Handlers) profile(g *echo.Group) {
         })
 		app := view.Page(view.AppModel{}, page)
 		return app.Render(c.Request().Context(), c.Response().Writer)
-    })
+    }))
 
-    g.PUT("profile", func(c echo.Context) error {
+    g.PUT("profile", middleware.AuthMiddleware(true)(func(c echo.Context) error {
         userId := c.Get("user_id").(int)
 
         w := c.Response().Writer
@@ -90,5 +91,5 @@ func (h Handlers) profile(g *echo.Group) {
         c.NoContent(http.StatusNoContent)
 
         return nil
-    })
+    }))
 }

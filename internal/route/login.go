@@ -1,11 +1,12 @@
 package user
 
 import (
+	"main/internal/middleware"
 	"main/view"
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
-    "github.com/go-playground/validator/v10"
 )
 
 type postLoginRequest struct {
@@ -14,13 +15,13 @@ type postLoginRequest struct {
 }
 
 func (h Handlers) login(g *echo.Group) {
-    g.GET("login", func(c echo.Context) error {
+    g.GET("login", middleware.AuthMiddleware(false)(func(c echo.Context) error {
         page := view.LoginPage(view.LoginPageModel{})
 		app := view.Page(view.AppModel{}, page)
 		return app.Render(c.Request().Context(), c.Response().Writer)
-    })
+    }))
 
-    g.POST("login", func(c echo.Context) error {
+    g.POST("login", middleware.AuthMiddleware(false)(func(c echo.Context) error {
         w := c.Response().Writer
         ctx := c.Request().Context()
 
@@ -62,7 +63,7 @@ func (h Handlers) login(g *echo.Group) {
         c.NoContent(http.StatusNoContent)
 
         return nil
-    })
+    }))
 
     g.POST("logout", func(c echo.Context) error {
         if err:= h.sessionManager.LogOut(c); err != nil {

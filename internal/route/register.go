@@ -2,6 +2,7 @@ package user
 
 import (
 	"main/domain_model"
+	"main/internal/middleware"
 	"main/view"
 	"net/http"
 
@@ -18,13 +19,13 @@ type postRegisterRequest struct {
 }
 
 func (h Handlers) register(g *echo.Group) {
-    g.GET("register", func (c echo.Context) error {
+    g.GET("register", middleware.AuthMiddleware(false)(func (c echo.Context) error {
         page := view.RegisterPage(view.RegisterPageModel{})
         app := view.Page(view.AppModel{}, page)
         return app.Render(c.Request().Context(), c.Response().Writer)
-    })
+    }))
 
-    g.POST("register", func (c echo.Context) error {
+    g.POST("register", middleware.AuthMiddleware(false)(func (c echo.Context) error {
         w := c.Response().Writer
         ctx := c.Request().Context()
 
@@ -74,5 +75,5 @@ func (h Handlers) register(g *echo.Group) {
         c.NoContent(http.StatusNoContent)
 
         return nil
-    })
+    }))
 }
