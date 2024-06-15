@@ -5,7 +5,6 @@ import (
 	"main/db"
 	"main/internal/middleware"
 	"main/internal/route"
-	"net/http"
 	"os"
 
 	"github.com/go-playground/validator/v10"
@@ -35,18 +34,12 @@ func main() {
 	defer conn.Close()
 
     sessionManager := middleware.InitSessions(os.Getenv("SESSION_KEY"))
-
     e.Use(sessionManager.Middleware())
 
-    g := e.Group("/")
-
     userRepo := db.CreatePgUserRepo(conn)
+    passageRepo := db.CreatePgPassageRepo(conn)
 
-    user.Init(g, sessionManager, userRepo)
-
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
+    route.Init(e.Group("/"), sessionManager, conn, userRepo, passageRepo)
 
     e.Static("/assets", "assets")
 
