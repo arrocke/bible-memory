@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"main/internal/db"
-	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -28,6 +27,7 @@ func (cv *Validator) Validate(i interface{}) error {
 
 type ServerContext struct {
     UserRepo db.UserRepo
+    PassageRepo db.PassageRepo
 }
 
 func Start(config ServerConfiguration) {
@@ -57,15 +57,13 @@ func Start(config ServerConfiguration) {
 
     context := ServerContext{
         UserRepo: db.UserRepo{Pool: pool},
+        PassageRepo: db.PassageRepo{Pool: pool},
     }
 
     e.Use(SessionMiddleware(config.SessionKey))
 
     userRoutes(e, context)
-
-    e.GET("/", func(c echo.Context) error {
-        return c.String(http.StatusOK, "Passages")
-    })
+    passageRoutes(e, context)
 
     e.Static("/assets", "assets")
 

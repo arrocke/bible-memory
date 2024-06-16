@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"errors"
-	"fmt"
 	"main/internal/model"
 
 	"github.com/jackc/pgx/v5"
@@ -32,7 +31,6 @@ func (r UserRepo) GetUserByEmail(c context.Context, email string) (model.User, e
             return model.User{}, err
         }
     }
-    fmt.Printf("%v %v %v %v %v %v", user.Id, user.FirstName, user.LastName, user.Email, user.Password)
 
     return user, nil
 }
