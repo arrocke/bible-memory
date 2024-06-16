@@ -1,3 +1,4 @@
 .env
 assets/styles.css
 bin/tailwindcss
+tmp/

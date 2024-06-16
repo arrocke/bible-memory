@@ -47,3 +47,4 @@ func GetSession(r *http.Request, ctx *ServerContext) (*Session, error) {
 
 	return &Session{ID: session.ID, user_id: &user_id}, nil
 }
+

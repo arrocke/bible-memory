@@ -1,0 +1,73 @@
+package view
+
+import "github.com/go-playground/validator/v10"
+
+type LoginViewModel struct {
+    Email string
+    Error string
+    Errors *validator.ValidationErrors
+}
+
+templ LoginForm(model LoginViewModel) {
+    <form hx-post="/login" hx-swap="outerHTML">
+        if model.Error != "" {
+            <div class="font-bold text-red-700">
+                {model.Error}
+            </div>
+        }
+        <div class="mb-4">
+            @label(labelModel{
+                Text: "Email",
+                For: "email",
+            })
+            @textInput(textInputModel{
+                Id: "email",
+                Class: "w-full block",
+                Type: "email",
+                Name: "email",
+                Value: model.Email,
+            })
+            @validationError(validationErrorModel{
+                Errors: model.Errors,
+                Field: "Email",
+                Messages: map[string]string{
+                    "required": "Please enter your email address.",
+                    "email": "Please enter a valid email address",
+                },
+            })
+        </div>
+        <div class="mb-8">
+            @label(labelModel{
+                Text: "Password",
+                For: "password",
+            })
+            @textInput(textInputModel{
+                Id: "password",
+                Class: "w-full block",
+                Type: "password",
+                Name: "password",
+            })
+            @validationError(validationErrorModel{
+                Errors: model.Errors,
+                Field: "Email",
+                Messages: map[string]string{
+                    "required": "Please enter your password.",
+                },
+            })
+        </div>
+        @button(buttonModel{
+            Text: "Log In",
+            Type: "submit",
+            Class: "w-full",
+        })
+    </form>
+}
+
+templ LoginView(model LoginViewModel) {
+    <div class="w-full h-full flex justify-center items-center">
+        <div class="w-96 p-8 border border-slate-300 rounded-lg shadow">
+            <h1 class="font-bold text-2xl mb-4 text-center">Log In</h1>
+            @LoginForm(model)
+        </div>
+    </div>
+}
