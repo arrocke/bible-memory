@@ -19,9 +19,13 @@ func (r PassageRepo) GetPassageById(c context.Context, id int) (model.Passage, e
         FROM passage
         WHERE id = $1
     `
-    var passage model.Passage
-    err := pgxscan.Select(c, r.Pool, &passage, query, id)
-	return passage, err
+    var passages []model.Passage
+    err := pgxscan.Select(c, r.Pool, &passages, query, id)
+    if err != nil && len(passages) == 0 {
+        return model.Passage{},NotFoundError
+    } else {
+	    return passages[0], err
+    }
 }
 
 func (r PassageRepo) GetPassagesForOwner(c context.Context, ownerId int) ([]model.Passage, error) {

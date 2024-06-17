@@ -4,18 +4,23 @@ import (
 	"main/internal/model"
 	"main/internal/view"
 	"net/http"
+	"strconv"
 
 	"github.com/a-h/templ"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
 
-type postPassagesRequest struct {
-	Reference string `form:"reference" validate:"required,reference"`
-	Text      string `form:text validate:"required"`
-}
-
 func passageRoutes(e *echo.Echo, ctx ServerContext) {
+    GetPassageId := func(c echo.Context) int {
+        i64, err := strconv.ParseInt(c.Param("id"), 10, 32)
+        if err != nil {
+            return 0
+        } else {
+            return int(i64)
+        }
+    }
+
 	RenderPassagesView := func(c echo.Context, viewComponent templ.Component) error {
 		userId, err := GetAuthenticatedUser(c)
 		if err != nil {
@@ -37,9 +42,10 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
 		return RenderPassagesView(c, nil)
 	}, AuthMiddleware(true))
 
-	e.GET("/passages/new", func(c echo.Context) error {
-		return RenderPassagesView(c, view.AddPassageView(view.AddPassageViewModel{}))
-	})
+    type postPassagesRequest struct {
+        Reference string `form:"reference" validate:"required,reference"`
+        Text      string `form:"text" validate:"required"`
+    }
 
 	e.POST("/passages", func(c echo.Context) error {
 		var req postPassagesRequest
@@ -70,12 +76,39 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
             return err
         }
 
-        print(passage.Reference.StartChapter)
-
         if err := ctx.PassageRepo.Create(c.Request().Context(), passage); err != nil {
             return err
         }
 
         return Redirect(c, "/")
 	})
+
+	e.GET("/passages/new", func(c echo.Context) error {
+		return RenderPassagesView(c, view.AddPassageView(view.AddPassageViewModel{}))
+	})
+
+    e.GET("/passages/:id", func (c echo.Context) error {
+        userId, err := GetAuthenticatedUser(c)
+        if err != nil {
+            return err
+        }
+
+        id := GetPassageId(c)
+        if id == 0 {
+            return Redirect(c, "/")
+        }
+
+        passage, err := ctx.PassageRepo.GetPassageById(c.Request().Context(), id)
+        if err != nil {
+            return err
+        }
+
+        if passage.Owner != userId {
+            return Redirect(c, "/")
+        }
+
+		return RenderPassagesView(c, view.EditPassageView(view.EditPassageViewModel{
+            Passage: passage,
+        }))
+    })
 }

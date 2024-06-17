@@ -55,7 +55,8 @@ func AddPassageForm(model AddPassageViewModel) templ.Component {
 			Errors: model.Errors,
 			Field:  "Reference",
 			Messages: map[string]string{
-				"required": "Please enter a verse reference.",
+				"required":  "Please enter a verse reference.",
+				"reference": "Please enter a valid verse reference.",
 			},
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
