@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"main/internal/db"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -17,14 +16,6 @@ type ServerConfiguration struct {
     Port string
 }
 
-type Validator struct {
-    validator *validator.Validate
-}
-
-func (cv *Validator) Validate(i interface{}) error {
-  return cv.validator.Struct(i)
-}
-
 type ServerContext struct {
     UserRepo db.UserRepo
     PassageRepo db.PassageRepo
@@ -32,7 +23,7 @@ type ServerContext struct {
 
 func Start(config ServerConfiguration) {
     e := echo.New()
-    e.Validator = &Validator{validator: validator.New()}
+    e.Validator = createValidator()
 
     pool, err := pgxpool.New(context.Background(), config.DatabaseUrl)
 	if err != nil {

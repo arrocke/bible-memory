@@ -14,14 +14,12 @@ templ passageListItem(model model.Passage) {
         <a
             class="flex-grow"
             href={templ.URL(fmt.Sprintf("/passages/%v/review", model.Id))}
-            hx-target="#page"
         >
-          {model.Reference()}
+          {model.Reference.String()}
         </a>
         <a
             class="w-6 h-6 flex items-center justify-center"
             href={templ.URL(fmt.Sprintf("/passages/%v", model.Id))}
-            hx-target="#page"
         >
           <span class="sr-only">Edit</span>
           <svg class="icon">
@@ -56,10 +54,11 @@ templ passageListItem(model model.Passage) {
 type PassagesViewModel struct {
     Passages []model.Passage
     StartOpen bool
+    View templ.Component
 }
 
 
-templ PassagesView(model PassagesViewModel, page templ.Component) {
+templ PassagesView(model PassagesViewModel) {
     <div class="flex h-full relative">
       <button id="open-sidebar-button" type="button"
         class="sm:hidden border-slate-300 border-r w-8 font-bold flex flex-col items-center justify-start gap-1 focus:underline">
@@ -77,7 +76,7 @@ templ PassagesView(model PassagesViewModel, page templ.Component) {
         }
       >
         <div class="flex border-b border-slate-300 py-2 px-4">
-          <a class="flex-grow flex items-center gap-1" href="/passages/new" hx-target="#page">
+          <a class="flex-grow flex items-center gap-1" href="/passages/new">
             <svg class="icon">
               <use href="/assets/icons.svg#plus"></use>
             </svg>
@@ -97,8 +96,8 @@ templ PassagesView(model PassagesViewModel, page templ.Component) {
         </ul>
       </div>
       <main id="main" class="flex-grow relative">
-        if page != nil {
-            @page
+        if model.View != nil {
+            @model.View
         }
       </main>
     </div>

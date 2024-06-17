@@ -58,14 +58,14 @@ func passageListItem(model model.Passage) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#page\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(model.Reference())
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(model.Reference.String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/passages.templ`, Line: 19, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/passages.templ`, Line: 18, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -80,14 +80,14 @@ func passageListItem(model model.Passage) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#page\"><span class=\"sr-only\">Edit</span> <svg class=\"icon\"><use href=\"/assets/icons.svg#pencil\"></use></svg></a> <button class=\"-mr-1 w-6 h-6 text-red-700 flex items-center justify-center\" hx-delete=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><span class=\"sr-only\">Edit</span> <svg class=\"icon\"><use href=\"/assets/icons.svg#pencil\"></use></svg></a> <button class=\"-mr-1 w-6 h-6 text-red-700 flex items-center justify-center\" hx-delete=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(string(templ.URL(fmt.Sprintf("/passages/%v", model.Id))))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/passages.templ`, Line: 33, Col: 79}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/passages.templ`, Line: 31, Col: 79}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -106,7 +106,7 @@ func passageListItem(model model.Passage) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(model.NextReview.Format("01-02-2006"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/passages.templ`, Line: 49, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/passages.templ`, Line: 47, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -127,9 +127,10 @@ func passageListItem(model model.Passage) templ.Component {
 type PassagesViewModel struct {
 	Passages  []model.Passage
 	StartOpen bool
+	View      templ.Component
 }
 
-func PassagesView(model PassagesViewModel, page templ.Component) templ.Component {
+func PassagesView(model PassagesViewModel) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -166,7 +167,7 @@ func PassagesView(model PassagesViewModel, page templ.Component) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"flex border-b border-slate-300 py-2 px-4\"><a class=\"flex-grow flex items-center gap-1\" href=\"/passages/new\" hx-target=\"#page\"><svg class=\"icon\"><use href=\"/assets/icons.svg#plus\"></use></svg> Add Passage</a> <button id=\"close-sidebar-button\" class=\"sm:hidden\" title=\"Close\"><svg class=\"icon\" aria-hidden=\"true\"><use href=\"/assets/icons.svg#angles-left\"></use></svg> <span class=\"sr-only\">Close Sidebar</span></button></div><ul id=\"passage-list\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"flex border-b border-slate-300 py-2 px-4\"><a class=\"flex-grow flex items-center gap-1\" href=\"/passages/new\"><svg class=\"icon\"><use href=\"/assets/icons.svg#plus\"></use></svg> Add Passage</a> <button id=\"close-sidebar-button\" class=\"sm:hidden\" title=\"Close\"><svg class=\"icon\" aria-hidden=\"true\"><use href=\"/assets/icons.svg#angles-left\"></use></svg> <span class=\"sr-only\">Close Sidebar</span></button></div><ul id=\"passage-list\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -180,8 +181,8 @@ func PassagesView(model PassagesViewModel, page templ.Component) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if page != nil {
-			templ_7745c5c3_Err = page.Render(ctx, templ_7745c5c3_Buffer)
+		if model.View != nil {
+			templ_7745c5c3_Err = model.View.Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
