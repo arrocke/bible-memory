@@ -16,12 +16,15 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"main/internal/model"
 )
 
 type EditPassageViewModel struct {
-	Passage model.Passage
-	Errors  *validator.ValidationErrors
+	Id         int
+	Reference  string
+	Text       string
+	NextReview *time.Time
+	Interval   *int
+	Errors     *validator.ValidationErrors
 }
 
 func formatDate(date *time.Time) string {
@@ -58,9 +61,9 @@ func EditPassageForm(model EditPassageViewModel) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(string(templ.URL(fmt.Sprintf("/passages/%v", model.Passage.Id))))
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(string(templ.URL(fmt.Sprintf("/passages/%v", model.Id))))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/edit_passage.templ`, Line: 34, Col: 80}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/edit_passage.templ`, Line: 37, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -81,7 +84,7 @@ func EditPassageForm(model EditPassageViewModel) templ.Component {
 			Id:    "reference",
 			Class: "w-full block",
 			Name:  "reference",
-			Value: model.Passage.Reference.String(),
+			Value: model.Reference,
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -102,8 +105,8 @@ func EditPassageForm(model EditPassageViewModel) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = label(labelModel{
-			Text: "Reference",
-			For:  "reference",
+			Text: "Review At",
+			For:  "review-at",
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -113,7 +116,7 @@ func EditPassageForm(model EditPassageViewModel) templ.Component {
 			Type:  "date",
 			Class: "w-full block",
 			Name:  "review_at",
-			Value: formatDate(model.Passage.NextReview),
+			Value: formatDate(model.NextReview),
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -138,7 +141,7 @@ func EditPassageForm(model EditPassageViewModel) templ.Component {
 			Type:  "number",
 			Class: "w-16 mr-2",
 			Name:  "interval",
-			Value: stringifyInt(model.Passage.Interval),
+			Value: stringifyInt(model.Interval),
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -173,7 +176,7 @@ func EditPassageForm(model EditPassageViewModel) templ.Component {
 			Type:  "multiline",
 			Class: "h-32 min-h-32 resize-y block w-full",
 			Name:  "text",
-			Value: model.Passage.Text,
+			Value: model.Text,
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -229,9 +232,9 @@ func EditPassageView(model EditPassageViewModel) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(model.Passage.Reference.String())
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(model.Reference)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/edit_passage.templ`, Line: 123, Col: 81}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/edit_passage.templ`, Line: 126, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {

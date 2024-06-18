@@ -6,11 +6,14 @@ import (
     "strconv"
 
     "github.com/go-playground/validator/v10"
-	"main/internal/model"
 )
 
 type EditPassageViewModel struct {
-    Passage model.Passage
+    Id int
+    Reference string
+    Text string
+    NextReview *time.Time
+    Interval *int
     Errors *validator.ValidationErrors
 }
 
@@ -31,7 +34,7 @@ func stringifyInt(n *int) string {
 }
 
 templ EditPassageForm(model EditPassageViewModel) {
-  <form hx-put={string(templ.URL(fmt.Sprintf("/passages/%v", model.Passage.Id)))} hx-swap="outerHTML">
+  <form hx-put={string(templ.URL(fmt.Sprintf("/passages/%v", model.Id)))} hx-swap="outerHTML">
     <div class="mb-4">
         @label(labelModel{
             Text: "Reference",
@@ -41,7 +44,7 @@ templ EditPassageForm(model EditPassageViewModel) {
             Id:    "reference",
             Class: "w-full block",
             Name:  "reference",
-            Value: model.Passage.Reference.String(),
+            Value: model.Reference,
         })
         @validationError(validationErrorModel{
             Errors: model.Errors,
@@ -55,15 +58,15 @@ templ EditPassageForm(model EditPassageViewModel) {
     <div class="mb-4 flex gap-4">
       <div>
         @label(labelModel{
-            Text: "Reference",
-            For: "reference",
+            Text: "Review At",
+            For: "review-at",
         })
         @textInput(textInputModel{
             Id:    "review-at",
             Type:  "date",
             Class: "w-full block",
             Name:  "review_at",
-            Value: formatDate(model.Passage.NextReview),
+            Value: formatDate(model.NextReview),
         })
       </div>
       <div>
@@ -77,7 +80,7 @@ templ EditPassageForm(model EditPassageViewModel) {
                 Type:  "number",
                 Class: "w-16 mr-2",
                 Name:  "interval",
-                Value: stringifyInt(model.Passage.Interval),
+                Value: stringifyInt(model.Interval),
             })
             days
         </div>
@@ -100,7 +103,7 @@ templ EditPassageForm(model EditPassageViewModel) {
             Type: "multiline",
             Class:     "h-32 min-h-32 resize-y block w-full",
             Name:      "text",
-            Value:     model.Passage.Text,
+            Value:     model.Text,
         })
         @validationError(validationErrorModel{
             Errors: model.Errors,
@@ -120,7 +123,7 @@ templ EditPassageForm(model EditPassageViewModel) {
 
 templ EditPassageView(model EditPassageViewModel) {
     <div class="p-4">
-        <h1 class="font-bold text-lg mb-2">Edit {model.Passage.Reference.String()}</h1>
+        <h1 class="font-bold text-lg mb-2">Edit {model.Reference}</h1>
         @EditPassageForm(model)
     </div>
 }
