@@ -42,7 +42,7 @@ func (r PassageRepo) GetPassageById(c context.Context, id int) (model.Passage, e
     `
     var passages []model.Passage
     err := pgxscan.Select(c, r.Pool, &passages, query, id)
-    if err != nil && len(passages) == 0 {
+    if err == nil && len(passages) == 0 {
         return model.Passage{},NotFoundError
     } else {
 	    return passages[0], err
@@ -90,4 +90,14 @@ func (r PassageRepo) Update(c context.Context, passage model.Passage) error {
     `
     _, err := r.Pool.Exec(c, query, passageNamedArgs(passage))
 	return err
+}
+
+func (r PassageRepo) Delete(c context.Context, passageId int) error {
+    query := `
+        DELETE FROM passage
+        WHERE id = $1
+    `
+
+    _, err := r.Pool.Exec(c, query, passageId)
+    return err
 }

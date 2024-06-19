@@ -2,11 +2,12 @@ package app
 
 import (
 	"errors"
+	"fmt"
 	"main/internal/db"
 	"main/internal/model"
 	"main/internal/view"
 	"net/http"
-	"strconv"
+	"strings"
 	"time"
 
 	"github.com/a-h/templ"
@@ -26,15 +27,6 @@ func (d *date) UnmarshalParam(param string) error {
 }
 
 func passageRoutes(e *echo.Echo, ctx ServerContext) {
-    GetPassageId := func(c echo.Context) int {
-        i64, err := strconv.ParseInt(c.Param("id"), 10, 32)
-        if err != nil {
-            return 0
-        } else {
-            return int(i64)
-        }
-    }
-
 	RenderPassagesView := func(c echo.Context, viewComponent templ.Component) error {
 		userId, err := GetAuthenticatedUser(c)
 		if err != nil {
@@ -95,11 +87,11 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
         }
 
         return Redirect(c, "/")
-	})
+	}, AuthMiddleware(true))
 
 	e.GET("/passages/new", func(c echo.Context) error {
 		return RenderPassagesView(c, view.AddPassageView(view.AddPassageViewModel{}))
-	})
+	}, AuthMiddleware(true))
 
     e.GET("/passages/:id", func (c echo.Context) error {
         userId, err := GetAuthenticatedUser(c)
@@ -107,14 +99,18 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
             return err
         }
 
-        id := GetPassageId(c)
-        if id == 0 {
+        var id int
+        if err := echo.PathParamsBinder(c).Int("id", &id).BindError(); err != nil {
             return Redirect(c, "/")
         }
 
         passage, err := ctx.PassageRepo.GetPassageById(c.Request().Context(), id)
         if err != nil {
-            return err
+            if errors.Is(err, db.NotFoundError) {
+                return Redirect(c, "/")
+            } else {
+                return err
+            }
         }
 
         if passage.Owner != userId {
@@ -128,7 +124,7 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
             Interval: passage.Interval,
             NextReview: passage.NextReview,
         }))
-    })
+    }, AuthMiddleware(true))
 
     type putPassageRequest struct {
         Id int `param:"id"`
@@ -139,6 +135,11 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
     }
 
     e.PUT("/passages/:id", func (c echo.Context) error {
+        userId, err := GetAuthenticatedUser(c)
+        if err != nil {
+            return err
+        }
+
 		var req putPassageRequest
 		if err := c.Bind(&req); err != nil {
 			return c.String(http.StatusBadRequest, "bad request")
@@ -169,6 +170,10 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
             }
         }
 
+        if passage.Owner != userId {
+            return Redirect(c, "/")
+        }
+
         // We don't have to handle this error because the request validation should prevent this from returning an error
         reference, err := model.ParseReference(req.Reference)
         if err != nil {
@@ -185,5 +190,43 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
         }
 
         return Redirect(c, "/")
-    })
+    }, AuthMiddleware(true))
+
+    e.DELETE("/passages/:id", func (c echo.Context) error {
+        userId, err := GetAuthenticatedUser(c)
+        if err != nil {
+            return err
+        }
+
+        var id int
+        if err := echo.PathParamsBinder(c).Int("id", &id).BindError(); err != nil {
+            return Redirect(c, "/")
+        }
+
+        passage, err := ctx.PassageRepo.GetPassageById(c.Request().Context(), id)
+        if err != nil {
+            if errors.Is(err, db.NotFoundError) {
+                return Redirect(c, "/")
+            } else {
+                return err
+            }
+        }
+
+        if passage.Owner != userId {
+            return Redirect(c, "/")
+        }
+
+        if err := ctx.PassageRepo.Delete(c.Request().Context(), passage.Id); err != nil {
+            return err
+        }
+
+        currentUrl := c.Request().Header.Get("hx-current-url")
+        if strings.HasSuffix(currentUrl, fmt.Sprintf("/passages/%v", passage.Id)) ||
+            strings.Contains(currentUrl, fmt.Sprintf("/passages/%v/", passage.Id)) {
+            return Redirect(c, "/")
+        } else {
+            return c.NoContent(http.StatusOK)
+        }
+
+    }, AuthMiddleware(true))
 }

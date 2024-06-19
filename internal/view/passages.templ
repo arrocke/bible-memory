@@ -29,7 +29,7 @@ templ passageListItem(model model.Passage) {
         <button
             class="-mr-1 w-6 h-6 text-red-700 flex items-center justify-center"
             hx-delete={string(templ.URL(fmt.Sprintf("/passages/%v", model.Id)))}
-            hx-target="closest li" hx-swap="outerHTML" hx-confirm="Are you sure you want to delete {{.Reference}}?"
+            hx-target="closest li" hx-swap="outerHTML" hx-confirm={fmt.Sprintf("Are you sure you want to delete %v?", model.Reference.String())}
             title="Delete"
         >
           <span class="sr-only">Delete</span>
