@@ -1,6 +1,8 @@
 package app
 
 import (
+	"errors"
+	"main/internal/db"
 	"main/internal/model"
 	"main/internal/view"
 	"net/http"
@@ -158,13 +160,30 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
 			}
 		}
 
-        model := view.EditPassageViewModel{
-            Id: req.Id,
-            Text: req.Text,
-            Reference: req.Reference,
-            Interval: req.Interval,
-            NextReview: (time.Time)(req.ReviewAt),
+        passage, err := ctx.PassageRepo.GetPassageById(c.Request().Context(), req.Id)
+        if err != nil {
+            if errors.Is(err, db.NotFoundError) {
+                return Redirect(c, "/")
+            } else {
+                return err
+            }
         }
-        return RenderComponent(c, view.EditPassageForm(model))
+
+        // We don't have to handle this error because the request validation should prevent this from returning an error
+        reference, err := model.ParseReference(req.Reference)
+        if err != nil {
+            return err
+        }
+
+        passage.Reference = reference
+        passage.Text = req.Text
+        passage.Interval = req.Interval
+        passage.NextReview = time.Time(req.ReviewAt)
+
+        if err := ctx.PassageRepo.Update(c.Request().Context(), passage); err != nil {
+            return err
+        }
+
+        return Redirect(c, "/")
     })
 }

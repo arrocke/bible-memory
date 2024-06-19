@@ -6,6 +6,7 @@ import (
 
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype/zeronull"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -13,9 +14,29 @@ type PassageRepo struct {
     Pool *pgxpool.Pool
 }
 
+func passageNamedArgs(p model.Passage) pgx.NamedArgs {
+    return pgx.NamedArgs{
+        "id": p.Id,
+        "book": p.Reference.Book,
+        "start_chapter": p.Reference.StartChapter,
+        "start_verse": p.Reference.StartVerse,
+        "end_chapter": p.Reference.EndChapter,
+        "end_verse": p.Reference.EndVerse,
+        "text": p.Text,
+        "user_id": p.Owner,
+        "interval": zeronull.Int4(p.Interval),
+        "reviewed_at": zeronull.Timestamp(p.ReviewedAt),
+        "review_at": zeronull.Timestamp(p.NextReview),
+    }
+}
+
 func (r PassageRepo) GetPassageById(c context.Context, id int) (model.Passage, error) {
     query := `
-        SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text, user_id, COALESCE(interval, 0) AS interval, COALESCE(reviewed_at, '0001-01-01') AS reviewed_at, COALESCE(review_at, '0001-01-01') AS review_at
+        SELECT
+            id, book, start_chapter, start_verse, end_chapter, end_verse, text, user_id,
+            COALESCE(interval, 0) AS interval,
+            COALESCE(reviewed_at, '0001-01-01') AS reviewed_at,
+            COALESCE(review_at, '0001-01-01') AS review_at
         FROM passage
         WHERE id = $1
     `
@@ -30,7 +51,11 @@ func (r PassageRepo) GetPassageById(c context.Context, id int) (model.Passage, e
 
 func (r PassageRepo) GetPassagesForOwner(c context.Context, ownerId int) ([]model.Passage, error) {
     query := `
-        SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text, user_id, COALESCE(interval, 0) AS interval, COALESCE(reviewed_at, '0001-01-01') AS reviewed_at, COALESCE(review_at, '0001-01-01') AS review_at
+        SELECT
+            id, book, start_chapter, start_verse, end_chapter, end_verse, text, user_id,
+            COALESCE(interval, 0) AS interval,
+            COALESCE(reviewed_at, '0001-01-01') AS reviewed_at,
+            COALESCE(review_at, '0001-01-01') AS review_at
         FROM passage
         WHERE user_id = $1
     `
@@ -44,18 +69,7 @@ func (r PassageRepo) Create(c context.Context, passage model.Passage) error {
         INSERT INTO passage (book, start_chapter, start_verse, end_chapter, end_verse, text, user_id, interval, reviewed_at, review_at)
         VALUES (@book, @start_chapter, @start_verse, @end_chapter, @end_verse, @text, @user_id, @interval, @reviewed_at, @review_at)
     `
-    _, err := r.Pool.Exec(c, query, pgx.NamedArgs{
-        "book": passage.Reference.Book,
-        "start_chapter": passage.Reference.StartChapter,
-        "start_verse": passage.Reference.StartVerse,
-        "end_chapter": passage.Reference.EndChapter,
-        "end_verse": passage.Reference.EndVerse,
-        "text": passage.Text,
-        "user_id": passage.Owner,
-        "interval": passage.Interval,
-        "reviewed_at": passage.ReviewedAt,
-        "review_at": passage.NextReview,
-    })
+    _, err := r.Pool.Exec(c, query, passageNamedArgs(passage))
 	return err
 }
 
@@ -74,18 +88,6 @@ func (r PassageRepo) Update(c context.Context, passage model.Passage) error {
             review_at = @review_at
         WHERE id = @id
     `
-    _, err := r.Pool.Exec(c, query, pgx.NamedArgs{
-        "id": passage.Id,
-        "book": passage.Reference.Book,
-        "start_chatper": passage.Reference.StartChapter,
-        "start_verse": passage.Reference.StartVerse,
-        "end_chapter": passage.Reference.EndChapter,
-        "end_verse": passage.Reference.EndVerse,
-        "text": passage.Text,
-        "user_id": passage.Owner,
-        "interval": passage.Interval,
-        "reviewed_at": passage.ReviewedAt,
-        "review_at": passage.NextReview,
-    })
+    _, err := r.Pool.Exec(c, query, passageNamedArgs(passage))
 	return err
 }

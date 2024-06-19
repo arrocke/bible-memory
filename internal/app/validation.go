@@ -1,7 +1,7 @@
 package app
 
 import (
-	"regexp"
+	"main/internal/model"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -22,9 +22,7 @@ func createValidator() *requestValidator {
     return &v
 }
 
-var referenceRegexp = regexp.MustCompile(`(.+?)\s*(\d+)[.:](\d+)(?:\s*-\s*(?:(\d+)[.:])?(\d+))?`)
-
 func validateReference(fl validator.FieldLevel) bool {
-    return referenceRegexp.Match([]byte(fl.Field().String()))
+    return model.ReferenceFormat.Match([]byte(fl.Field().String()))
 }
 
