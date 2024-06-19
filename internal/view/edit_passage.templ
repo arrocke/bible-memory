@@ -12,24 +12,24 @@ type EditPassageViewModel struct {
     Id int
     Reference string
     Text string
-    NextReview *time.Time
-    Interval *int
+    NextReview time.Time
+    Interval int
     Errors *validator.ValidationErrors
 }
 
-func formatDate(date *time.Time) string {
-    if date == nil {
+func formatDate(date time.Time) string {
+    if date.IsZero() {
         return ""
     } else {
         return date.Format("2006-01-02")
     }
 }
 
-func stringifyInt(n *int) string {
-    if (n == nil) {
+func stringifyInt(n int) string {
+    if (n == 0) {
         return ""
     } else {
-        return strconv.Itoa(*n)
+        return strconv.Itoa(n)
     }
 }
 

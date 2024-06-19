@@ -15,7 +15,7 @@ type PassageRepo struct {
 
 func (r PassageRepo) GetPassageById(c context.Context, id int) (model.Passage, error) {
     query := `
-        SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text, user_id, interval, reviewed_at, review_at
+        SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text, user_id, COALESCE(interval, 0) AS interval, COALESCE(reviewed_at, '0001-01-01') AS reviewed_at, COALESCE(review_at, '0001-01-01') AS review_at
         FROM passage
         WHERE id = $1
     `
@@ -30,7 +30,7 @@ func (r PassageRepo) GetPassageById(c context.Context, id int) (model.Passage, e
 
 func (r PassageRepo) GetPassagesForOwner(c context.Context, ownerId int) ([]model.Passage, error) {
     query := `
-        SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text, user_id, interval, reviewed_at, review_at
+        SELECT id, book, start_chapter, start_verse, end_chapter, end_verse, text, user_id, COALESCE(interval, 0) AS interval, COALESCE(reviewed_at, '0001-01-01') AS reviewed_at, COALESCE(review_at, '0001-01-01') AS review_at
         FROM passage
         WHERE user_id = $1
     `

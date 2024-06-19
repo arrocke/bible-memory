@@ -41,7 +41,7 @@ templ passageListItem(model model.Passage) {
       <div class="flex items-center">
         <span class="text-xs flex-grow">
           Review: 
-          if model.NextReview == nil {
+          if model.NextReview.IsZero() {
               -
           } else {
               {model.NextReview.Format("01-02-2006")}

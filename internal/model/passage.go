@@ -12,9 +12,9 @@ type Passage struct {
     Reference Reference `db:""`
 	Text         string
     Owner       int `db:"user_id"`
-	Interval     *int
-	ReviewedAt   *time.Time
-    NextReview   *time.Time `db:"review_at"`
+	Interval     int
+	ReviewedAt   time.Time
+    NextReview   time.Time `db:"review_at"`
 }
 
 func CreatePassage(referenceString string, text string, userId int) (Passage, error) {
