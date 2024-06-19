@@ -1,0 +1,73 @@
+package view
+
+type ReviewWord struct {
+    Word string `json:"word"`
+    Number string `json:"number"`
+    Prefix string `json:"prefix"`
+    Suffix string `json:"suffix"`
+}
+
+type ReviewPassageViewModel struct {
+    Id int `json:"id"`
+    Reference string `json:-`
+    Words []ReviewWord `json:"words"`
+    HardInterval int `json:"hardInterval"`
+    GoodInterval int `json:"goodInterval"`
+    EasyInterval int `json:"easyInterval"`
+    AlreadyReviewed bool `json:"alreadyReviewed"`
+}
+
+templ ReviewPassageView(model ReviewPassageViewModel) {
+<div class="p-4 absolute w-full flex flex-col h-full min-h-0">
+  <h2 class="view-heading">Review {model.Reference}</h2>
+  <div id="result"></div>
+  <div id="mode-select" class="flex">
+    <button
+      class="border border-slate-500 border-r-0 last:border-r px-4 h-8 font-bold first:rounded-l last:rounded-r"
+      type="button" data-mode="learn">Learn</button>
+    <button
+      class="border border-slate-500 border-r-0 last:border-r px-4 h-8 font-bold first:rounded-l last:rounded-r"
+      type="button" data-mode="recall">Recall</button>
+    <button
+      class="border border-slate-500 border-r-0 last:border-r px-4 h-8 font-bold first:rounded-l last:rounded-r"
+      type="button" data-mode="review">Review</button>
+  </div>
+  <div id="typer" class="flex-1 min-h-0"> </div>
+</div>
+
+<script src="/assets/typer.js"></script>
+@templ.JSONScript("passage-data", model)
+<script type="text/javascript">
+  (() => {
+    let data = JSON.parse(document.querySelector('#passage-data').textContent)
+    let selectModeRoot = document.querySelector('#mode-select')
+    selectModeRoot.addEventListener('click', e => {
+      const mode = e.target.dataset.mode
+      if (mode) {
+        selectModeRoot.style.display = 'none'
+        initTyper(mode)
+      }
+    })
+
+  function initTyper(mode) {
+    Typer({
+      el: document.querySelector('#typer'),
+      alreadyReviewed: data.alreadyReviewed,
+      words: data.words,
+      mode,
+      intervals: {
+        hard: data.hardInterval,
+        good: data.goodInterval,
+        easy: data.easyInterval,
+      },
+      onComplete({ grade }) {
+        htmx.ajax("POST", `/passages/${data.id}/review`, {
+          values: { grade, mode },
+          target: '#result'
+        })
+      }
+    })
+  }
+  })()
+</script>
+}

@@ -7,6 +7,7 @@ import (
 	"main/internal/model"
 	"main/internal/view"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -229,4 +230,50 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
         }
 
     }, AuthMiddleware(true))
+
+	wordRegex := regexp.MustCompile(`(?:(\d+)\s?)?([^A-Za-zÀ-ÖØ-öø-ÿ\s]+)?([A-Za-zÀ-ÖØ-öø-ÿ]+(?:(?:'|’|-)[A-Za-zÀ-ÖØ-öø-ÿ]+)?(?:'|’)?)([^A-Za-zÀ-ÖØ-öø-ÿ0-9]*\s+)?`)
+
+    e.GET("/passages/:id/review", func(c echo.Context) error {
+        userId, err := GetAuthenticatedUser(c)
+        if err != nil {
+            return err
+        }
+
+        var id int
+        if err := echo.PathParamsBinder(c).Int("id", &id).BindError(); err != nil {
+            return Redirect(c, "/")
+        }
+
+        passage, err := ctx.PassageRepo.GetPassageById(c.Request().Context(), id)
+        if err != nil {
+            if errors.Is(err, db.NotFoundError) {
+                return Redirect(c, "/")
+            } else {
+                return err
+            }
+        }
+
+        if passage.Owner != userId {
+            return Redirect(c, "/")
+        }
+
+        wordMatches := wordRegex.FindAllStringSubmatch(passage.Text, -1)
+        words := make([]view.ReviewWord, len(wordMatches))
+		for i, match := range wordMatches {
+			words[i] = view.ReviewWord{
+				Number:      match[1],
+				Prefix:      match[2],
+				Word:        match[3],
+				Suffix:      match[4],
+				// FirstLetter: match[3][0:1],
+				// RestOfWord:  match[3][1:],
+			}
+		}
+
+		return RenderPassagesView(c, view.ReviewPassageView(view.ReviewPassageViewModel{
+            Id: passage.Id,
+            Reference: passage.Reference.String(),
+            Words: words,
+        }))
+	}, AuthMiddleware(true))
 }
