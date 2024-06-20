@@ -312,5 +312,5 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
         }
 
         return renderReview(c, passage, true)
-    })
+    }, AuthMiddleware(true))
 }
