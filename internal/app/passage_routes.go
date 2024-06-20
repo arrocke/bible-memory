@@ -39,9 +39,16 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
 			return err
 		}
 
+        startOpen := false
+        if viewComponent == nil {
+            startOpen = true
+        }
+
 		return RenderHtml(c, view.PassagesView(view.PassagesViewModel{
 			Passages: passages,
+            Now: GetClientDate(c),
 			View:     viewComponent,
+            StartOpen: startOpen,
 		}))
 	}
 
@@ -233,6 +240,33 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
 
 	wordRegex := regexp.MustCompile(`(?:(\d+)\s?)?([^A-Za-zÀ-ÖØ-öø-ÿ\s]+)?([A-Za-zÀ-ÖØ-öø-ÿ]+(?:(?:'|’|-)[A-Za-zÀ-ÖØ-öø-ÿ]+)?(?:'|’)?)([^A-Za-zÀ-ÖØ-öø-ÿ0-9]*\s+)?`)
 
+    renderReview := func(c echo.Context, passage model.Passage, complete bool) error {
+        wordMatches := wordRegex.FindAllStringSubmatch(passage.Text, -1)
+        words := make([]view.ReviewWord, len(wordMatches))
+		for i, match := range wordMatches {
+			words[i] = view.ReviewWord{
+				Number:      match[1],
+				Prefix:      match[2],
+				Word:        match[3],
+				Suffix:      match[4],
+			}
+		}
+
+        now := GetClientDate(c)
+
+		return RenderPassagesView(c, view.ReviewPassageView(view.ReviewPassageViewModel{
+            Id: passage.Id,
+            Reference: passage.Reference.String(),
+            Words: words,
+            HardInterval: passage.NextInterval(2, now),
+            GoodInterval: passage.NextInterval(3, now),
+            EasyInterval: passage.NextInterval(4, now),
+            AlreadyReviewed: passage.ReviewedAt.Equal(now),
+            Complete: complete,
+            NextReview: passage.NextReview,
+        }))
+    }
+
     e.GET("/passages/:id/review", func(c echo.Context) error {
         userId, err := GetAuthenticatedUser(c)
         if err != nil {
@@ -257,23 +291,51 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
             return Redirect(c, "/")
         }
 
-        wordMatches := wordRegex.FindAllStringSubmatch(passage.Text, -1)
-        words := make([]view.ReviewWord, len(wordMatches))
-		for i, match := range wordMatches {
-			words[i] = view.ReviewWord{
-				Number:      match[1],
-				Prefix:      match[2],
-				Word:        match[3],
-				Suffix:      match[4],
-				// FirstLetter: match[3][0:1],
-				// RestOfWord:  match[3][1:],
-			}
+        return renderReview(c, passage, false)
+	}, AuthMiddleware(true))
+
+    type postReviewRequest struct {
+        Mode string `form:"mode"`
+        Grade int `form:"grade"`
+    }
+
+    e.POST("/passages/:id/review", func(c echo.Context) error {
+        userId, err := GetAuthenticatedUser(c)
+        if err != nil {
+            return err
+        }
+
+        var id int
+        if err := echo.PathParamsBinder(c).Int("id", &id).BindError(); err != nil {
+            return Redirect(c, "/")
+        }
+
+		var req postReviewRequest
+		if err := c.Bind(&req); err != nil {
+			return c.String(http.StatusBadRequest, "bad request")
 		}
 
-		return RenderPassagesView(c, view.ReviewPassageView(view.ReviewPassageViewModel{
-            Id: passage.Id,
-            Reference: passage.Reference.String(),
-            Words: words,
-        }))
-	}, AuthMiddleware(true))
+        passage, err := ctx.PassageRepo.GetPassageById(c.Request().Context(), id)
+        if err != nil {
+            if errors.Is(err, db.NotFoundError) {
+                return Redirect(c, "/")
+            } else {
+                return err
+            }
+        }
+
+        if passage.Owner != userId {
+            return Redirect(c, "/")
+        }
+
+        if req.Mode == "review" {
+            passage.Review(req.Grade, GetClientDate(c))
+
+            if err := ctx.PassageRepo.Update(c.Request().Context(), passage); err != nil {
+                return err
+            }
+        }
+
+        return renderReview(c, passage, true)
+    })
 }

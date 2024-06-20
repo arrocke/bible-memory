@@ -1,6 +1,9 @@
 package app
 
 import (
+	"strconv"
+	"time"
+
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
@@ -76,4 +79,23 @@ func GetAuthenticatedUser(c echo.Context) (int, error) {
     } else {
         return 0, nil
     }
+}
+
+func GetClientDate(c echo.Context) time.Time {
+	location := time.FixedZone("Temp", GetClientTZ(c)*60)
+	now := time.Now().In(location)
+
+	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+}
+
+func GetClientTZ(c echo.Context) int {
+	cookieVal, err := c.Cookie("tzOffset")
+	if err != nil {
+		return 0
+	}
+	parsedVal, err := strconv.ParseInt(cookieVal.Value, 10, 32)
+	if err != nil {
+		return 0
+	}
+	return int(parsedVal)
 }

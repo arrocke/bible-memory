@@ -12,11 +12,12 @@ import "bytes"
 
 import (
 	"fmt"
+	"time"
 
 	"main/internal/model"
 )
 
-func passageListItem(model model.Passage) templ.Component {
+func passageListItem(model model.Passage, now time.Time) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -31,7 +32,7 @@ func passageListItem(model model.Passage) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		var templ_7745c5c3_Var2 = []any{
 			"py-2 px-4 border-b border-slate-300",
-		}
+			templ.KV("bg-green-300", !model.NextReview.IsZero() && now.Compare(model.NextReview) >= 0)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -65,7 +66,7 @@ func passageListItem(model model.Passage) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(model.Reference.String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/passages.templ`, Line: 18, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/passages.templ`, Line: 20, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -87,7 +88,7 @@ func passageListItem(model model.Passage) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(string(templ.URL(fmt.Sprintf("/passages/%v", model.Id))))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/passages.templ`, Line: 31, Col: 79}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/passages.templ`, Line: 33, Col: 79}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -100,7 +101,7 @@ func passageListItem(model model.Passage) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Are you sure you want to delete %v?", model.Reference.String()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/passages.templ`, Line: 32, Col: 143}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/passages.templ`, Line: 34, Col: 143}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -119,7 +120,7 @@ func passageListItem(model model.Passage) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(model.NextReview.Format("01-02-2006"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/passages.templ`, Line: 47, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/passages.templ`, Line: 49, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -139,8 +140,9 @@ func passageListItem(model model.Passage) templ.Component {
 
 type PassagesViewModel struct {
 	Passages  []model.Passage
-	StartOpen bool
+	Now       time.Time
 	View      templ.Component
+	StartOpen bool
 }
 
 func PassagesView(model PassagesViewModel) templ.Component {
@@ -185,7 +187,7 @@ func PassagesView(model PassagesViewModel) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		for _, passage := range model.Passages {
-			templ_7745c5c3_Err = passageListItem(passage).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = passageListItem(passage, model.Now).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

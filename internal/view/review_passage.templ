@@ -1,5 +1,7 @@
 package view
 
+import "time"
+
 type ReviewWord struct {
     Word string `json:"word"`
     Number string `json:"number"`
@@ -15,12 +17,23 @@ type ReviewPassageViewModel struct {
     GoodInterval int `json:"goodInterval"`
     EasyInterval int `json:"easyInterval"`
     AlreadyReviewed bool `json:"alreadyReviewed"`
+
+    Complete bool
+    NextReview time.Time
 }
 
 templ ReviewPassageView(model ReviewPassageViewModel) {
 <div class="p-4 absolute w-full flex flex-col h-full min-h-0">
   <h2 class="view-heading">Review {model.Reference}</h2>
-  <div id="result"></div>
+  if model.Complete {
+    <div class="mb-4">
+      if model.NextReview.IsZero() {
+        Nice work!
+      } else {
+        Your next review is on {model.NextReview.Format("01-02-2006")}
+      }
+    </div>
+  }
   <div id="mode-select" class="flex">
     <button
       class="border border-slate-500 border-r-0 last:border-r px-4 h-8 font-bold first:rounded-l last:rounded-r"
@@ -63,7 +76,7 @@ templ ReviewPassageView(model ReviewPassageViewModel) {
       onComplete({ grade }) {
         htmx.ajax("POST", `/passages/${data.id}/review`, {
           values: { grade, mode },
-          target: '#result'
+          target: 'body'
         })
       }
     })

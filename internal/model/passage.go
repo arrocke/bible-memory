@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"math"
 	"regexp"
 	"strconv"
 	"time"
@@ -30,6 +31,43 @@ func CreatePassage(referenceString string, text string, userId int) (Passage, er
     passage.Reference = reference
 
     return passage, nil
+}
+
+func (p *Passage) NextInterval(grade int, reviewedAt time.Time) int {
+    	if p.Interval == 0 || p.ReviewedAt.IsZero() {
+		switch grade {
+		case 1:
+			return 1
+		case 2:
+			return 1
+		case 3:
+			return 2
+		case 4:
+			return 4
+		}
+	} else {
+		reviewInterval := math.Ceil(reviewedAt.Sub(p.ReviewedAt).Hours() / 24.0)
+		extension := min(float64(p.Interval), reviewInterval) + 0.5*max(0.0, reviewInterval-float64(p.Interval))
+
+		switch grade {
+		case 1:
+			return max(1, int(extension/2.0))
+		case 2:
+			return int(extension)
+		case 3:
+			return int(float64(p.Interval) + extension)
+		case 4:
+			return int(float64(p.Interval) + 1.5*extension)
+		}
+	}
+
+	return 1
+}
+
+func (p *Passage) Review(grade int, reviewedAt time.Time) {
+    p.Interval = p.NextInterval(grade, reviewedAt) 
+    p.NextReview = reviewedAt.AddDate(0, 0, p.Interval)
+    p.ReviewedAt = reviewedAt
 }
 
 
