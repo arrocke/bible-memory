@@ -1,0 +1,33 @@
+package view
+
+templ Html(content templ.Component) {
+    <!DOCTYPE html>
+    <html lang="en" class="h-full">
+
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
+
+      <!--
+          <link rel="icon" type="image/png" href="/assets/bible-48.png">
+          <link rel="manifest" href="/assets/manifest.json" />
+      -->
+      <link rel="stylesheet" href="/assets/styles.css" />
+
+      <script type="text/javascript">
+        if (!document.cooke?.includes('tzOffset')) {
+          document.cookie = 'tzOffset=' + (new Date().getTimezoneOffset() * -1) + '; path=/';
+        }
+      </script>
+
+      <script src="https://unpkg.com/htmx.org@1.9.10"
+        integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
+        crossorigin="anonymous">
+      </script>
+    </head>
+
+    <body hx-boost="true" class="flex flex-col items-stretch h-full">
+        @content
+    </body>
+    </html>
+}

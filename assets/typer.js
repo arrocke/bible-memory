@@ -1,3 +1,4 @@
+(() => {
 const LETTERS_REGEX = /^[A-Za-z]$/;
 const DIACRITIC_REGEX = /[\u0300-\u036f]/g;
 
@@ -316,3 +317,4 @@ window.Typer = function ({ el: root, words, mode, alreadyReviewed, intervals, on
     progress.update(counts);
   });
 };
+})()

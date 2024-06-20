@@ -1,0 +1,135 @@
+package view
+
+import (
+    "strings"
+
+    "github.com/go-playground/validator/v10"
+)
+
+type buttonModel struct {
+    Text string
+    Type string
+    Class string
+}
+
+templ button(model buttonModel) {
+    <button
+        class={
+            "rounded bg-slate-900 text-white font-bold px-4 py-2 h-8 flex justify-center items-center",
+            model.Class
+        }
+        if model.Type != "" {
+            type={model.Type}
+        }
+    >
+        {model.Text}
+    </button>
+}
+
+type labelModel struct {
+    Text string
+    For string
+    Class string
+}
+
+templ label(model labelModel) {
+    <label
+        class={
+            "font-bold text-sm",
+            model.Class
+        }
+        if model.For != "" {
+            id={model.For}
+        }
+    >
+        {model.Text}
+    </label>
+}
+
+type validationErrorModel struct {
+    Errors *validator.ValidationErrors
+    Field string
+    Messages map[string]string
+}
+
+func formatValidationError(model validationErrorModel) string {
+    if model.Errors == nil {
+        return ""
+    } else {
+        for _, err := range *model.Errors {
+            if err.Field() == model.Field {
+                if msg, ok := model.Messages[err.Tag()]; ok {
+                    return strings.ReplaceAll(msg, "{param}", err.Param())
+                } else {
+                    return "Invalid"
+                }
+            }
+        }
+        return ""
+    }
+}
+
+func hasValidationError(model validationErrorModel) bool {
+    if model.Errors == nil {
+        return false
+    } else {
+        for _, err := range *model.Errors {
+            if err.Field() == model.Field {
+                return true
+            }
+        }
+        return false
+    }
+}
+
+templ validationError(model validationErrorModel) {
+    if hasValidationError(model) {
+        <div class="text-sm text-red-800">
+            { formatValidationError(model) }
+        </div>
+    }
+}
+
+type textInputModel struct {
+    Id string
+    Class string
+    Type string
+    Value string
+    Name string
+}
+
+templ textInput(model textInputModel) {
+    if model.Type == "multiline" {
+        <textarea
+            class={
+                "border border-slate-500 rounded px-2 py-1",
+                model.Class
+            }
+            if model.Id != "" {
+                id={model.Id}
+            }
+            if model.Name != "" {
+                name={model.Name}
+            }
+        >{model.Value}</textarea>
+    } else {
+        <input
+            class={
+                "border border-slate-500 rounded h-8 px-2 py-1",
+                model.Class
+            }
+            if model.Id != "" {
+                id={model.Id}
+            }
+            if model.Type != "" {
+                type={model.Type}
+            }
+            if model.Value != "" {
+                value={model.Value}
+            }
+            if model.Name != "" {
+                name={model.Name}
+            }
+        />
+    }
+}
