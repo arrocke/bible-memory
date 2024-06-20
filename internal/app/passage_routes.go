@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/a-h/templ"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
@@ -28,32 +27,8 @@ func (d *date) UnmarshalParam(param string) error {
 }
 
 func passageRoutes(e *echo.Echo, ctx ServerContext) {
-	RenderPassagesView := func(c echo.Context, viewComponent templ.Component) error {
-		userId, err := GetAuthenticatedUser(c)
-		if err != nil {
-			return err
-		}
-
-		passages, err := ctx.PassageRepo.GetPassagesForOwner(c.Request().Context(), userId)
-		if err != nil {
-			return err
-		}
-
-        startOpen := false
-        if viewComponent == nil {
-            startOpen = true
-        }
-
-		return RenderHtml(c, view.PassagesView(view.PassagesViewModel{
-			Passages: passages,
-            Now: GetClientDate(c),
-			View:     viewComponent,
-            StartOpen: startOpen,
-		}))
-	}
-
 	e.GET("/", func(c echo.Context) error {
-		return RenderPassagesView(c, nil)
+		return ctx.RenderPassagesView(c, nil)
 	}, AuthMiddleware(true))
 
     type postPassagesRequest struct {
@@ -98,7 +73,7 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
 	}, AuthMiddleware(true))
 
 	e.GET("/passages/new", func(c echo.Context) error {
-		return RenderPassagesView(c, view.AddPassageView(view.AddPassageViewModel{}))
+		return ctx.RenderPassagesView(c, view.AddPassageView(view.AddPassageViewModel{}))
 	}, AuthMiddleware(true))
 
     e.GET("/passages/:id", func (c echo.Context) error {
@@ -125,7 +100,7 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
             return Redirect(c, "/")
         }
 
-		return RenderPassagesView(c, view.EditPassageView(view.EditPassageViewModel{
+		return ctx.RenderPassagesView(c, view.EditPassageView(view.EditPassageViewModel{
             Id: passage.Id,
             Reference: passage.Reference.String(),
             Text: passage.Text,
@@ -254,7 +229,7 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
 
         now := GetClientDate(c)
 
-		return RenderPassagesView(c, view.ReviewPassageView(view.ReviewPassageViewModel{
+		return ctx.RenderPassagesView(c, view.ReviewPassageView(view.ReviewPassageViewModel{
             Id: passage.Id,
             Reference: passage.Reference.String(),
             Words: words,

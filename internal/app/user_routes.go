@@ -63,4 +63,12 @@ func userRoutes(e *echo.Echo, ctx ServerContext) {
         
         return RedirectWithRefresh(c, "/")
     }, AuthMiddleware(false))
+
+    e.POST("/logout", func(c echo.Context) error {
+        if err := LogOut(c); err != nil {
+            return err
+        }
+
+        return RedirectWithRefresh(c, "/")
+    })
 }

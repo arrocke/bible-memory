@@ -52,7 +52,7 @@ func LogIn(c echo.Context, userId int) error {
     return nil
 }
 
-func LogOut(c echo.Context, userId string) error {
+func LogOut(c echo.Context) error {
     sess, err := session.Get("session", c)
     if err != nil {
         return err

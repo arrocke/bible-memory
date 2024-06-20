@@ -35,3 +35,56 @@ func RenderComponent(c echo.Context, component templ.Component) error {
 func RenderHtml(c echo.Context, component templ.Component) error {
     return RenderComponent(c, view.Html(component))
 }
+
+func (ctx ServerContext) RenderView(c echo.Context, viewComponent templ.Component) error {
+    userId, err := GetAuthenticatedUser(c)
+    if err != nil {
+        return err
+    }
+
+    if userId == 0 {
+        return RenderHtml(c, view.Layout(view.LayoutModel{
+            Authenticated: false,
+            View: viewComponent,
+        }))
+    } else {
+        user, err := ctx.UserRepo.GetUserById(c.Request().Context(), userId)
+        if err != nil {
+            return err
+        }
+
+        return RenderHtml(c, view.Layout(view.LayoutModel{
+            Authenticated: true,
+            User: view.UserModel {
+                FirstName: user.FirstName,
+                LastName: user.LastName,
+            },
+            View: viewComponent,
+        }))
+    }
+}
+
+func (ctx ServerContext) RenderPassagesView(c echo.Context, viewComponent templ.Component) error {
+    userId, err := GetAuthenticatedUser(c)
+    if err != nil {
+        return err
+    }
+
+    passages, err := ctx.PassageRepo.GetPassagesForOwner(c.Request().Context(), userId)
+    if err != nil {
+        return err
+    }
+
+    startOpen := false
+    if viewComponent == nil {
+        startOpen = true
+    }
+
+    return ctx.RenderView(c, view.PassagesView(view.PassagesViewModel{
+        Passages: passages,
+        Now: GetClientDate(c),
+        View:     viewComponent,
+        StartOpen: startOpen,
+    }))
+}
+
