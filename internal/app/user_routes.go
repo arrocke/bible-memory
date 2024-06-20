@@ -71,4 +71,75 @@ func userRoutes(e *echo.Echo, ctx ServerContext) {
 
         return RedirectWithRefresh(c, "/")
     })
+
+    e.GET("/profile", func(c echo.Context) error {
+        userId, err := GetAuthenticatedUser(c)
+        if err != nil {
+            return err
+        }
+
+        user, err := ctx.UserRepo.GetUserById(c.Request().Context(), userId)
+        if err != nil {
+            return err
+        }
+
+        return ctx.RenderView(c, view.ProfileView(view.ProfileViewModel{
+            Email: user.Email,
+            FirstName: user.FirstName,
+            LastName: user.LastName,
+        }))
+    }, AuthMiddleware(true))
+
+    type putProfileRequest struct {
+        FirstName string `form:"first_name" validate:"required"`
+        LastName string `form:"last_name" validate:"required"`
+        Email string `form:"email" validate:"required,email"`
+    }
+
+    e.PUT("/profile", func(c echo.Context) error {
+        userId, err := GetAuthenticatedUser(c)
+        if err != nil {
+            return err
+        }
+
+		var req putProfileRequest
+		if err := c.Bind(&req); err != nil {
+			return c.String(http.StatusBadRequest, "bad request")
+		}
+
+		if err := c.Validate(req); err != nil {
+			if errors, ok := err.(validator.ValidationErrors); ok {
+				model := view.ProfileViewModel{
+                    FirstName: req.FirstName,
+                    LastName: req.LastName,
+                    Email: req.Email,
+					Errors: &errors,
+				}
+				return RenderComponent(c, view.ProfileForm(model))
+			} else {
+				return err
+			}
+		}
+
+        user, err := ctx.UserRepo.GetUserById(c.Request().Context(), userId)
+        if err != nil {
+            return err
+        }
+
+        user.Email = req.Email
+        user.FirstName = req.FirstName
+        user.LastName = req.LastName
+
+        if err := ctx.UserRepo.Update(c.Request().Context(), user); err != nil {
+            return err
+        }
+
+        model := view.ProfileViewModel{
+            FirstName: req.FirstName,
+            LastName: req.LastName,
+            Email: req.Email,
+            Success: true,
+        }
+        return RenderComponent(c, view.ProfileForm(model))
+    }, AuthMiddleware(true))
 }

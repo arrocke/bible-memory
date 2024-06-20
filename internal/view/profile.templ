@@ -1,0 +1,96 @@
+package view
+
+import "github.com/go-playground/validator/v10"
+
+type ProfileViewModel struct {
+    Email string
+    FirstName string
+    LastName string
+    Success bool
+    Errors *validator.ValidationErrors
+}
+
+templ ProfileForm(model ProfileViewModel) {
+  <form hx-put="/profile" hx-swap="outerHTML">
+        if model.Success {
+            <div class="font-bold text-green-700 mb-2">
+                Your changes have been saved
+            </div>
+        }
+      <div class="mb-4">
+        @label(labelModel{
+            Text: "Email",
+            For: "email",
+        })
+        @textInput(textInputModel{
+            Id:        "email",
+            Type: "email",
+            Class:     "block w-full",
+            Name:      "email",
+            Value:     model.Email,
+        })
+        @validationError(validationErrorModel{
+            Errors: model.Errors,
+            Field: "Email",
+            Messages: map[string]string{
+                "required": "Please enter your email.",
+                "email": "Please enter a valid email.",
+            },
+        })
+      </div>
+    <div class="mb-8 flex gap-4 w-full">
+      <div class="w-full">
+        @label(labelModel{
+            Text: "First Name",
+            For: "first-name",
+        })
+        @textInput(textInputModel{
+            Id:    "first-name",
+            Class: "w-full block",
+            Name:  "first_name",
+            Value: model.FirstName,
+        })
+        @validationError(validationErrorModel{
+            Errors: model.Errors,
+            Field: "FirstName",
+            Messages: map[string]string{
+                "required": "Please enter your first name.",
+            },
+        })
+      </div>
+      <div class="w-full">
+        @label(labelModel{
+            Text: "Last Name",
+            For: "last-name",
+        })
+        @textInput(textInputModel{
+            Id:    "last-name",
+            Class: "w-full block",
+            Name:  "last_name",
+            Value: model.LastName,
+        })
+        @validationError(validationErrorModel{
+            Errors: model.Errors,
+            Field: "LastName",
+            Messages: map[string]string{
+                "required": "Please enter your last name.",
+            },
+        })
+      </div>
+    </div>
+    @button(buttonModel{
+        Text: "Update",
+        Type: "submit",
+        Class: "w-full",
+    })
+  </form>
+}
+
+templ ProfileView(model ProfileViewModel) {
+    <div class="w-full h-full flex justify-center pt-4">
+        <div class="w-96">
+            <h1 class="font-bold text-2xl mb-4 text-center">Profile</h1>
+            @ProfileForm(model)
+        </div>
+    </div>
+}
