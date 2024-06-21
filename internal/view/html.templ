@@ -12,7 +12,7 @@ templ Html(content templ.Component) {
           <link rel="icon" type="image/png" href="/assets/bible-48.png">
           <link rel="manifest" href="/assets/manifest.json" />
       -->
-      <link rel="stylesheet" href="/assets/styles.css" />
+      <link rel="stylesheet" href={HashFile("assets/styles.css")} />
 
       <script type="text/javascript">
         if (!document.cooke?.includes('tzOffset')) {

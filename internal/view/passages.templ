@@ -24,9 +24,7 @@ templ passageListItem(model model.Passage, now time.Time) {
             href={templ.URL(fmt.Sprintf("/passages/%v", model.Id))}
         >
           <span class="sr-only">Edit</span>
-          <svg class="icon">
-            <use href="/assets/icons.svg#pencil" />
-          </svg>
+          @icon("pencil")
         </a>
         <button
             class="-mr-1 w-6 h-6 text-red-700 flex items-center justify-center"
@@ -35,9 +33,7 @@ templ passageListItem(model model.Passage, now time.Time) {
             title="Delete"
         >
           <span class="sr-only">Delete</span>
-          <svg class="icon">
-            <use href="/assets/icons.svg#trash" />
-          </svg>
+          @icon("trash")
         </button>
       </div>
       <div class="flex items-center">
@@ -68,9 +64,7 @@ templ PassagesView(model PassagesViewModel) {
         <div class="text-vertical mt-4">
           Passages
         </div>
-        <svg aria-hidden="true" class="icon">
-          <use href="/assets/icons.svg#angles-right" />
-        </svg>
+        @icon("angles-right")
       </button>
       <div id="sidebar"
         class={
@@ -80,15 +74,11 @@ templ PassagesView(model PassagesViewModel) {
       >
         <div class="flex border-b border-slate-300 py-2 px-4">
           <a class="flex-grow flex items-center gap-1" href="/passages/new">
-            <svg class="icon">
-              <use href="/assets/icons.svg#plus"></use>
-            </svg>
+            @icon("plus")
             Add Passage
           </a>
           <button id="close-sidebar-button" class="sm:hidden" title="Close">
-            <svg class="icon" aria-hidden="true">
-              <use href="/assets/icons.svg#angles-left"></use>
-            </svg>
+            @icon("angles-left")
             <span class="sr-only">Close Sidebar</span>
           </button>
         </div>

@@ -22,9 +22,9 @@ if model.Authenticated {
         <button class="font-bold hover:underline focus:underline flex items-end gap-1" id="user-dropdown"
           data-menu="user-menu">
           {model.User.FirstName} {model.User.LastName}
-          <svg class="icon mb-1" aria-hidden="true">
-            <use id="user-dropdown-icon" href="/assets/icons.svg#caret-down" />
-          </svg>
+          <div class="mb-1">
+            @icon("caret-down")
+          </div>
         </button>
         <ul id="user-menu"
           class="invisible z-10 box-content absolute bg-white p-2 w-full -left-2 top-[34px] flex flex-col gap-3 border border-t-0 border-slate-300 rounded-b">
@@ -40,22 +40,22 @@ if model.Authenticated {
     <script type="text/javascript">
     (() => {
       const userDropdownButton = document.querySelector('#user-dropdown')
-      const icon = document.querySelector('#user-dropdown-icon')
+      const icon = userDropdownButton.querySelector('use')
       let isOpen = false
       userDropdownButton?.addEventListener('click', e => {
         if (isOpen) return
 
-        const menu = document.getElementById(e.target.dataset.menu)
+        const menu = document.getElementById(e.currentTarget.dataset.menu)
         menu.classList.remove('invisible')
         isOpen = true
-        icon.setAttribute('href', "/assets/icons.svg#caret-up")
+        icon.setAttribute('href', icon.getAttribute('href').replace("caret-down", "caret-up"))
 
         setTimeout(() => {
           const handler = e => {
             if (!menu.contains(e.target) && menu !== e.target) {
               isOpen = false
               menu.classList.add('invisible')
-              icon.setAttribute('href', "/assets/icons.svg#caret-down")
+              icon.setAttribute('href', icon.getAttribute('href').replace("caret-up", "caret-down"))
               window.removeEventListener('click', handler)
             }
           }

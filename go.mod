@@ -4,6 +4,7 @@ go 1.21.6
 
 require (
 	github.com/a-h/templ v0.2.707 // indirect
+	github.com/benbjohnson/hashfs v0.2.2 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/georgysavva/scany/v2 v2.1.3 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect

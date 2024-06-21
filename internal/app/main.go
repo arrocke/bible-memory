@@ -4,13 +4,16 @@ import (
 	"context"
 	"fmt"
 	"main/internal/db"
+	"main/internal/view"
 
+	"github.com/benbjohnson/hashfs"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 type ServerConfiguration struct {
+    Env string
     DatabaseUrl string
     SessionKey string
     Port string
@@ -24,6 +27,10 @@ type ServerContext struct {
 func Start(config ServerConfiguration) {
     e := echo.New()
     e.Validator = createValidator()
+
+    view.ShouldHashFiles = config.Env != "development"
+
+    println(view.ShouldHashFiles)
 
     pool, err := pgxpool.New(context.Background(), config.DatabaseUrl)
 	if err != nil {
@@ -56,8 +63,11 @@ func Start(config ServerConfiguration) {
     userRoutes(e, context)
     passageRoutes(e, context)
 
-    e.Static("/assets", "assets")
-
+    if view.ShouldHashFiles {
+        e.Any("/assets/*", echo.WrapHandler(hashfs.FileServer(view.HashedFS)))
+    } else {
+        e.Static("/assets",  "internal/view/assets")
+    }
 
     port := config.Port
 	if port == "" {

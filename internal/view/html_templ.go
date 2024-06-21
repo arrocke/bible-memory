@@ -23,7 +23,20 @@ func Html(content templ.Component) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\" class=\"h-full\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, interactive-widget=resizes-content\"><!--\n          <link rel=\"icon\" type=\"image/png\" href=\"/assets/bible-48.png\">\n          <link rel=\"manifest\" href=\"/assets/manifest.json\" />\n      --><link rel=\"stylesheet\" href=\"/assets/styles.css\"><script type=\"text/javascript\">\n        if (!document.cooke?.includes('tzOffset')) {\n          document.cookie = 'tzOffset=' + (new Date().getTimezoneOffset() * -1) + '; path=/';\n        }\n      </script><script src=\"https://unpkg.com/htmx.org@1.9.10\" integrity=\"sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC\" crossorigin=\"anonymous\">\n      </script></head><body hx-boost=\"true\" class=\"flex flex-col items-stretch h-full\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\" class=\"h-full\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, interactive-widget=resizes-content\"><!--\n          <link rel=\"icon\" type=\"image/png\" href=\"/assets/bible-48.png\">\n          <link rel=\"manifest\" href=\"/assets/manifest.json\" />\n      --><link rel=\"stylesheet\" href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(HashFile("assets/styles.css"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/html.templ`, Line: 15, Col: 64}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><script type=\"text/javascript\">\n        if (!document.cooke?.includes('tzOffset')) {\n          document.cookie = 'tzOffset=' + (new Date().getTimezoneOffset() * -1) + '; path=/';\n        }\n      </script><script src=\"https://unpkg.com/htmx.org@1.9.10\" integrity=\"sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC\" crossorigin=\"anonymous\">\n      </script></head><body hx-boost=\"true\" class=\"flex flex-col items-stretch h-full\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

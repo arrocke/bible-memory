@@ -1,0 +1,9 @@
+package view
+
+import "fmt"
+
+templ icon(name string) {
+  <svg aria-hidden="true" class="icon">
+    <use href={string(templ.URL(fmt.Sprintf("%v#%v", HashFile("assets/icons.svg"), name)))} />
+  </svg>
+}

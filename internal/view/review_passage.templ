@@ -48,7 +48,7 @@ templ ReviewPassageView(model ReviewPassageViewModel) {
   <div id="typer" class="flex-1 min-h-0"> </div>
 </div>
 
-<script src="/assets/typer.js"></script>
+<script src={HashFile("assets/typer.js")}></script>
 @templ.JSONScript("passage-data", model)
 <script type="text/javascript">
   (() => {
