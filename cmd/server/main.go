@@ -14,5 +14,6 @@ func main() {
         Env: os.Getenv("ENV"),
         DatabaseUrl: os.Getenv("DATABASE_URL"),
         SessionKey: os.Getenv("SESSION_KEY"),
+        Port: os.Getenv("PORT"),
     })
 }
