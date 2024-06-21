@@ -1,4 +1,4 @@
 #!/bin/bash
 
 ./bin/install-tailwind
-./bin/tailwindcss -i ./internal/assets/tailwind.css -o ./internal/assets/styles.css
+./bin/tailwindcss -i ./internal/view/assets/tailwind.css -o ./internal/view/assets/styles.css
