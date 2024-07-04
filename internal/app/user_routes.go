@@ -18,7 +18,7 @@ type postLoginRequest struct {
 func userRoutes(e *echo.Echo, ctx ServerContext) {
     e.GET("/login", func(c echo.Context) error {
         loginView := view.LoginView(view.LoginViewModel{})
-        return RenderHtml(c, loginView)
+        return RenderComponent(c, view.Html(loginView))
     }, AuthMiddleware(false))
 
     e.POST("/login", func(c echo.Context) error {
@@ -83,11 +83,21 @@ func userRoutes(e *echo.Echo, ctx ServerContext) {
             return err
         }
 
-        return ctx.RenderView(c, view.ProfileView(view.ProfileViewModel{
+        component := view.ProfileView(view.ProfileViewModel{
             Email: user.Email,
             FirstName: user.FirstName,
             LastName: user.LastName,
-        }))
+        })
+        if IsHtmxRequest(c) {
+            Retarget(c, "#view")
+            return RenderComponent(c, component)
+        } else {
+            page, err := ctx.CreateView(c, component)
+            if err != nil {
+                return err
+            }
+            return RenderComponent(c, view.Html(page))
+        }
     }, AuthMiddleware(true))
 
     type putProfileRequest struct {

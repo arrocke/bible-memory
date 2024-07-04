@@ -28,7 +28,27 @@ func (d *date) UnmarshalParam(param string) error {
 
 func passageRoutes(e *echo.Echo, ctx ServerContext) {
 	e.GET("/", func(c echo.Context) error {
-		return ctx.RenderPassagesView(c, nil)
+        currentUrl := CurrentUrl(c)
+        if currentUrl != nil && (strings.HasPrefix(currentUrl.Path, "/passages") || currentUrl.Path == "/") {
+            Retarget(c, "#passage-view")
+            return c.NoContent(http.StatusOK)
+        } else {
+            component, err := ctx.CreatePassagesList(c, nil, true)
+            if err != nil {
+                return err
+            }
+
+            if IsHtmxRequest(c) {
+                Retarget(c, "#view")
+                return RenderComponent(c, component)
+            } else {
+                page, err := ctx.CreateView(c, component)
+                if err != nil {
+                    return err
+                }
+                return RenderComponent(c, view.Html(page))
+            }
+        }
 	}, AuthMiddleware(true))
 
     type postPassagesRequest struct {
@@ -73,7 +93,19 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
 	}, AuthMiddleware(true))
 
 	e.GET("/passages/new", func(c echo.Context) error {
-		return ctx.RenderPassagesView(c, view.AddPassageView(view.AddPassageViewModel{}))
+        passageView := view.AddPassageView(view.AddPassageViewModel{})
+
+        currentUrl := CurrentUrl(c)
+        if currentUrl != nil && (strings.HasPrefix(currentUrl.Path, "/passages") || currentUrl.Path == "/") {
+            Retarget(c, "#passage-view")
+            return RenderComponent(c, passageView)
+        } else {
+            component, err := ctx.CreatePassageView(c, passageView)
+            if err != nil {
+                return err
+            }
+            return RenderComponent(c, view.Html(component))
+        }
 	}, AuthMiddleware(true))
 
     e.GET("/passages/:id", func (c echo.Context) error {
@@ -100,13 +132,25 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
             return Redirect(c, "/")
         }
 
-		return ctx.RenderPassagesView(c, view.EditPassageView(view.EditPassageViewModel{
+        passageView := view.EditPassageView(view.EditPassageViewModel{
             Id: passage.Id,
             Reference: passage.Reference.String(),
             Text: passage.Text,
             Interval: passage.Interval,
             NextReview: passage.NextReview,
-        }))
+        })
+
+        currentUrl := CurrentUrl(c)
+        if currentUrl != nil && (strings.HasPrefix(currentUrl.Path, "/passages") || currentUrl.Path == "/") {
+            Retarget(c, "#passage-view")
+            return RenderComponent(c, passageView)
+        } else {
+            component, err := ctx.CreatePassageView(c, passageView)
+            if err != nil {
+                return err
+            }
+            return RenderComponent(c, view.Html(component))
+        }
     }, AuthMiddleware(true))
 
     type putPassageRequest struct {
@@ -229,7 +273,7 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
 
         now := GetClientDate(c)
 
-		return ctx.RenderPassagesView(c, view.ReviewPassageView(view.ReviewPassageViewModel{
+        passageView := view.ReviewPassageView(view.ReviewPassageViewModel{
             Id: passage.Id,
             Reference: passage.Reference.String(),
             Words: words,
@@ -239,7 +283,19 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
             AlreadyReviewed: passage.ReviewedAt.Equal(now),
             Complete: complete,
             NextReview: passage.NextReview,
-        }))
+        })
+
+        currentUrl := CurrentUrl(c)
+        if currentUrl != nil && (strings.HasPrefix(currentUrl.Path, "/passages") || currentUrl.Path == "/") {
+            Retarget(c, "#passage-view")
+            return RenderComponent(c, passageView)
+        } else {
+            component, err := ctx.CreatePassageView(c, passageView)
+            if err != nil {
+                return err
+            }
+            return RenderComponent(c, view.Html(component))
+        }
     }
 
     e.GET("/passages/:id/review", func(c echo.Context) error {
