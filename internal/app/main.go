@@ -30,8 +30,6 @@ func Start(config ServerConfiguration) {
 
     view.ShouldHashFiles = config.Env != "development"
 
-    println(view.ShouldHashFiles)
-
     pool, err := pgxpool.New(context.Background(), config.DatabaseUrl)
 	if err != nil {
 	    e.Logger.Fatalf("Unable to connect to database: %v\n", err)

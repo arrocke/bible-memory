@@ -92,14 +92,14 @@ func ReviewPassageView(model ReviewPassageViewModel) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"mode-select\" class=\"flex\"><button class=\"border border-slate-500 border-r-0 last:border-r px-4 h-8 font-bold first:rounded-l last:rounded-r\" type=\"button\" data-mode=\"learn\">Learn</button> <button class=\"border border-slate-500 border-r-0 last:border-r px-4 h-8 font-bold first:rounded-l last:rounded-r\" type=\"button\" data-mode=\"recall\">Recall</button> <button class=\"border border-slate-500 border-r-0 last:border-r px-4 h-8 font-bold first:rounded-l last:rounded-r\" type=\"button\" data-mode=\"review\">Review</button></div><div id=\"typer\" class=\"flex-1 min-h-0\"></div></div><script src=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"mode-select\" class=\"flex\"><button class=\"border border-slate-500 border-r-0 last:border-r px-4 h-8 font-bold first:rounded-l last:rounded-r\" type=\"button\" data-mode=\"learn\" autofocus>Learn</button> <button class=\"border border-slate-500 border-r-0 last:border-r px-4 h-8 font-bold first:rounded-l last:rounded-r\" type=\"button\" data-mode=\"recall\">Recall</button> <button class=\"border border-slate-500 border-r-0 last:border-r px-4 h-8 font-bold first:rounded-l last:rounded-r\" type=\"button\" data-mode=\"review\">Review</button></div><div id=\"typer\" class=\"flex-1 min-h-0\"></div></div><script src=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(HashFile("assets/typer.js"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/review_passage.templ`, Line: 51, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/review_passage.templ`, Line: 55, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {

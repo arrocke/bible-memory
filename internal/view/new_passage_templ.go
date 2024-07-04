@@ -43,10 +43,11 @@ func AddPassageForm(model AddPassageViewModel) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = textInput(textInputModel{
-			Id:    "reference",
-			Class: "w-full block",
-			Name:  "reference",
-			Value: model.Reference,
+			Id:        "reference",
+			Class:     "w-full block",
+			Name:      "reference",
+			Value:     model.Reference,
+			Autofocus: model.Errors == nil || hasValidationError(model.Errors, "Reference"),
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -74,11 +75,12 @@ func AddPassageForm(model AddPassageViewModel) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = textInput(textInputModel{
-			Type:  "multiline",
-			Id:    "text",
-			Class: "h-32 min-h-32 resize-y block w-full",
-			Name:  "text",
-			Value: model.Text,
+			Type:      "multiline",
+			Id:        "text",
+			Class:     "h-32 min-h-32 resize-y block w-full",
+			Name:      "text",
+			Value:     model.Text,
+			Autofocus: hasValidationError(model.Errors, "Text"),
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

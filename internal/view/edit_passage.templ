@@ -45,6 +45,7 @@ templ EditPassageForm(model EditPassageViewModel) {
             Class: "w-full block",
             Name:  "reference",
             Value: model.Reference,
+            Autofocus: model.Errors == nil || hasValidationError(model.Errors, "Reference"),
         })
         @validationError(validationErrorModel{
             Errors: model.Errors,
@@ -81,6 +82,7 @@ templ EditPassageForm(model EditPassageViewModel) {
                 Class: "w-16 mr-2",
                 Name:  "interval",
                 Value: stringifyInt(model.Interval),
+                Autofocus: hasValidationError(model.Errors, "Interval"),
             })
             days
         </div>
@@ -104,6 +106,7 @@ templ EditPassageForm(model EditPassageViewModel) {
             Class:     "h-32 min-h-32 resize-y block w-full",
             Name:      "text",
             Value:     model.Text,
+            Autofocus: hasValidationError(model.Errors, "Text"),
         })
         @validationError(validationErrorModel{
             Errors: model.Errors,

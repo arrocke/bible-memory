@@ -1,8 +1,8 @@
 package app
 
 import (
-	"main/internal/view"
 	"net/http"
+	"net/url"
 
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
@@ -32,59 +32,33 @@ func RenderComponent(c echo.Context, component templ.Component) error {
     return component.Render(c.Request().Context(), c.Response().Writer)
 }
 
-func RenderHtml(c echo.Context, component templ.Component) error {
-    return RenderComponent(c, view.Html(component))
+func Reswap(c echo.Context, swap string) {
+    c.Response().Header().Set("hx-reswap", swap)
 }
 
-func (ctx ServerContext) RenderView(c echo.Context, viewComponent templ.Component) error {
-    userId, err := GetAuthenticatedUser(c)
-    if err != nil {
-        return err
-    }
+func Retarget(c echo.Context, target string) {
+    c.Response().Header().Set("hx-retarget", target)
+}
 
-    if userId == 0 {
-        return RenderHtml(c, view.Layout(view.LayoutModel{
-            Authenticated: false,
-            View: viewComponent,
-        }))
+func PushUrl(c echo.Context, path string) {
+    c.Response().Header().Set("hx-push-url", path)
+}
+
+
+func IsHtmxRequest(c echo.Context) bool {
+    return c.Request().Header.Get("hx-request") == "true"
+}
+
+func CurrentUrl(c echo.Context) *url.URL {
+    header := c.Request().Header.Get("hx-current-url")
+    if header == "" {
+        return nil
     } else {
-        user, err := ctx.UserRepo.GetUserById(c.Request().Context(), userId)
-        if err != nil {
-            return err
+        parsedUrl, err := url.Parse(header)
+        if err == nil {
+            return parsedUrl
+        } else {
+            return nil
         }
-
-        return RenderHtml(c, view.Layout(view.LayoutModel{
-            Authenticated: true,
-            User: view.UserModel {
-                FirstName: user.FirstName,
-                LastName: user.LastName,
-            },
-            View: viewComponent,
-        }))
     }
 }
-
-func (ctx ServerContext) RenderPassagesView(c echo.Context, viewComponent templ.Component) error {
-    userId, err := GetAuthenticatedUser(c)
-    if err != nil {
-        return err
-    }
-
-    passages, err := ctx.PassageRepo.GetPassagesForOwner(c.Request().Context(), userId)
-    if err != nil {
-        return err
-    }
-
-    startOpen := false
-    if viewComponent == nil {
-        startOpen = true
-    }
-
-    return ctx.RenderView(c, view.PassagesView(view.PassagesViewModel{
-        Passages: passages,
-        Now: GetClientDate(c),
-        View:     viewComponent,
-        StartOpen: startOpen,
-    }))
-}
-

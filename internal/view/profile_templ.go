@@ -55,11 +55,12 @@ func ProfileForm(model ProfileViewModel) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = textInput(textInputModel{
-			Id:    "email",
-			Type:  "email",
-			Class: "block w-full",
-			Name:  "email",
-			Value: model.Email,
+			Id:        "email",
+			Type:      "email",
+			Class:     "block w-full",
+			Name:      "email",
+			Value:     model.Email,
+			Autofocus: (model.Errors == nil && !model.Success) || hasValidationError(model.Errors, "Email"),
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -87,10 +88,11 @@ func ProfileForm(model ProfileViewModel) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = textInput(textInputModel{
-			Id:    "first-name",
-			Class: "w-full block",
-			Name:  "first_name",
-			Value: model.FirstName,
+			Id:        "first-name",
+			Class:     "w-full block",
+			Name:      "first_name",
+			Value:     model.FirstName,
+			Autofocus: hasValidationError(model.Errors, "FirstName"),
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -117,10 +119,11 @@ func ProfileForm(model ProfileViewModel) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = textInput(textInputModel{
-			Id:    "last-name",
-			Class: "w-full block",
-			Name:  "last_name",
-			Value: model.LastName,
+			Id:        "last-name",
+			Class:     "w-full block",
+			Name:      "last_name",
+			Value:     model.LastName,
+			Autofocus: hasValidationError(model.Errors, "LastName"),
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
