@@ -81,10 +81,11 @@ func EditPassageForm(model EditPassageViewModel) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = textInput(textInputModel{
-			Id:    "reference",
-			Class: "w-full block",
-			Name:  "reference",
-			Value: model.Reference,
+			Id:        "reference",
+			Class:     "w-full block",
+			Name:      "reference",
+			Value:     model.Reference,
+			Autofocus: model.Errors == nil || hasValidationError(model.Errors, "Reference"),
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -137,11 +138,12 @@ func EditPassageForm(model EditPassageViewModel) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = textInput(textInputModel{
-			Id:    "interval",
-			Type:  "number",
-			Class: "w-16 mr-2",
-			Name:  "interval",
-			Value: stringifyInt(model.Interval),
+			Id:        "interval",
+			Type:      "number",
+			Class:     "w-16 mr-2",
+			Name:      "interval",
+			Value:     stringifyInt(model.Interval),
+			Autofocus: hasValidationError(model.Errors, "Interval"),
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -172,11 +174,12 @@ func EditPassageForm(model EditPassageViewModel) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = textInput(textInputModel{
-			Id:    "text",
-			Type:  "multiline",
-			Class: "h-32 min-h-32 resize-y block w-full",
-			Name:  "text",
-			Value: model.Text,
+			Id:        "text",
+			Type:      "multiline",
+			Class:     "h-32 min-h-32 resize-y block w-full",
+			Name:      "text",
+			Value:     model.Text,
+			Autofocus: hasValidationError(model.Errors, "Text"),
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -234,7 +237,7 @@ func EditPassageView(model EditPassageViewModel) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(model.Reference)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/edit_passage.templ`, Line: 126, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/edit_passage.templ`, Line: 129, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {

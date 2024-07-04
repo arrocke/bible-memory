@@ -211,12 +211,12 @@ func formatValidationError(model validationErrorModel) string {
 	}
 }
 
-func hasValidationError(model validationErrorModel) bool {
-	if model.Errors == nil {
+func hasValidationError(errors *validator.ValidationErrors, field string) bool {
+	if errors == nil {
 		return false
 	} else {
-		for _, err := range *model.Errors {
-			if err.Field() == model.Field {
+		for _, err := range *errors {
+			if err.Field() == field {
 				return true
 			}
 		}
@@ -237,7 +237,7 @@ func validationError(model validationErrorModel) templ.Component {
 			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if hasValidationError(model) {
+		if hasValidationError(model.Errors, model.Field) {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"text-sm text-red-800\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -264,11 +264,12 @@ func validationError(model validationErrorModel) templ.Component {
 }
 
 type textInputModel struct {
-	Id    string
-	Class string
-	Type  string
-	Value string
-	Name  string
+	Id        string
+	Class     string
+	Type      string
+	Value     string
+	Name      string
+	Autofocus bool
 }
 
 func textInput(model textInputModel) templ.Component {
@@ -317,7 +318,7 @@ func textInput(model textInputModel) templ.Component {
 				var templ_7745c5c3_Var16 string
 				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(model.Id)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/inputs.templ`, Line: 109, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/inputs.templ`, Line: 110, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 				if templ_7745c5c3_Err != nil {
@@ -336,7 +337,7 @@ func textInput(model textInputModel) templ.Component {
 				var templ_7745c5c3_Var17 string
 				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(model.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/inputs.templ`, Line: 112, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/inputs.templ`, Line: 113, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
@@ -347,6 +348,14 @@ func textInput(model textInputModel) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
+			if model.Autofocus {
+				if true {
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" autofocus")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -354,7 +363,7 @@ func textInput(model textInputModel) templ.Component {
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(model.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/inputs.templ`, Line: 114, Col: 21}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/inputs.templ`, Line: 118, Col: 21}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -397,7 +406,7 @@ func textInput(model textInputModel) templ.Component {
 				var templ_7745c5c3_Var21 string
 				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(model.Id)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/inputs.templ`, Line: 122, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/inputs.templ`, Line: 126, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 				if templ_7745c5c3_Err != nil {
@@ -416,7 +425,7 @@ func textInput(model textInputModel) templ.Component {
 				var templ_7745c5c3_Var22 string
 				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(model.Type)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/inputs.templ`, Line: 125, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/inputs.templ`, Line: 129, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 				if templ_7745c5c3_Err != nil {
@@ -435,7 +444,7 @@ func textInput(model textInputModel) templ.Component {
 				var templ_7745c5c3_Var23 string
 				templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(model.Value)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/inputs.templ`, Line: 128, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/inputs.templ`, Line: 132, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 				if templ_7745c5c3_Err != nil {
@@ -454,7 +463,7 @@ func textInput(model textInputModel) templ.Component {
 				var templ_7745c5c3_Var24 string
 				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(model.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/inputs.templ`, Line: 131, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/inputs.templ`, Line: 135, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 				if templ_7745c5c3_Err != nil {
@@ -463,6 +472,14 @@ func textInput(model textInputModel) templ.Component {
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
+				}
+			}
+			if model.Autofocus {
+				if true {
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" autofocus")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
 				}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(">")

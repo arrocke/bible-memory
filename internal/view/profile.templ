@@ -28,6 +28,7 @@ templ ProfileForm(model ProfileViewModel) {
             Class:     "block w-full",
             Name:      "email",
             Value:     model.Email,
+            Autofocus: (model.Errors == nil && !model.Success) || hasValidationError(model.Errors, "Email"),
         })
         @validationError(validationErrorModel{
             Errors: model.Errors,
@@ -49,6 +50,7 @@ templ ProfileForm(model ProfileViewModel) {
             Class: "w-full block",
             Name:  "first_name",
             Value: model.FirstName,
+            Autofocus: hasValidationError(model.Errors, "FirstName"),
         })
         @validationError(validationErrorModel{
             Errors: model.Errors,
@@ -68,6 +70,7 @@ templ ProfileForm(model ProfileViewModel) {
             Class: "w-full block",
             Name:  "last_name",
             Value: model.LastName,
+            Autofocus: hasValidationError(model.Errors, "LastName"),
         })
         @validationError(validationErrorModel{
             Errors: model.Errors,

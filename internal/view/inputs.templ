@@ -69,12 +69,12 @@ func formatValidationError(model validationErrorModel) string {
     }
 }
 
-func hasValidationError(model validationErrorModel) bool {
-    if model.Errors == nil {
+func hasValidationError(errors *validator.ValidationErrors, field string) bool {
+    if errors == nil {
         return false
     } else {
-        for _, err := range *model.Errors {
-            if err.Field() == model.Field {
+        for _, err := range *errors {
+            if err.Field() == field {
                 return true
             }
         }
@@ -83,7 +83,7 @@ func hasValidationError(model validationErrorModel) bool {
 }
 
 templ validationError(model validationErrorModel) {
-    if hasValidationError(model) {
+    if hasValidationError(model.Errors, model.Field) {
         <div class="text-sm text-red-800">
             { formatValidationError(model) }
         </div>
@@ -96,6 +96,7 @@ type textInputModel struct {
     Type string
     Value string
     Name string
+    Autofocus bool
 }
 
 templ textInput(model textInputModel) {
@@ -110,6 +111,9 @@ templ textInput(model textInputModel) {
             }
             if model.Name != "" {
                 name={model.Name}
+            }
+            if model.Autofocus {
+                autofocus?={true}
             }
         >{model.Value}</textarea>
     } else {
@@ -129,6 +133,9 @@ templ textInput(model textInputModel) {
             }
             if model.Name != "" {
                 name={model.Name}
+            }
+            if model.Autofocus {
+                autofocus?={true}
             }
         />
     }

@@ -3,6 +3,8 @@ package app
 import (
 	"main/internal/view"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
@@ -42,7 +44,10 @@ func (ctx ServerContext) RenderView(c echo.Context, viewComponent templ.Componen
         return err
     }
 
-    if userId == 0 {
+    if c.Request().Header.Get("hx-request") == "true" {
+        c.Response().Header().Set("hx-retarget", "#view")
+        return RenderComponent(c, viewComponent)
+    } else if userId == 0 {
         return RenderHtml(c, view.Layout(view.LayoutModel{
             Authenticated: false,
             View: viewComponent,
@@ -65,6 +70,17 @@ func (ctx ServerContext) RenderView(c echo.Context, viewComponent templ.Componen
 }
 
 func (ctx ServerContext) RenderPassagesView(c echo.Context, viewComponent templ.Component) error {
+    currentUrl := c.Request().Header.Get("hx-current-url")
+    if currentUrl != "" || viewComponent != nil {
+        url, err := url.Parse(currentUrl)
+        if err == nil && (strings.HasPrefix(url.Path, "/passages") || url.Path == "/") {
+            if viewComponent != nil {
+                c.Response().Header().Set("hx-retarget", "#passage-view")
+                return RenderComponent(c, viewComponent)
+            }
+        }
+    }
+
     userId, err := GetAuthenticatedUser(c)
     if err != nil {
         return err

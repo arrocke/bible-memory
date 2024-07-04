@@ -18,7 +18,7 @@ type postLoginRequest struct {
 func userRoutes(e *echo.Echo, ctx ServerContext) {
     e.GET("/login", func(c echo.Context) error {
         loginView := view.LoginView(view.LoginViewModel{})
-        return view.Html(loginView).Render(c.Request().Context(), c.Response().Writer)
+        return RenderHtml(c, loginView)
     }, AuthMiddleware(false))
 
     e.POST("/login", func(c echo.Context) error {
