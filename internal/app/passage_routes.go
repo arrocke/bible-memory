@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/a-h/templ"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
@@ -89,7 +90,14 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
             return err
         }
 
-        return Redirect(c, "/")
+        component, err := ctx.CreatePassagesList(c, nil, true)
+        if err != nil {
+            return err
+        }
+
+        PushUrl(c, "/")
+        Retarget(c, "#view")
+        return RenderComponent(c, component)
 	}, AuthMiddleware(true))
 
 	e.GET("/passages/new", func(c echo.Context) error {
@@ -216,7 +224,15 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
             return err
         }
 
-        return Redirect(c, "/")
+        component, err := ctx.CreatePassagesList(c, nil, true)
+        if err != nil {
+            return err
+        }
+
+        PushUrl(c, "/")
+        Retarget(c, "#view")
+        Reswap(c, "innerHTML")
+        return RenderComponent(c, component)
     }, AuthMiddleware(true))
 
     e.DELETE("/passages/:id", func (c echo.Context) error {
@@ -259,7 +275,7 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
 
 	wordRegex := regexp.MustCompile(`(?:(\d+)\s?)?([^A-Za-zÀ-ÖØ-öø-ÿ\s]+)?([A-Za-zÀ-ÖØ-öø-ÿ]+(?:(?:'|’|-)[A-Za-zÀ-ÖØ-öø-ÿ]+)?(?:'|’)?)([^A-Za-zÀ-ÖØ-öø-ÿ0-9]*\s+)?`)
 
-    renderReview := func(c echo.Context, passage model.Passage, complete bool) error {
+    createReview := func(c echo.Context, passage model.Passage, complete bool) templ.Component {
         wordMatches := wordRegex.FindAllStringSubmatch(passage.Text, -1)
         words := make([]view.ReviewWord, len(wordMatches))
 		for i, match := range wordMatches {
@@ -285,17 +301,8 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
             NextReview: passage.NextReview,
         })
 
-        currentUrl := CurrentUrl(c)
-        if currentUrl != nil && (strings.HasPrefix(currentUrl.Path, "/passages") || currentUrl.Path == "/") {
-            Retarget(c, "#passage-view")
-            return RenderComponent(c, passageView)
-        } else {
-            component, err := ctx.CreatePassageView(c, passageView)
-            if err != nil {
-                return err
-            }
-            return RenderComponent(c, view.Html(component))
-        }
+        return passageView
+
     }
 
     e.GET("/passages/:id/review", func(c echo.Context) error {
@@ -322,7 +329,19 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
             return Redirect(c, "/")
         }
 
-        return renderReview(c, passage, false)
+        review := createReview(c, passage, false)
+
+        currentUrl := CurrentUrl(c)
+        if currentUrl != nil && (strings.HasPrefix(currentUrl.Path, "/passages") || currentUrl.Path == "/") {
+            Retarget(c, "#passage-view")
+            return RenderComponent(c, review)
+        } else {
+            component, err := ctx.CreatePassageView(c, review)
+            if err != nil {
+                return err
+            }
+            return RenderComponent(c, view.Html(component))
+        }
 	}, AuthMiddleware(true))
 
     type postReviewRequest struct {
@@ -367,6 +386,14 @@ func passageRoutes(e *echo.Echo, ctx ServerContext) {
             }
         }
 
-        return renderReview(c, passage, true)
+        review := createReview(c, passage, false)
+
+        component, err := ctx.CreatePassagesList(c, review, true)
+        if err != nil {
+            return err
+        }
+
+        Retarget(c, "#view")
+        return RenderComponent(c, component)
     }, AuthMiddleware(true))
 }

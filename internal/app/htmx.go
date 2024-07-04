@@ -32,9 +32,18 @@ func RenderComponent(c echo.Context, component templ.Component) error {
     return component.Render(c.Request().Context(), c.Response().Writer)
 }
 
+func Reswap(c echo.Context, swap string) {
+    c.Response().Header().Set("hx-reswap", swap)
+}
+
 func Retarget(c echo.Context, target string) {
     c.Response().Header().Set("hx-retarget", target)
 }
+
+func PushUrl(c echo.Context, path string) {
+    c.Response().Header().Set("hx-push-url", path)
+}
+
 
 func IsHtmxRequest(c echo.Context) bool {
     return c.Request().Header.Get("hx-request") == "true"

@@ -150,6 +150,15 @@ func userRoutes(e *echo.Echo, ctx ServerContext) {
             Email: req.Email,
             Success: true,
         }
-        return RenderComponent(c, view.ProfileForm(model))
+        profileView := view.ProfileView(model)
+
+        layout, err := ctx.CreateView(c, profileView)
+        if err != nil {
+            return err
+        }
+
+        Retarget(c, "body")
+        Reswap(c, "innerHTML")
+        return RenderComponent(c, layout)
     }, AuthMiddleware(true))
 }
