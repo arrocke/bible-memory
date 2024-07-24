@@ -58,6 +58,7 @@ func (r PassageRepo) GetPassagesForOwner(c context.Context, ownerId int) ([]mode
             COALESCE(review_at, '0001-01-01') AS review_at
         FROM passage
         WHERE user_id = $1
+        ORDER BY book, start_chapter, start_verse
     `
     var passages []model.Passage
     err := pgxscan.Select(c, r.Pool, &passages, query, ownerId)
