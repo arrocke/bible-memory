@@ -47,7 +47,7 @@ func (p *Passage) NextInterval(grade int, reviewedAt time.Time) int {
 		}
 	} else {
 		reviewInterval := math.Ceil(reviewedAt.Sub(p.ReviewedAt).Hours() / 24.0)
-		extension := min(float64(p.Interval), reviewInterval) + 0.5*max(0.0, reviewInterval-float64(p.Interval))
+		extension := min(float64(p.Interval), reviewInterval)
 
 		switch grade {
 		case 1:
